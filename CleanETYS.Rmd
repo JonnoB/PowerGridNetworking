@@ -1,0 +1,99 @@
+---
+title: "Networking the ETYS"
+author: "Jonathan Bourne"
+date: "2 May 2017"
+output: html_document
+---
+
+
+```{r Setup}
+packages <- c("tidyverse", "igraph","readr","readxl", "broom", "zoo")
+
+new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+
+lapply(packages, library, character.only = TRUE)
+
+
+#Set up file system to read the correct folders this switches between aws and windows mode
+
+
+datafile<- "/home/jonno/Dropbox/Jonathan Bourne Phd Folder/ETYSAppendixB"
+
+```
+
+
+```{r}
+#create the path to the file
+path <- file.path(datafile, "ETYS 2016 Appendix B.xlsx")
+
+
+#Create a list of all the sheets in the file
+
+AllData <- path %>% 
+  excel_sheets(.) %>%
+lapply(., read_excel, path = path, skip = 1)
+
+#break out the sheet names
+
+AllData[[1]] <- AllData[[1]][2:3] %>% 
+  setNames(c("Table", "Title")) %>% 
+  filter(complete.cases(.)) %>%
+  mutate(Table = replace(Table, Table=="Table", "Index"), 
+         element = 1:(n())) #provides list element reference
+
+names(AllData) <- AllData[[1]]$Table
+
+View(AllData$Index)
+
+```
+
+
+Take index of substation codes and combine into a single table 
+```{r}
+
+SubstationCodes <- AllData[2:4] %>% map2_df(.x =.,
+                     .y = names(.),
+                     ~ .x %>% 
+                      mutate(Table =.y ) %>%
+                      setNames(make.names(names(.)))) %>%
+  mutate(Site.Code = str_trim(Site.Code),
+         Site.Name = str_trim(Site.Name)) #remove leading and trailing whitespace which causes problems with analysis.
+
+#I'm not sure why the OFTO is different and therfore cannot be incuded
+
+#How many site codes are there?
+
+length(unique(SubstationCodes$Site.Code))
+
+#Howmany when the results are split by organisation?
+
+SubstationCodes %>% split(.$Table) %>% map_dbl(~length(unique(.x$Site.Code))) %>% sum
+
+#The results of these two tests show that the different tables contain identical codes. These need to be identified.
+
+OverlappingSubstations <- SubstationCodes %>% split(.$Table) %>% 
+  map(~data.frame(unique(SubstationCodes$Site.Code) %in% .x$Site.Code))  %>%
+  bind_cols() %>% setNames(unique(SubstationCodes$Table))%>% 
+  mutate(tots = rowSums(.)) %>%
+  bind_cols(data.frame(Site.Code = unique(SubstationCodes$Site.Code)),.) %>%
+  filter(tots>1) %>% left_join(., SubstationCodes)
+
+#This overlapping data frame shows which nodes overlap across tables. It also shows that the different organisation may not have the same voltages. For example Invernan (INVR) SHE has 132 and 33 Kv connections whilst SPT has 275kv. 
+#The overlapping table also reveals an issue with the naming convention. the code LOCH is used for both the substation by Lochay hydro plant and also the substation by Loch Hill windfarm which are over 100 miles apart. 
+
+#Checking for multiple uses of the same code in different substations to see how many times events like "LOCH" occur.
+
+DoubleNames <- SubstationCodes %>% group_by(Site.Code, Site.Name) %>% summarise(counts =n()) %>% 
+  ungroup %>%
+  group_by(Site.Code) %>% mutate(reps = n()) %>% ungroup %>% filter(reps>1)
+
+#This is a common occurance for the doubles, there are two occurances one the name the other with "windfarm" added on. This needs to be investigated to check whether they are in the same physical location or not. 
+SubstationCodes %>% filter(Site.Code == "BIRN")
+
+#Although several of the doubles are spelling mistakes.
+#Further investigation needs to be made to see whether these doubles are the same point or are different physical locations.
+
+```
+
