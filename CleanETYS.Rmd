@@ -7,7 +7,7 @@ output: html_document
 
 
 ```{r Setup}
-packages <- c("tidyverse", "igraph","readr","readxl", "broom", "zoo")
+packages <- c("tidyverse", "igraph","readr","readxl", "broom", "zoo", "stringr")
 
 new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -23,6 +23,21 @@ datafile<- "/home/jonno/Dropbox/Jonathan Bourne Phd Folder/ETYSAppendixB"
 
 ```
 
+#Functions
+
+```{r}
+StackList <- function(elements)  {
+  AllData[elements]%>%
+  map2_df(.x =.,
+                     .y = names(.),
+                     ~ .x %>% 
+                      mutate(Table =.y ) 
+                     )}
+```
+
+
+
+#Loading and creating a structure for the data
 
 ```{r}
 #create the path to the file
@@ -33,11 +48,12 @@ path <- file.path(datafile, "ETYS 2016 Appendix B.xlsx")
 
 AllData <- path %>% 
   excel_sheets(.) %>%
-lapply(., read_excel, path = path, skip = 1)
+lapply(., read_excel, path = path, skip = 1, trim_ws = TRUE ) %>%
+  map(~.x %>% setNames(make.names(names(.))))
 
 #break out the sheet names
 
-AllData[[1]] <- AllData[[1]][2:3] %>% 
+AllData[[1]] <- AllData[[1]] %>% 
   setNames(c("Table", "Title")) %>% 
   filter(complete.cases(.)) %>%
   mutate(Table = replace(Table, Table=="Table", "Index"), 
@@ -49,15 +65,12 @@ View(AllData$Index)
 
 ```
 
+#Structuring the substations
 
 Take index of substation codes and combine into a single table 
 ```{r}
 
-SubstationCodes <- AllData[2:4] %>% map2_df(.x =.,
-                     .y = names(.),
-                     ~ .x %>% 
-                      mutate(Table =.y ) %>%
-                      setNames(make.names(names(.)))) %>%
+Substation <- StackList(2:4) %>%
   mutate(Site.Code = str_trim(Site.Code),
          Site.Name = str_trim(Site.Name)) #remove leading and trailing whitespace which causes problems with analysis.
 
@@ -65,35 +78,141 @@ SubstationCodes <- AllData[2:4] %>% map2_df(.x =.,
 
 #How many site codes are there?
 
-length(unique(SubstationCodes$Site.Code))
+length(unique(Substation$Site.Code))
 
 #Howmany when the results are split by organisation?
 
-SubstationCodes %>% split(.$Table) %>% map_dbl(~length(unique(.x$Site.Code))) %>% sum
+Substation %>% split(.$Table) %>% map_dbl(~length(unique(.x$Site.Code))) %>% sum
 
 #The results of these two tests show that the different tables contain identical codes. These need to be identified.
 
-OverlappingSubstations <- SubstationCodes %>% split(.$Table) %>% 
-  map(~data.frame(unique(SubstationCodes$Site.Code) %in% .x$Site.Code))  %>%
-  bind_cols() %>% setNames(unique(SubstationCodes$Table))%>% 
+OverlappingSubstations <- Substation %>% split(.$Table) %>% 
+  map(~data.frame(unique(Substation$Site.Code) %in% .x$Site.Code))  %>%
+  bind_cols() %>% setNames(unique(Substation$Table))%>% 
   mutate(tots = rowSums(.)) %>%
-  bind_cols(data.frame(Site.Code = unique(SubstationCodes$Site.Code)),.) %>%
-  filter(tots>1) %>% left_join(., SubstationCodes)
+  bind_cols(data.frame(Site.Code = unique(Substation$Site.Code)),.) %>%
+  filter(tots>1) %>% left_join(., Substation)
 
 #This overlapping data frame shows which nodes overlap across tables. It also shows that the different organisation may not have the same voltages. For example Invernan (INVR) SHE has 132 and 33 Kv connections whilst SPT has 275kv. 
 #The overlapping table also reveals an issue with the naming convention. the code LOCH is used for both the substation by Lochay hydro plant and also the substation by Loch Hill windfarm which are over 100 miles apart. 
 
 #Checking for multiple uses of the same code in different substations to see how many times events like "LOCH" occur.
 
-DoubleNames <- SubstationCodes %>% group_by(Site.Code, Site.Name) %>% summarise(counts =n()) %>% 
+DoubleNames <- Substation %>% group_by(Site.Code, Site.Name) %>% summarise(counts =n()) %>% 
   ungroup %>%
   group_by(Site.Code) %>% mutate(reps = n()) %>% ungroup %>% filter(reps>1)
 
 #This is a common occurance for the doubles, there are two occurances one the name the other with "windfarm" added on. This needs to be investigated to check whether they are in the same physical location or not. 
-SubstationCodes %>% filter(Site.Code == "BIRN")
+Substation %>% filter(Site.Code == "BIRN")
 
 #Although several of the doubles are spelling mistakes.
 #Further investigation needs to be made to see whether these doubles are the same point or are different physical locations.
+
+```
+
+#Structuring the circuits.
+
+
+
+```{r Cicuits}
+
+AllData[[8]]<- AllData[[8]] %>% 
+  mutate(Winter.Rating..MVA. = as.numeric(Winter.Rating..MVA.)) # For some reason this has been imported as a character I don't know why. It needs to be converted to numeric to avoid errors when createing the combined data frame.
+
+Circuits <- StackList(6:8)
+
+#Are all the codes of the same length?
+nchar(Circuitst$Node1) %>% table
+nchar(Circuits$Node2) %>% table
+#No. However the substation codes are all exactly 4 character long. What does this mean? 
+#It is not to do with the OFTO parts.
+nchar(Substation$Site.Code) %>% table
+
+Circuits %>% filter(nchar(Node2) ==5)
+Circuits %>% filter(nchar(Node2) ==8)
+
+
+```
+
+```{r CircuitsChange}
+circuits_change <-  StackList(10:12)
+#What are the different Status possible with the changes?
+unique(circuits_change$Status)
+#What is the difference between delete and remove?
+
+```
+
+#Transformers
+
+```{r transformers}
+
+names(AllData[[16]])[1:2] <-c("Node1", "Node2") #The name had been written differently to the other two
+Transformers <- StackList(14:16)
+
+```
+
+
+```{r transformers_change}
+names(AllData[[20]])[1:2] <-c("Node1", "Node2") #The name had been written differently to the other two
+transformers_change <- StackList(18:20)
+
+```
+
+
+#Reactive Compensation Equipment
+
+RCE
+
+
+```{r RCE}
+
+names(AllData[[24]])[4] <-"MVAr.Generation"
+
+AllData[[22]]<- AllData[[22]] %>% 
+  mutate(Unit.Number = as.character(Unit.Number),
+         MVAr.Generation = as.numeric(MVAr.Generation))
+
+AllData[[23]]<- AllData[[23]] %>% 
+  mutate(Unit.Number = as.character(Unit.Number))
+
+AllData[[24]]<- AllData[[24]] %>% 
+  mutate(Unit.Number = as.character(Unit.Number),
+         MVAr.Generation = as.numeric(MVAr.Generation))
+
+
+RCE <- StackList(22:24)
+```
+
+#OFTO
+
+```{r}
+
+  AllData[[24]] %>% sapply(.,class)
+  AllData[[22]]$MVAr.Generation %>% table
+  AllData[[23]]$MVAr.Generation %>% table
+  AllData[[24]]$MVAr.Generation %>% table
+  
+test<- AllData[[24]]    
+```
+
+#Why isn;t whitespace ebing trimmed?
+
+```{r}
+
+folder <- "https://www.dropbox.com/sh/yy0w5b73xis6hri/AAAAcuB8IgRVsPYB4b-sOXeMa?dl=0"
+filename <- "ETYS 2016 Appendix B.xlsx"
+
+http://www2.nationalgrid.com/WorkArea/DownloadAsset.aspx?id=8589937799
+
+test <- read_excel("ETYS 2016 Appendix B.xlsx", skip = 1, sheet = 22, trim_ws = TRUE)
+print(test$`MVAr Generation`)
+test$`MVAr Generation` %>% str_count(patter = "\\s")
+
+test$`MVAr Generation` %>% table #all are numeric
+test$`MVAr Generation` %>% class #however the class is characer
+  
+test$`MVAr Generation` %>% str_count(patter = "\\s") %>%
+  sum(na.rm = T) #It should be 0 however it is 2 
 
 ```
 
