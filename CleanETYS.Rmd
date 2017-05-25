@@ -31,8 +31,16 @@ StackList <- function(elements)  {
   map2_df(.x =.,
                      .y = names(.),
                      ~ .x %>% 
-                      mutate(Table =.y ) 
-                     )}
+                      mutate(Table =.y ) %>% RemoveSymbols
+  )}
+
+
+RemoveSymbols <-function(df)  {
+  df  %>% mutate_all( funs(gsub("^[^A-Z0-9]{1,}", "", ., ignore.case = FALSE))) %>%
+     map_df(parse_guess) 
+}
+
+
 ```
 
 
@@ -115,10 +123,6 @@ Substation %>% filter(Site.Code == "BIRN")
 
 
 ```{r Cicuits}
-
-AllData[[8]]<- AllData[[8]] %>% 
-  mutate(Winter.Rating..MVA. = as.numeric(Winter.Rating..MVA.)) # For some reason this has been imported as a character I don't know why. It needs to be converted to numeric to avoid errors when createing the combined data frame.
-
 Circuits <- StackList(6:8)
 
 #Are all the codes of the same length?
@@ -167,20 +171,22 @@ RCE
 ```{r RCE}
 
 names(AllData[[24]])[4] <-"MVAr.Generation"
+names(AllData[[23]])[5] <-"MVAr.Absorbtion"
+names(AllData[[24]])[5] <-"MVAr.Absorbtion"
 
-AllData[[22]]<- AllData[[22]] %>% 
-  mutate(Unit.Number = as.character(Unit.Number),
-         MVAr.Generation = as.numeric(MVAr.Generation))
-
-AllData[[23]]<- AllData[[23]] %>% 
-  mutate(Unit.Number = as.character(Unit.Number))
-
-AllData[[24]]<- AllData[[24]] %>% 
-  mutate(Unit.Number = as.character(Unit.Number),
-         MVAr.Generation = as.numeric(MVAr.Generation))
+AllData[[22]]$MVAr.Absorption<- AllData[[22]]$MVAr.Absorption %>%gsub("[^A-Z0-9]", "", ., ignore.case = TRUE)
 
 
+test <- 
+
+  
+  
 RCE <- StackList(22:24)
+names(AllData[[24]])[4] <-"MVAr.Absorbtion"
+sapply(AllData2[[3]], class)==sapply(AllData2[[2]], class) 
+sapply(AllData2[[1]], class)
+
+View(AllData2[[1]])
 ```
 
 #OFTO
@@ -192,27 +198,6 @@ RCE <- StackList(22:24)
   AllData[[23]]$MVAr.Generation %>% table
   AllData[[24]]$MVAr.Generation %>% table
   
-test<- AllData[[24]]    
-```
-
-#Why isn;t whitespace ebing trimmed?
-
-```{r}
-
-folder <- "https://www.dropbox.com/sh/yy0w5b73xis6hri/AAAAcuB8IgRVsPYB4b-sOXeMa?dl=0"
-filename <- "ETYS 2016 Appendix B.xlsx"
-
-http://www2.nationalgrid.com/WorkArea/DownloadAsset.aspx?id=8589937799
-
-test <- read_excel("ETYS 2016 Appendix B.xlsx", skip = 1, sheet = 22, trim_ws = TRUE)
-print(test$`MVAr Generation`)
-test$`MVAr Generation` %>% str_count(patter = "\\s")
-
-test$`MVAr Generation` %>% table #all are numeric
-test$`MVAr Generation` %>% class #however the class is characer
-  
-test$`MVAr Generation` %>% str_count(patter = "\\s") %>%
-  sum(na.rm = T) #It should be 0 however it is 2 
+AllData[[22]]$MVAr.Absorption %>%gsub("[^A-Z0-9]", "", ., ignore.case = FALSE)
 
 ```
-
