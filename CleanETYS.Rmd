@@ -126,7 +126,7 @@ Substation %>% filter(Site.Code == "BIRN")
 Circuits <- StackList(6:8)
 
 #Are all the codes of the same length?
-nchar(Circuitst$Node1) %>% table
+nchar(Circuits$Node1) %>% table
 nchar(Circuits$Node2) %>% table
 #No. However the substation codes are all exactly 4 character long. What does this mean? 
 #It is not to do with the OFTO parts.
@@ -167,8 +167,10 @@ transformers_change <- StackList(18:20)
 
 RCE
 
-
+The RCE needs a lot of treatment as there are formatting differences and also the bind_rows part of map_df doesn't coerce, which is annoying.
 ```{r RCE}
+
+
 
 names(AllData[[24]])[4] <-"MVAr.Generation"
 names(AllData[[23]])[5] <-"MVAr.Absorbtion"
@@ -177,16 +179,14 @@ names(AllData[[24]])[5] <-"MVAr.Absorbtion"
 AllData[[22]]$MVAr.Absorption<- AllData[[22]]$MVAr.Absorption %>%gsub("[^A-Z0-9]", "", ., ignore.case = TRUE)
 
 
-test <- 
+RCE<- AllData[22:24] %>% map(~.x %>% RemoveSymbols %>% 
+                                 mutate(Unit.Number = as.character(Unit.Number),
+                                        Connection.Voltage..kV. = as.character(Connection.Voltage..kV.)))%>%
+  map2_df(.x =.,
+                     .y = names(.),
+                     ~ .x %>% 
+                      mutate(Table =.y ) )
 
-  
-  
-RCE <- StackList(22:24)
-names(AllData[[24]])[4] <-"MVAr.Absorbtion"
-sapply(AllData2[[3]], class)==sapply(AllData2[[2]], class) 
-sapply(AllData2[[1]], class)
-
-View(AllData2[[1]])
 ```
 
 #OFTO
@@ -201,3 +201,79 @@ View(AllData2[[1]])
 AllData[[22]]$MVAr.Absorption %>%gsub("[^A-Z0-9]", "", ., ignore.case = FALSE)
 
 ```
+
+
+
+#Make a circuit network
+
+Some experiments to get a sensible looking network working
+
+
+One idea may be to build up a single site into a complete graph, a good example would be harker as it has 8 units.
+
+```{r}
+#find the substation with the most occurances
+data_frame(Names =  c(str_sub(Circuits$Node1,  1,4),str_sub(Circuits$Node2,  1,4))) %>%
+  group_by(Names) %>%
+  summarise(Counts = n()) %>%
+  arrange(-Counts)
+
+#sublist <- Circuits %>% filter(grepl("ABNE", .$Node1)|grepl("ABNE", .$Node2))
+
+#This network has a lot of isolated nodes
+graph1 <-graph_from_edgelist(as.matrix(Circuits[,1:2]), directed = FALSE)
+degree(graph1) %>% table
+plot(graph1)
+
+#To get around the above problem I will only use the 4 character identifier to construct the network.
+
+graph2 <- Circuits %>% mutate(Node14 = str_sub(Node1,  1,4),
+                    Node24 = str_sub(Node2,  1,4))
+graph2 <- graph_from_edgelist(el =graph2 %>% select(Node14, Node24) %>% as.matrix, directed = FALSE)
+degree(graph2) %>% table #huge reduction in isolated nodes
+graph2 %>% 
+  simplify(., remove.multiple = F, remove.loops = T) %>% 
+  plot(., edge.arrow.size=.4, vertex.label=NA)
+
+```
+
+
+One issue is that it is difficult to know what everything is linking two, inorder to get a greater undersstanding I will try to match the full names to everything else and see how many have a match and how many don't
+
+```{r}
+
+FullnameCounts <- list(
+  data_frame(Name = c(Circuits$Node1, Circuits$Node2), Type = "Circuits"),
+data_frame(Name = c(Transformers$Node1, Transformers$Node2), Type = "Transformers"),
+data_frame(Name =RCE$Node, Type = "RCE")) %>%
+  bind_rows %>%
+group_by(Name, Type) %>%
+  summarise(Count = n()) %>%
+  arrange(-Count) %>%
+group_by(Name) %>%
+  mutate(Total = sum(Count),
+         TypeCounts = n()) %>% 
+  ungroup
+
+#Add in the amount of times a site appears
+FullnameCounts <- FullnameCounts %>%
+  mutate(Site = str_sub(Name, 1,4)) %>%
+  group_by(Site) %>%
+  mutate(SiteCount = sum(Count),
+         SiteTypeCounts = unique(Type) %>% length) %>%
+  ungroup
+
+
+#Of the 1034 occurances 322 names only occur once, it is then important to try and match these to the other types of node.
+ table(FullnameCounts$Count)
+
+
+
+FullnameCounts <- data_frame(Names = c(Transformers$Node1, Transformers$Node2)) %>%
+  group_by(Names) %>%
+  summarise(Counts = n()) %>%
+  arrange(-Counts)
+
+
+```
+1
