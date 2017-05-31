@@ -20,29 +20,11 @@ lapply(packages, library, character.only = TRUE)
 
 
 datafile<- "/home/jonno/Dropbox/Jonathan Bourne Phd Folder/ETYSAppendixB"
+Functions <-"/home/jonno/Create_ETYS_network/Functions"
+
+list.files(Functions) %>% map(~source(file.path(Functions,.x)))
 
 ```
-
-#Functions
-
-```{r}
-StackList <- function(elements)  {
-  AllData[elements]%>%
-  map2_df(.x =.,
-                     .y = names(.),
-                     ~ .x %>% 
-                      mutate(Table =.y ) %>% RemoveSymbols
-  )}
-
-
-RemoveSymbols <-function(df)  {
-  df  %>% mutate_all( funs(gsub("^[^A-Z0-9]{1,}", "", ., ignore.case = FALSE))) %>%
-     map_df(parse_guess) 
-}
-
-
-```
-
 
 
 #Loading and creating a structure for the data
@@ -238,7 +220,7 @@ graph2 %>%
 ```
 
 
-One issue is that it is difficult to know what everything is linking two, inorder to get a greater undersstanding I will try to match the full names to everything else and see how many have a match and how many don't
+One issue is that it is difficult to know what everything is linking two, in order to get a greater under standing I will try to match the full names to everything else and see how many have a match and how many don't
 
 ```{r}
 
@@ -264,11 +246,39 @@ FullnameCounts <- FullnameCounts %>%
   ungroup
 
 
-#Of the 1034 occurances 322 names only occur once, it is then important to try and match these to the other types of node.
+
+Substation %>% 
+  filter(Site.Code == "ABNE")
+
+FullnameCounts %>% 
+  filter(Site == "ORRI")
+
+
+Circuits %>% 
+  filter(Node1 == "BEAU1K"|Node2 == "BEAU1K")
+
+Circuits %>% 
+  filter(grepl("DUCC", Node1)|grepl("DUCC",Node2))
+
+Transformers %>% 
+  filter(Node1 == "BEAU1K"|Node2 == "BEAU1K")
+
+
+
+#How many appear only once
  table(FullnameCounts$Count)
 
 
 
+ #is everything that has a 3- also have a 33kv voltage?
+ test <- FullnameCounts%>% 
+  filter(grepl("3-", Name))
+ 
+test <-  Substation %>% filter(Site.Code %in% test$Site) 
+table(test$Voltage..kV.) 
+
+sum( Substation$Voltage..kV. %in% test$Name)
+ 
 FullnameCounts <- data_frame(Names = c(Transformers$Node1, Transformers$Node2)) %>%
   group_by(Names) %>%
   summarise(Counts = n()) %>%
@@ -276,4 +286,46 @@ FullnameCounts <- data_frame(Names = c(Transformers$Node1, Transformers$Node2)) 
 
 
 ```
-1
+
+
+#making a larger network using fullname counts
+```{r}
+
+
+
+graph1 <-bind_rows(Circuits, Transformers) %>%  
+  .[,1:2] %>%
+  as.matrix() %>% 
+  graph_from_edgelist(., directed = FALSE)
+degree(graph1) %>% table
+
+plot(graph1)
+
+
+ABNEgraph <-bind_rows(Circuits, Transformers) %>%  
+  filter(grepl("ABNE", Node1)|grepl("ABNE",Node2)) %>%
+  .[,1:2] %>%
+  as.matrix() %>% 
+  graph_from_edgelist(., directed = FALSE)
+degree(ABNEgraph) %>% table
+
+plot(ABNEgraph)
+
+
+BEAUgraph <-bind_rows(Circuits, Transformers) %>%  
+  filter(grepl("BEAU2", Node1)|grepl("BEAU2",Node2)) %>%
+  .[,1:2] %>%
+  as.matrix() %>% 
+  graph_from_edgelist(., directed = FALSE)
+degree(BEAUgraph) %>% table
+
+
+#This graph looks like it has doubles between BEAU2J/BEAU1J why? is this a double circuit? What can I do about it?
+plot(BEAUgraph)
+
+z<- SubGraph("HARK")
+
+
+
+```
+
