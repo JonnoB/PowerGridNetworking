@@ -5,6 +5,26 @@ date: "2 May 2017"
 output: html_document
 ---
 
+zico kolter-carnegie mellon
+
+check out the network tools package
+
+Not all the nodes are listed as sites
+
+We can Work out the voltage, by ranking the MVA of the node and assigning it the same rank as the ranked V of the substation, using this we can say that we know the voltage at each point.
+
+We assign the known loads to the nodes
+and randomly assign the generators to nodes in the matching substations
+We then solve a series of simultaneous equations where we have the matrix formula V=ZI and also know that V=0 at transmission nodes and V = rank line V at the node.
+
+This means I have to 
+assign a V to each node
+match loads 
+match generators
+
+I can try using a simplified/made up version
+This might also mean that when I want to use multiple voltage levels I end up having to iterate across sub-nets
+
 
 ```{r Setup}
 packages <- c("tidyverse", "igraph","readr","readxl", "broom", "zoo", "stringr")
@@ -55,14 +75,48 @@ View(AllData$Index)
 
 ```
 
-#Structuring the substations
-
-Take index of substation codes and combine into a single table 
+#Create base data
 ```{r}
 
 Substation <- StackList(2:4) %>%
   mutate(Site.Code = str_trim(Site.Code),
          Site.Name = str_trim(Site.Name)) #remove leading and trailing whitespace which causes problems with analysis.
+
+Circuits <- StackList(6:8)
+
+names(AllData[[16]])[1:2] <-c("Node1", "Node2") #The name had been written differently to the other two
+Transformers <- StackList(14:16)
+
+#The RCE needs a lot of treatment as there are formatting differences and also the bind_rows part of map_df doesn't coerce, which is annoying.
+names(AllData[[24]])[4] <-"MVAr.Generation"
+names(AllData[[23]])[5] <-"MVAr.Absorbtion"
+names(AllData[[24]])[5] <-"MVAr.Absorbtion"
+
+AllData[[22]]$MVAr.Absorption<- AllData[[22]]$MVAr.Absorption %>%gsub("[^A-Z0-9]", "", ., ignore.case = TRUE)
+
+
+RCE<- AllData[22:24] %>% map(~.x %>% RemoveSymbols %>% 
+                                 mutate(Unit.Number = as.character(Unit.Number),
+                                        Connection.Voltage..kV. = as.character(Connection.Voltage..kV.)))%>%
+  map2_df(.x =.,
+                     .y = names(.),
+                     ~ .x %>% 
+                      mutate(Table =.y ) )
+
+```
+
+#Create change data
+
+```{r}
+circuits_change <-  StackList(10:12)
+
+names(AllData[[20]])[1:2] <-c("Node1", "Node2") #The name had been written differently to the other two
+transformers_change <- StackList(18:20)
+```
+
+
+#Understanding the Substation data
+```{r}
 
 #I'm not sure why the OFTO is different and therfore cannot be incuded
 
@@ -100,76 +154,6 @@ Substation %>% filter(Site.Code == "BIRN")
 
 ```
 
-#Structuring the circuits.
-
-
-
-```{r Cicuits}
-Circuits <- StackList(6:8)
-
-#Are all the codes of the same length?
-nchar(Circuits$Node1) %>% table
-nchar(Circuits$Node2) %>% table
-#No. However the substation codes are all exactly 4 character long. What does this mean? 
-#It is not to do with the OFTO parts.
-nchar(Substation$Site.Code) %>% table
-
-Circuits %>% filter(nchar(Node2) ==5)
-Circuits %>% filter(nchar(Node2) ==8)
-
-
-```
-
-```{r CircuitsChange}
-circuits_change <-  StackList(10:12)
-#What are the different Status possible with the changes?
-unique(circuits_change$Status)
-#What is the difference between delete and remove?
-
-```
-
-#Transformers
-
-```{r transformers}
-
-names(AllData[[16]])[1:2] <-c("Node1", "Node2") #The name had been written differently to the other two
-Transformers <- StackList(14:16)
-
-```
-
-
-```{r transformers_change}
-names(AllData[[20]])[1:2] <-c("Node1", "Node2") #The name had been written differently to the other two
-transformers_change <- StackList(18:20)
-
-```
-
-
-#Reactive Compensation Equipment
-
-RCE
-
-The RCE needs a lot of treatment as there are formatting differences and also the bind_rows part of map_df doesn't coerce, which is annoying.
-```{r RCE}
-
-
-
-names(AllData[[24]])[4] <-"MVAr.Generation"
-names(AllData[[23]])[5] <-"MVAr.Absorbtion"
-names(AllData[[24]])[5] <-"MVAr.Absorbtion"
-
-AllData[[22]]$MVAr.Absorption<- AllData[[22]]$MVAr.Absorption %>%gsub("[^A-Z0-9]", "", ., ignore.case = TRUE)
-
-
-RCE<- AllData[22:24] %>% map(~.x %>% RemoveSymbols %>% 
-                                 mutate(Unit.Number = as.character(Unit.Number),
-                                        Connection.Voltage..kV. = as.character(Connection.Voltage..kV.)))%>%
-  map2_df(.x =.,
-                     .y = names(.),
-                     ~ .x %>% 
-                      mutate(Table =.y ) )
-
-```
 
 #OFTO
 
@@ -260,8 +244,9 @@ Circuits %>%
 Circuits %>% 
   filter(grepl("DUCC", Node1)|grepl("DUCC",Node2))
 
+#Double connection is this right? means double transformer?
 Transformers %>% 
-  filter(Node1 == "BEAU1K"|Node2 == "BEAU1K")
+  filter(Node1 == "BEAU1J"|Node2 == "BEAU1J")
 
 
 
@@ -278,11 +263,11 @@ test <-  Substation %>% filter(Site.Code %in% test$Site)
 table(test$Voltage..kV.) 
 
 sum( Substation$Voltage..kV. %in% test$Name)
- 
-FullnameCounts <- data_frame(Names = c(Transformers$Node1, Transformers$Node2)) %>%
-  group_by(Names) %>%
-  summarise(Counts = n()) %>%
-  arrange(-Counts)
+#  
+# FullnameCounts <- data_frame(Names = c(Transformers$Node1, Transformers$Node2)) %>%
+#   group_by(Names) %>%
+#   summarise(Counts = n()) %>%
+#   arrange(-Counts)
 
 
 ```
@@ -290,8 +275,6 @@ FullnameCounts <- data_frame(Names = c(Transformers$Node1, Transformers$Node2)) 
 
 #making a larger network using fullname counts
 ```{r}
-
-
 
 graph1 <-bind_rows(Circuits, Transformers) %>%  
   .[,1:2] %>%
@@ -302,29 +285,251 @@ degree(graph1) %>% table
 plot(graph1)
 
 
-ABNEgraph <-bind_rows(Circuits, Transformers) %>%  
-  filter(grepl("ABNE", Node1)|grepl("ABNE",Node2)) %>%
-  .[,1:2] %>%
-  as.matrix() %>% 
-  graph_from_edgelist(., directed = FALSE)
-degree(ABNEgraph) %>% table
-
-plot(ABNEgraph)
+g2 <- delete.vertices(graph1, clusters(graph1)[[1]]==1)
+#The disconnected componants
+plot(g2)
 
 
-BEAUgraph <-bind_rows(Circuits, Transformers) %>%  
-  filter(grepl("BEAU2", Node1)|grepl("BEAU2",Node2)) %>%
-  .[,1:2] %>%
-  as.matrix() %>% 
-  graph_from_edgelist(., directed = FALSE)
+Substation %>% 
+  filter(Site.Code == "CAFA")
+
+Circuits %>% 
+  filter(grepl("CAFA", Node1)|grepl("CAFA",Node2))
+
+Transformers %>% 
+  filter(grepl("CAFA", Node1)|grepl("CAFA",Node2))
+
+#missing
+Substation %>% 
+  filter(Site.Code == "LINS")
+
+test<- FullnameCounts %>% 
+  filter(Site == "MOTA")
+
+Substation %>% 
+  filter(Site.Code == "LISD")
+
+```
+
+
+
+
+```{r}
+ABNEgraph <-SubGraph("ABHA")
+
+BEAUgraph <-SubGraph("BEAU|FAAR")
 degree(BEAUgraph) %>% table
-
 
 #This graph looks like it has doubles between BEAU2J/BEAU1J why? is this a double circuit? What can I do about it?
 plot(BEAUgraph)
 
 z<- SubGraph("HARK")
 
+#I tried to make a plus 1 gtraph but it didnt work very well.
+test2<- paste(unique(str_sub(V(z)$name,1,4)) ,collapse = "|")
+
+
+
+```
+
+
+Load the demand dataset
+```{r}
+
+demand <- read_excel(file.path(datafile,"ETYS16 AppG demand data.xlsx"), skip = 7)
+
+#Percent f demand that matches a nodes
+sum(unique(demand$Node) %in% unique(FullnameCounts$Name))/length(unique(demand$Node))
+
+#check using just site this matches loads
+sum(str_sub(unique(demand$Node),1,4) %in% str_sub(unique(FullnameCounts$Name),1,4))/length(unique(demand$Node))
+
+
+demand2 <- FullnameCounts %>% filter(grepl("AMEM", Name))
+
+test <- FullnameCounts %>% filter(Name %in% unique(demand$Node))
+
+demand2 <- demand %>% filter(grepl("BEAU", Node))
+
+
+
+
+```
+
+Geerateion
+```{r}
+Substation %>% filter(grepl("Brigg",Site.Name, ignore.case = TRUE))
+
+SubGraph("DRAX")
+
+```
+
+solving the simultaneos equations of the impedance matrix to get voltage and current
+```{r}
+A <- matrix(data=c(1, 2, 3, 2, 5, 9, 5, 7, 8), nrow=3, ncol=3, byrow=TRUE)    
+b <- matrix(data=c(20, 100, 200), nrow=3, ncol=1, byrow=FALSE)
+round(solve(A, b), 3)
+```
+
+
+#Substation graph
+
+This graph uses only substations
+
+```{r}
+Name <- "BEAU"
+
+SubStatGraph <-bind_rows(Circuits, Transformers) %>%
+  # filter(grepl(Name, Node1)|grepl(Name,Node2)) %>%
+  mutate(Node1 = str_sub(Node1, 1, 4),
+         Node2 = str_sub(Node2, 1, 4)) %>%
+  .[,1:2] %>%
+  as.matrix() %>% 
+  graph_from_edgelist(., directed = FALSE)
+degree(SubStatGraph) %>% table
+
+
+l <- layout_with_drl(SubStatGraph, options=list(simmer.attraction=0))
+
+minC <- rep(-Inf, vcount(SubStatGraph))
+maxC <- rep(Inf, vcount(SubStatGraph))
+minC[1] <- maxC[1] <- 0
+co <- layout_with_fr(SubStatGraph, minx=minC, maxx=maxC,
+                                  miny=minC, maxy=maxC)
+SubStatGraph %>%
+  simplify(., remove.multiple = T, remove.loops = T) %>% 
+    plot(., layout = co,vertex.size=.8, edge.arrow.size=.4, vertex.label=NA)
+
+SubStatGraph %>%
+  simplify(., remove.multiple = T, remove.loops = T) %>% 
+plot(., layout = l, vertex.label = NA,vertex.size=.8, edge.arrow.size=.4)
+
+SubStatGraph %>% 
+  simplify(., remove.multiple = T, remove.loops = T) %>% 
+  plot(.,vertex.size=.8, edge.arrow.size=.4, vertex.label = NA)
+
+
+```
+
+
+#Looking at impedance
+
+It doesn't make sense that connections like ABNE1Q-ABNE1R have a reactance but 0 susceptance.
+
+The reactance is a percentage which relies on the power to have a value. But the impedance matrix combines with power/V/A to create useful stuff, so how is this not a circular logic?
+
+you also need a transmission matrix
+
+
+
+```{r}
+ Impedance <- bind_rows(mutate(Circuits, MVA=Spring.Rating..MVA.,
+                               Type = "Circuit"), 
+                        mutate(Transformers, MVA = Rating..MVA.,
+                               Type = "Transformer")) %>%
+  select(Node1, Node2, R....on.100MVA., X....on.100MVA., B....on.100MVA.,
+         MVA, Type) %>%
+    mutate(
+    
+        R = R....on.100MVA./100,
+        X = X....on.100MVA./100,
+        B = B....on.100MVA./100,
+        MVA = round(MVA, 0),
+        ImpInvS = 1/B,
+         ImpRX =  complex(real = R, imaginary = X),
+         ImpInvS2 = 1/(B*MVA),
+         ImpRX2 = complex(real = R, imaginary = X)*MVA,
+    B2 = -X/(R^2+X^2)) %>%
+  #create the voltage matching
+  mutate(Node1b = str_sub(Node1, 1, 4),
+         Node2b = str_sub(Node2, 1, 4)) 
+
+imp2 <- bind_rows(Impedance[,c(16,6)], rename(Impedance[,c(17,6)], Node1b= Node2b)) %>%
+  group_by(Node1b, MVA) %>%
+  summarise(Counts = n()) %>%
+  group_by(Node1b) %>%
+  mutate(rank = rank(MVA))
+#ABTH has 5 power levels but only two voltage levels so this won't work
+Substation %>% filter(Site.Code=="ABTH")
+
+#Create impedance using 1/B
+Impmat<- Impedance %>% 
+  select(Node1,Node2, ImpInvS) %>%
+  CreateImpedance
+
+#Create impedance using X
+Impmat2 <- Impedance %>% 
+    mutate(X2 = X*MVA ) %>%
+  select(Node1,Node2, X2) %>%
+  CreateImpedance
+
+
+#Create addmitance using 1/X
+Admat<- Impedance %>% 
+    mutate(B2 = 1/(X*MVA) ) %>%
+  select(Node1,Node2, B2) %>%
+  group_by(Node1,Node2) %>%   #trying to remove multuple connections
+  summarise(B2 = sum(B2)) %>%
+  CreateImpedance
+
+
+
+#Is junk
+#Admat2 <- solve(Admat)
+
+
+MinVolt <- Substation %>%
+  group_by(Site.Code) %>%
+  summarise(V = min(Voltage..kV.))
+
+Voltagemaker <- left_join(data.frame(Node = colnames(Admat)), 
+                          demand, by = "Node") %>%
+  group_by(Node) %>%
+  mutate_all(funs(ifelse(is.na(.),0,1)))%>%
+  ungroup %>% 
+  .[,c(1,3)] %>%
+  mutate(Site.Code = str_sub(Node, 1,4)) %>%
+  left_join(., MinVolt, by = "Site.Code") %>%
+  mutate(V = ifelse(is.na(V),0, V)) #some nodes don't have a site, these are set to 0
+
+#I will add load in Drax, DRAX42
+#Didcot -
+#Dounray
+
+#building in edgename numbers helps the multiples but doesn cure
+
+test <- Impedance %>%
+  CreateTransmission(., "Node1", "Node2", "B2")
+
+#slice is not working becuase the data is stacked!
+
+Impedance %>% select(Node1, Node2, B2) %>% slice(c(1976,4385))
+
+Impedance %>% select(Node1, Node2, B2) %>% .[c(1976,4385),]
+
+dups<- test[duplicated(paste0(test$Edgename, test$Node1))|duplicated(paste0(test$Edgename, test$Node1), fromLast = T),]
+
+checkdup <- Impedance %>% filter(Node1 == "CRAI1-")
+
+
+
+```
+
+
+#Create voltges
+
+I can probably create a site to site voltage network
+
+```{r}
+
+test<- Substation %>% 
+  group_by(Site.Code) %>%
+  mutate(rank = rank(Voltage..kV.)) %>%
+  filter(Site.Code =="EXET"|Site.Code =="ABHA")
+
+test<- Substation %>% 
+  group_by(Site.Code) %>%
+  mutate(rank = rank(Voltage..kV.))
 
 
 ```
