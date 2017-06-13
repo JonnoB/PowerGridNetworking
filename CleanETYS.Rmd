@@ -230,24 +230,9 @@ FullnameCounts <- FullnameCounts %>%
   ungroup
 
 
-
-Substation %>% 
-  filter(Site.Code == "ABNE")
-
-FullnameCounts %>% 
-  filter(Site == "ORRI")
-
-
-Circuits %>% 
-  filter(Node1 == "BEAU1K"|Node2 == "BEAU1K")
-
-Circuits %>% 
-  filter(grepl("DUCC", Node1)|grepl("DUCC",Node2))
-
 #Double connection is this right? means double transformer?
 Transformers %>% 
   filter(Node1 == "BEAU1J"|Node2 == "BEAU1J")
-
 
 
 #How many appear only once
@@ -263,12 +248,6 @@ test <-  Substation %>% filter(Site.Code %in% test$Site)
 table(test$Voltage..kV.) 
 
 sum( Substation$Voltage..kV. %in% test$Name)
-#  
-# FullnameCounts <- data_frame(Names = c(Transformers$Node1, Transformers$Node2)) %>%
-#   group_by(Names) %>%
-#   summarise(Counts = n()) %>%
-#   arrange(-Counts)
-
 
 ```
 
@@ -356,7 +335,7 @@ demand2 <- demand %>% filter(grepl("BEAU", Node))
 
 ```
 
-Geerateion
+Generateion
 ```{r}
 Substation %>% filter(grepl("Brigg",Site.Name, ignore.case = TRUE))
 
@@ -503,9 +482,9 @@ test <- Impedance %>%
 
 #slice is not working becuase the data is stacked!
 
-Impedance %>% select(Node1, Node2, B2) %>% slice(c(1976,4385))
+Impedance %>% select(Node1, Node2, B2) %>% slice(c(1976,4385)) #self loop
 
-Impedance %>% select(Node1, Node2, B2) %>% .[c(1976,4385),]
+Impedance %>% select(Node1, Node2, B2) %>% .[c(1990, 4399),]
 
 dups<- test[duplicated(paste0(test$Edgename, test$Node1))|duplicated(paste0(test$Edgename, test$Node1), fromLast = T),]
 
