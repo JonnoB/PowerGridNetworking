@@ -18,7 +18,8 @@ CreateTransmission <- function(df, StartNode, EndNode, edgeweight){
   df <- bind_rows(df2, df3) %>%
   spread(., Node1, EdgeWeight, fil = 0)
   
-  Transmat <- df
+  Transmat <- as.matrix(df[,-1])
+  rownames(Transmat)<- df$Edgename
 
   return(Transmat)
 }

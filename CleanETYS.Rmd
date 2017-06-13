@@ -477,20 +477,11 @@ Voltagemaker <- left_join(data.frame(Node = colnames(Admat)),
 
 #building in edgename numbers helps the multiples but doesn cure
 
-test <- Impedance %>%
+Transmission <- Impedance %>%
   CreateTransmission(., "Node1", "Node2", "B2")
 
-#slice is not working becuase the data is stacked!
-
-Impedance %>% select(Node1, Node2, B2) %>% slice(c(1976,4385)) #self loop
-
-Impedance %>% select(Node1, Node2, B2) %>% .[c(1990, 4399),]
-
-dups<- test[duplicated(paste0(test$Edgename, test$Node1))|duplicated(paste0(test$Edgename, test$Node1), fromLast = T),]
-
-checkdup <- Impedance %>% filter(Node1 == "CRAI1-")
-
-
+#Doesn't work
+Current <- Transmission %*% Admat %*% Voltagemaker$V
 
 ```
 
