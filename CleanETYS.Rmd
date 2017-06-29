@@ -27,7 +27,7 @@ This might also mean that when I want to use multiple voltage levels I end up ha
 
 
 ```{r Setup}
-packages <- c("tidyverse", "igraph","readr","readxl", "broom", "zoo", "stringr")
+packages <- c("tidyverse", "igraph","readr","readxl", "broom", "zoo", "stringr", "xtable")
 
 new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -38,11 +38,13 @@ lapply(packages, library, character.only = TRUE)
 
 #Set up file system to read the correct folders this switches between aws and windows mode
 
-
+basewd<- "/home/jonno/Dropbox/Jonathan Bourne Phd Folder"
 datafile<- "/home/jonno/Dropbox/Jonathan Bourne Phd Folder/ETYSAppendixB"
 Functions <-"/home/jonno/Create_ETYS_network/Functions"
 
 list.files(Functions) %>% map(~source(file.path(Functions,.x)))
+
+LatexFigs <- "/home/jonno/Dropbox/Apps/ShareLaTeX/Data problems with the ETYS/Figures"
 
 ```
 
@@ -89,8 +91,8 @@ Transformers <- StackList(14:16)
 
 #The RCE needs a lot of treatment as there are formatting differences and also the bind_rows part of map_df doesn't coerce, which is annoying.
 names(AllData[[24]])[4] <-"MVAr.Generation"
-names(AllData[[23]])[5] <-"MVAr.Absorbtion"
-names(AllData[[24]])[5] <-"MVAr.Absorbtion"
+names(AllData[[23]])[5] <-"MVAr.Absorption"
+names(AllData[[24]])[5] <-"MVAr.Absorption"
 
 AllData[[22]]$MVAr.Absorption<- AllData[[22]]$MVAr.Absorption %>%gsub("[^A-Z0-9]", "", ., ignore.case = TRUE)
 
@@ -146,6 +148,9 @@ DoubleNames <- Substation %>% group_by(Site.Code, Site.Name) %>% summarise(count
   ungroup %>%
   group_by(Site.Code) %>% mutate(reps = n()) %>% ungroup %>% filter(reps>1)
 
+DoubleNames %>% select(Site.Code, Site.Name) %>%
+  xtable()
+
 #This is a common occurance for the doubles, there are two occurances one the name the other with "windfarm" added on. This needs to be investigated to check whether they are in the same physical location or not. 
 Substation %>% filter(Site.Code == "BIRN")
 
@@ -159,12 +164,38 @@ Substation %>% filter(Site.Code == "BIRN")
 
 ```{r}
 
-  AllData[[24]] %>% sapply(.,class)
-  AllData[[22]]$MVAr.Generation %>% table
-  AllData[[23]]$MVAr.Generation %>% table
-  AllData[[24]]$MVAr.Generation %>% table
-  
-AllData[[22]]$MVAr.Absorption %>%gsub("[^A-Z0-9]", "", ., ignore.case = FALSE)
+
+CircuitsOFTO <- AllData[[9]] %>%
+  rename(Node1 = Node.1, Node2 =Node.2, Cable.Length..km. = Length..km., Circuit.Type = Type) %>%
+  mutate(OHL.Length..km. = 0,
+         Winter.Rating..MVA. = Rating..MVA.,
+         Spring.Rating..MVA. = Rating..MVA.,
+         Summer.Rating..MVA. = Rating..MVA.,
+         Autumn.Rating..MVA. = Rating..MVA.,
+         Table = "B.2.1d") %>% 
+  select(-OFTO, -Station, -Rating..MVA., -Voltage..kV.  ) #voltage ius removed, although it is very useful, for consistancy 
+
+Circuits <- bind_rows(Circuits, CircuitsOFTO)
+
+
+TransformersOFTO <- AllData[[17]] %>%
+  mutate(Table = "B.3.1d") %>% 
+  select(-OFTO, -Site, -Rating..MVA.) %>%
+  setNames(c("Node1","Node2" ,"R....on.100MVA.","X....on.100MVA.","B....on.100MVA.","Rating..MVA.","Table"  ))
+
+
+Transformers <- Transformers %>% 
+  mutate(Rating..MVA. = as.character(Rating..MVA.)) %>%
+  bind_rows(.,TransformersOFTO)
+
+RCEOFTO <- AllData[[25]] %>%
+  mutate(MVAr.Generation =  as.numeric(MVAr.Generation),
+         MVAr.Absorption =  as.numeric(MVAr.Generation),
+         Table = "B.4.1d") %>%
+  select(-OFTO,-Tapping)
+
+
+RCE  <- bind_rows(RCE, RCEOFTO)
 
 ```
 
@@ -203,7 +234,7 @@ graph2 %>%
 
 ```
 
-
+#Fullname
 One issue is that it is difficult to know what everything is linking two, in order to get a greater under standing I will try to match the full names to everything else and see how many have a match and how many don't
 
 ```{r}
@@ -242,7 +273,7 @@ Transformers %>%
 
  #is everything that has a 3- also have a 33kv voltage?
  test <- FullnameCounts%>% 
-  filter(grepl("3-", Name))
+  filter(grepl("AMUL", Name))
  
 test <-  Substation %>% filter(Site.Code %in% test$Site) 
 table(test$Voltage..kV.) 
@@ -296,7 +327,7 @@ Substation %>%
 ```{r}
 ABNEgraph <-SubGraph("ABHA")
 
-BEAUgraph <-SubGraph("BEAU|FAAR")
+BEAUgraph <-SubGraph("BEAU")
 degree(BEAUgraph) %>% table
 
 #This graph looks like it has doubles between BEAU2J/BEAU1J why? is this a double circuit? What can I do about it?
@@ -307,12 +338,39 @@ z<- SubGraph("HARK")
 #I tried to make a plus 1 gtraph but it didnt work very well.
 test2<- paste(unique(str_sub(V(z)$name,1,4)) ,collapse = "|")
 
+#For the document the data problems...
+
+FullnameCounts %>% filter(Site =="BEAU")
+
+Substation %>% filter(Site.Code=="BEAU") %>%
+  xtable
+z <- SubGraph("BEAU")
+
+setwd(LatexFigs)
+pdf('BEAU.pdf')
+plot(z)
+dev.off()
 
 
+z <- SubGraph("DRAX")
+
+setwd(LatexFigs)
+pdf('Drax.pdf')
+plot(z)
+dev.off()
+
+
+z <- SubGraph("AMUL")
+setwd(LatexFigs)
+pdf('AMUL.pdf')
+plot(z)
+dev.off()
+
+setwd(datafile)
 ```
 
 
-Load the demand dataset
+#Load the demand dataset
 ```{r}
 
 demand <- read_excel(file.path(datafile,"ETYS16 AppG demand data.xlsx"), skip = 7)
@@ -324,7 +382,7 @@ sum(unique(demand$Node) %in% unique(FullnameCounts$Name))/length(unique(demand$N
 sum(str_sub(unique(demand$Node),1,4) %in% str_sub(unique(FullnameCounts$Name),1,4))/length(unique(demand$Node))
 
 
-demand2 <- FullnameCounts %>% filter(grepl("AMEM", Name))
+demand2 <- FullnameCounts %>% filter(grepl("KEAR", Name))
 
 test <- FullnameCounts %>% filter(Name %in% unique(demand$Node))
 
@@ -337,17 +395,8 @@ demand2 <- demand %>% filter(grepl("BEAU", Node))
 
 Generateion
 ```{r}
-Substation %>% filter(grepl("Brigg",Site.Name, ignore.case = TRUE))
+Substation %>% filter(grepl("kear",Site.Name, ignore.case = TRUE))
 
-SubGraph("DRAX")
-
-```
-
-solving the simultaneos equations of the impedance matrix to get voltage and current
-```{r}
-A <- matrix(data=c(1, 2, 3, 2, 5, 9, 5, 7, 8), nrow=3, ncol=3, byrow=TRUE)    
-b <- matrix(data=c(20, 100, 200), nrow=3, ncol=1, byrow=FALSE)
-round(solve(A, b), 3)
 ```
 
 

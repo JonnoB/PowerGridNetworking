@@ -1,0 +1,51 @@
+---
+title: "Untitled"
+author: "Jonathan Bourne"
+date: "29 June 2017"
+output: html_document
+---
+
+http://www2.nationalgrid.com/uk/services/land-and-development/planning-authority/shape-files/
+
+
+```{r}
+
+require(rgdal)
+setwd(file.path(basewd, "Substation shape"))
+
+
+
+SubstationShape <- readOGR("Substations.shp" )
+
+test <- tidy(SubstationShape)
+
+test2 <- as.data.frame(SubstationShape)
+
+namecheck <- test2$SUBSTATION %in% FullnameCounts$Name
+
+sum(namecheck)
+
+test2$SUBSTATION[namecheck]
+test2[namecheck,]
+
+FullnameCounts[FullnameCounts$Name %in% test2$SUBSTATION,]
+
+
+demandcheck <-test2$SUBSTATION %in% demand$Node
+
+sum(demandcheck)
+
+```
+
+
+```{r}
+
+setwd(file.path(basewd, "Cable Shape"))
+
+CableShape <- readOGR("Cable.shp" )
+
+Cable1 <- as.data.frame(CableShape)
+Cable2 <- tidy(CableShape)
+
+```
+
