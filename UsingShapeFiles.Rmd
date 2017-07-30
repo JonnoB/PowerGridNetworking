@@ -13,8 +13,6 @@ http://www2.nationalgrid.com/uk/services/land-and-development/planning-authority
 require(rgdal)
 setwd(file.path(basewd, "Substation shape"))
 
-
-
 SubstationShape <- readOGR("Substations.shp" )
 
 test <- tidy(SubstationShape)
@@ -46,6 +44,21 @@ CableShape <- readOGR("Cable.shp" )
 
 Cable1 <- as.data.frame(CableShape)
 Cable2 <- tidy(CableShape)
+
+```
+
+
+
+```{r}
+
+setwd(file.path(basewd, "SUBSTATION_SITE2"))
+
+SubstationShape <- readOGR("SUBSTATION_SITE.shp")
+
+test2 <- as.data.frame(SubstationShape)
+
+namecheck <- test2$SUBSTATION %in% FullnameCounts$Name
+
 
 ```
 

@@ -5,6 +5,10 @@ date: "2 May 2017"
 output: html_document
 ---
 
+
+charging team
+Dhami - 01926 654633
+
 zico kolter-carnegie mellon
 
 check out the network tools package
@@ -27,85 +31,42 @@ This might also mean that when I want to use multiple voltage levels I end up ha
 
 
 ```{r Setup}
-packages <- c("tidyverse", "igraph","readr","readxl", "broom", "zoo", "stringr", "xtable")
+setwd("/home/jonno/Create_ETYS_network/SubCode")
+source("Setup.R")
 
-new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages)
+source("LoadData.R")
 
-
-lapply(packages, library, character.only = TRUE)
-
-
-#Set up file system to read the correct folders this switches between aws and windows mode
-
-basewd<- "/home/jonno/Dropbox/Jonathan Bourne Phd Folder"
-datafile<- "/home/jonno/Dropbox/Jonathan Bourne Phd Folder/ETYSAppendixB"
-Functions <-"/home/jonno/Create_ETYS_network/Functions"
-
-list.files(Functions) %>% map(~source(file.path(Functions,.x)))
+source("CreateCoreData.R")
 
 LatexFigs <- "/home/jonno/Dropbox/Apps/ShareLaTeX/Data problems with the ETYS/Figures"
 
 ```
 
 
-#Loading and creating a structure for the data
-
+#FullName Counts
 ```{r}
-#create the path to the file
-path <- file.path(datafile, "ETYS 2016 Appendix B.xlsx")
+FullnameCounts <- list(
+  data_frame(Name = c(Circuits$Node1, Circuits$Node2), Type = "Circuits"),
+data_frame(Name = c(Transformers$Node1, Transformers$Node2), Type = "Transformers"),
+data_frame(Name =RCE$Node, Type = "RCE")) %>%
+  bind_rows %>%
+group_by(Name, Type) %>%
+  summarise(Count = n()) %>%
+  arrange(-Count) %>%
+group_by(Name) %>%
+  mutate(Total = sum(Count),
+         TypeCounts = n()) %>% 
+  ungroup
 
-
-#Create a list of all the sheets in the file
-
-AllData <- path %>% 
-  excel_sheets(.) %>%
-lapply(., read_excel, path = path, skip = 1, trim_ws = TRUE ) %>%
-  map(~.x %>% setNames(make.names(names(.))))
-
-#break out the sheet names
-
-AllData[[1]] <- AllData[[1]] %>% 
-  setNames(c("Table", "Title")) %>% 
-  filter(complete.cases(.)) %>%
-  mutate(Table = replace(Table, Table=="Table", "Index"), 
-         element = 1:(n())) #provides list element reference
-
-names(AllData) <- AllData[[1]]$Table
-
-View(AllData$Index)
-
+#Add in the amount of times a site appears
+FullnameCounts <- FullnameCounts %>%
+  mutate(Site = str_sub(Name, 1,4)) %>%
+  group_by(Site) %>%
+  mutate(SiteCount = sum(Count),
+         SiteTypeCounts = unique(Type) %>% length) %>%
+  ungroup
 ```
 
-#Create base data
-```{r}
-
-Substation <- StackList(2:4) %>%
-  mutate(Site.Code = str_trim(Site.Code),
-         Site.Name = str_trim(Site.Name)) #remove leading and trailing whitespace which causes problems with analysis.
-
-Circuits <- StackList(6:8)
-
-names(AllData[[16]])[1:2] <-c("Node1", "Node2") #The name had been written differently to the other two
-Transformers <- StackList(14:16)
-
-#The RCE needs a lot of treatment as there are formatting differences and also the bind_rows part of map_df doesn't coerce, which is annoying.
-names(AllData[[24]])[4] <-"MVAr.Generation"
-names(AllData[[23]])[5] <-"MVAr.Absorption"
-names(AllData[[24]])[5] <-"MVAr.Absorption"
-
-AllData[[22]]$MVAr.Absorption<- AllData[[22]]$MVAr.Absorption %>%gsub("[^A-Z0-9]", "", ., ignore.case = TRUE)
-
-
-RCE<- AllData[22:24] %>% map(~.x %>% RemoveSymbols %>% 
-                                 mutate(Unit.Number = as.character(Unit.Number),
-                                        Connection.Voltage..kV. = as.character(Connection.Voltage..kV.)))%>%
-  map2_df(.x =.,
-                     .y = names(.),
-                     ~ .x %>% 
-                      mutate(Table =.y ) )
-
-```
 
 #Create change data
 
@@ -160,46 +121,6 @@ Substation %>% filter(Site.Code == "BIRN")
 ```
 
 
-#OFTO
-
-```{r}
-
-
-CircuitsOFTO <- AllData[[9]] %>%
-  rename(Node1 = Node.1, Node2 =Node.2, Cable.Length..km. = Length..km., Circuit.Type = Type) %>%
-  mutate(OHL.Length..km. = 0,
-         Winter.Rating..MVA. = Rating..MVA.,
-         Spring.Rating..MVA. = Rating..MVA.,
-         Summer.Rating..MVA. = Rating..MVA.,
-         Autumn.Rating..MVA. = Rating..MVA.,
-         Table = "B.2.1d") %>% 
-  select(-OFTO, -Station, -Rating..MVA., -Voltage..kV.  ) #voltage ius removed, although it is very useful, for consistancy 
-
-Circuits <- bind_rows(Circuits, CircuitsOFTO)
-
-
-TransformersOFTO <- AllData[[17]] %>%
-  mutate(Table = "B.3.1d") %>% 
-  select(-OFTO, -Site, -Rating..MVA.) %>%
-  setNames(c("Node1","Node2" ,"R....on.100MVA.","X....on.100MVA.","B....on.100MVA.","Rating..MVA.","Table"  ))
-
-
-Transformers <- Transformers %>% 
-  mutate(Rating..MVA. = as.character(Rating..MVA.)) %>%
-  bind_rows(.,TransformersOFTO)
-
-RCEOFTO <- AllData[[25]] %>%
-  mutate(MVAr.Generation =  as.numeric(MVAr.Generation),
-         MVAr.Absorption =  as.numeric(MVAr.Generation),
-         Table = "B.4.1d") %>%
-  select(-OFTO,-Tapping)
-
-
-RCE  <- bind_rows(RCE, RCEOFTO)
-
-```
-
-
 
 #Make a circuit network
 
@@ -239,26 +160,7 @@ One issue is that it is difficult to know what everything is linking two, in ord
 
 ```{r}
 
-FullnameCounts <- list(
-  data_frame(Name = c(Circuits$Node1, Circuits$Node2), Type = "Circuits"),
-data_frame(Name = c(Transformers$Node1, Transformers$Node2), Type = "Transformers"),
-data_frame(Name =RCE$Node, Type = "RCE")) %>%
-  bind_rows %>%
-group_by(Name, Type) %>%
-  summarise(Count = n()) %>%
-  arrange(-Count) %>%
-group_by(Name) %>%
-  mutate(Total = sum(Count),
-         TypeCounts = n()) %>% 
-  ungroup
 
-#Add in the amount of times a site appears
-FullnameCounts <- FullnameCounts %>%
-  mutate(Site = str_sub(Name, 1,4)) %>%
-  group_by(Site) %>%
-  mutate(SiteCount = sum(Count),
-         SiteTypeCounts = unique(Type) %>% length) %>%
-  ungroup
 
 
 #Double connection is this right? means double transformer?
@@ -373,20 +275,20 @@ setwd(datafile)
 #Load the demand dataset
 ```{r}
 
-demand <- read_excel(file.path(datafile,"ETYS16 AppG demand data.xlsx"), skip = 7)
 
 #Percent f demand that matches a nodes
-sum(unique(demand$Node) %in% unique(FullnameCounts$Name))/length(unique(demand$Node))
+sum(unique(DemandData$Node) %in% unique(FullnameCounts$Name))/length(unique(DemandData$Node))
 
 #check using just site this matches loads
-sum(str_sub(unique(demand$Node),1,4) %in% str_sub(unique(FullnameCounts$Name),1,4))/length(unique(demand$Node))
+#This matches 97% of the demand and is therefore pretty useful. for a site based analysis.
+sum(str_sub(unique(DemandData$Node),1,4) %in% str_sub(unique(FullnameCounts$Name),1,4))/length(unique(DemandData$Node))
 
 
-demand2 <- FullnameCounts %>% filter(grepl("KEAR", Name))
+DemandData2 <- FullnameCounts %>% filter(grepl("KEAR", Name))
 
-test <- FullnameCounts %>% filter(Name %in% unique(demand$Node))
+test <- FullnameCounts %>% filter(Name %in% unique(DemandData$Node))
 
-demand2 <- demand %>% filter(grepl("BEAU", Node))
+DemandData2 <- DemandData %>% filter(grepl("BEAU", Node))
 
 
 
@@ -394,8 +296,14 @@ demand2 <- demand %>% filter(grepl("BEAU", Node))
 ```
 
 Generateion
+
 ```{r}
 Substation %>% filter(grepl("kear",Site.Name, ignore.case = TRUE))
+generators <- read_excel("ETYS16 AppF generation data.xlsx", sheet = 2)
+
+ test <- generators %>%  
+  mutate(Station = tolower(Station)) %>%
+    grep(pattern = "drax",  .$Station)
 
 ```
 
@@ -414,6 +322,8 @@ SubStatGraph <-bind_rows(Circuits, Transformers) %>%
   .[,1:2] %>%
   as.matrix() %>% 
   graph_from_edgelist(., directed = FALSE)
+
+#degree of site graph
 degree(SubStatGraph) %>% table
 
 
@@ -432,9 +342,6 @@ SubStatGraph %>%
   simplify(., remove.multiple = T, remove.loops = T) %>% 
 plot(., layout = l, vertex.label = NA,vertex.size=.8, edge.arrow.size=.4)
 
-SubStatGraph %>% 
-  simplify(., remove.multiple = T, remove.loops = T) %>% 
-  plot(.,vertex.size=.8, edge.arrow.size=.4, vertex.label = NA)
 
 
 ```
@@ -451,10 +358,16 @@ you also need a transmission matrix
 
 
 ```{r}
+
+#seperate out all the / multiple ratings for transformers and jsut take the lowest value
+TranformerMin <- Transformers$Rating..MVA. %>% str_split(., "/") %>% map_dbl(~.x %>% as.numeric %>% min)
+
  Impedance <- bind_rows(mutate(Circuits, MVA=Spring.Rating..MVA.,
                                Type = "Circuit"), 
                         mutate(Transformers, MVA = Rating..MVA.,
-                               Type = "Transformer")) %>%
+                               Type = "Transformer",
+                        #insert conveted MVA
+                               MVA = TranformerMin)) %>%
   select(Node1, Node2, R....on.100MVA., X....on.100MVA., B....on.100MVA.,
          MVA, Type) %>%
     mutate(
@@ -511,7 +424,7 @@ MinVolt <- Substation %>%
   summarise(V = min(Voltage..kV.))
 
 Voltagemaker <- left_join(data.frame(Node = colnames(Admat)), 
-                          demand, by = "Node") %>%
+                          DemandData, by = "Node") %>%
   group_by(Node) %>%
   mutate_all(funs(ifelse(is.na(.),0,1)))%>%
   ungroup %>% 
