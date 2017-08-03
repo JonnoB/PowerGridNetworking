@@ -39,11 +39,64 @@ Transformers[is.na(Transformers)] <- 0
 
 
 
+Extracting trasnport data
+```{r}
+
+trans1 <-TransportData[,1:16] %>% 
+  filter(!is.na(Bus.ID))
+
+#In this data the production and generation is already matched
+sum(trans1$Demand)  
+sum(trans1$Generation.A.....Peak.Security...Transport.Model.)  
+sum(trans1$Generation.B.....Year.Round...Transport.Model.)
+
+trans2 <- TransportData[,17:59] %>% 
+  filter(!is.na(Bus.1))
+  
+#Do the generation and or deman in trans1 match the nodes in the trans2?
+
+Trans2Nodes <- unique(c(trans2$Bus.1, trans2$Bus.2))
+
+#perfect match, this should be surprising but it is still good.
+sum(trans1$Bus.Name %in% Trans2Nodes)/nrow(trans1)
+
+
+
+
+SubStatGraph2 <-trans2 %>%
+  mutate(Node1 = str_sub(Bus.1, 1, 4),
+         Node2 = str_sub(Bus.2, 1, 4)) %>%
+  select(Node1, Node2) %>%
+  as.matrix() %>% 
+  graph_from_edgelist(., directed = FALSE)
+
+SubStatGraph2 %>% 
+  simplify(., remove.multiple = T, remove.loops = T) %>% 
+  plot(.,vertex.size=.8, edge.arrow.size=.4, vertex.label = NA)
+
+length(V(SubStatGraph2))
+
+
+SubStatGraph2 <-trans2 %>%
+  mutate(Node1 = Bus.1,
+         Node2 = Bus.2) %>%
+  select(Node1, Node2) %>%
+  as.matrix() %>% 
+  graph_from_edgelist(., directed = FALSE)
+
+SubStatGraph2 %>% 
+  simplify(., remove.multiple = T, remove.loops = T) %>% 
+  plot(.,vertex.size=.8, edge.arrow.size=.4, vertex.label = NA)
+length(V(SubStatGraph2))
+
+
+```
+
+
 Create Substation Graph
 ```{r}
 
 SubStatGraph <-bind_rows(Circuits, Transformers) %>%
-  # filter(grepl(Name, Node1)|grepl(Name,Node2)) %>%
   mutate(Node1 = str_sub(Node1, 1, 4),
          Node2 = str_sub(Node2, 1, 4)) %>%
   .[,1:2] %>%
@@ -100,7 +153,8 @@ sum(unique(DemandData$Node) %in% unique(FullnameCounts$Name))/length(unique(Dema
 sum(unique(DemandData$Site) %in% FullnameCounts$Site)/length(unique(DemandData$Site) )
 
 #Match rate is a joke
-sum(unique(GenerationData$Node.1) %in% FullnameCounts$Site)/length(unique(GenerationData$Node.1) )
+sum(unique(GenerationData$Node.1) %in% FullnameCounts$Name)/length(unique(GenerationData$Node.1) )
+
 
 #Match Rate is pretty good!
 sum(unique(GenerationData$Site) %in% FullnameCounts$Site)/length(unique(GenerationData$Site) )
@@ -111,7 +165,7 @@ G2 <- GenerationData %>%
 (sum(unique(G2$Site) %in% FullnameCounts$Site)/length(unique(G2$Site) ))
 
 #Terrible
-sum(unique(LocalAssetData$Bus.Name) %in% FullnameCounts$Site)/length(unique(LocalAssetData$Bus.Name) )
+sum(LocalAssetData$Bus.Name %in% FullnameCounts$Name)/length(unique(LocalAssetData$Bus.Name) )
 
 #Match Rate is slightly lower than the Generation Data set.
 sum(unique(str_sub(LocalAssetData$Bus.Name,1,4)) %in% FullnameCounts$Site)/length(unique(str_sub(LocalAssetData$Bus.Name,1,4)) )
@@ -282,7 +336,6 @@ Power <- Admat %*% CompInject$AdjNetPower[CompInject$Site %in% colnames(Admat)]
 
 Admat2 <-Admat
 diag(Admat2) <-0
-solve(Admat)
 
   solve(Admat[1:114,1:114])
 
@@ -296,38 +349,44 @@ test<-Admat[rowSums(abs(Admat))==0,]
 
 test <- Impedance %>% 
   filter(Node1b == "GWYW"|Node2b == "GWYW")
-
+FullnameCounts$Name
 ```
 
-None of the above works well so the networks need to be subsetted and explored more carefully
+
+#using Trans1
+
 ```{r}
  
-NewNodes <- KNearestNodes(SubStatGraph, "ABNE", 2)
+#NewNodes <- KNearestNodes(SubStatGraph, "ABNE", 1)
 
-CompInject2 <- BalencedGenDem(SubStatGraph, InjectionVector, NewNodes)
+#CompInject2 <- BalencedGenDem(SubStatGraph, InjectionVector, NewNodes)
 
 
-
- Impedance2 <- Impedance %>% 
-  filter( Node1b %in% NewNodes & Node2b %in% NewNodes )
+Impedance2 <- trans2 %>%
+  mutate(Y = 1/X..Peak.Security.) %>%
+  select(Bus.1, Bus.2, Y)
 
  
  #It looks like using the B2 metric was causing major problems
  Admat<- Impedance2 %>% 
-    mutate(B2 = B ) %>%
-  select(Node1b,Node2b, B2) %>%
-  group_by(Node1b,Node2b) %>%   #trying to remove multuple connections
-  summarise(B2 = max(B2, na.rm = TRUE)) %>%
+  group_by(Bus.1,Bus.2) %>%   #trying to remove multuple connections
+  summarise(Y = max(Y, na.rm = TRUE)) %>%
   CreateImpedance
-Admat[is.na(Admat)] <- 0 #Na's are created
-Admat[!is.finite(Admat)] <- 0 #Non finite numbers created by dividing by 0
- 
 
- Transmission <- Impedance2 %>% 
-  select(Node1b, Node2b, B) %>%
-  group_by(Node1b, Node2b) %>%
-  summarise(B2 = max(B, na.rm = TRUE))  %>%
-  CreateTransmission(., "Node1b", "Node2b", "B2")
+ plot(density(diag(Admat)))
+ 
+ remove <- which.max(diag(Admat))
+ Adinv<- solve(Admat[-remove, -remove])
+ Admat2 <- Admat  
+ Admat2[remove, remove] <- Admat2[remove, remove] + 50 # add in additional susceptance so it can be inverted
+ 
+ Adinv<- solve(Admat[-remove, -remove]) 
+ Adinv2<- solve(Admat2) 
+ 
+ Transmission <- Impedance2 %>%
+ group_by(Bus.1,Bus.2) %>%   #trying to remove multuple connections
+  summarise(Y = max(Y, na.rm = TRUE)) %>%
+  CreateTransmission(., "Bus.1", "Bus.2", "Y")
 
   Current <- Transmission %*% Admat %*% CompInject2$AdjNetPower[CompInject2$Site %in% colnames(Admat)]
  
@@ -340,24 +399,14 @@ Power <- Admat %*% InjectionVector$NetPower[InjectionVector$Site %in% colnames(A
  test %>% simplify %>% plot() 
  
  solve(Admat)
+test<- solve(Admat[-3,-3])
+ 
 rowSums(Admat) 
 
-Admat0<-Admat
-diag(Admat0)<-0
+diag(Admat) <- diag(Admat)+1
 
+solve(Admat)
 
-Admat2 <- as.integer(round(Admat,5)*10000) %>% matrix(nrow = 12)
-Admat2b <-Admat2
-diag(Admat2b)<-0
-diag(Admat2)<- -rowSums(Admat2b)
-rowSums(Admat2)
-
-Admat2 <- Admat2
-solve(Admat2, tol=1e-20)
-
-test <- data_frame(sums = rowSums(Admat0), diag =  diag(Admat)) %>%
-  mutate(ratio = sums/diag,
-         diff = sums + diag)
 ```
 
 

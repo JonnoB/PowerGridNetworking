@@ -1,0 +1,189 @@
+---
+title: "Untitled"
+author: "Jonathan Bourne"
+date: "1 August 2017"
+output: html_document
+---
+
+#Setup Chunk
+
+```{r}
+setwd("/home/jonno/Create_ETYS_network/SubCode")
+source("Setup.R")
+
+```
+
+
+#Load Tariff and Trasnport
+ 
+```{r}
+KeepPath <- getwd()
+
+#Load Tariff aka generation data
+setwd(Tariff)
+
+GenerationData <- read_excel("Tariff & Transport Model_2018_19 Tariffs_External.xlsm", sheet =10, skip = 33) %>%
+  setNames(make.names(names(.))) %>%
+  mutate(Site = str_sub(Node.1,1,4))
+
+LocalAssetData <- read_excel("Tariff & Transport Model_2018_19 Tariffs_External.xlsm", sheet =11, skip = 11) %>%
+  setNames(make.names(names(.)))
+
+TransportData <- read_excel("Tariff & Transport Model_2018_19 Tariffs_External.xlsm", sheet =12, skip = 11) %>%
+  setNames(make.names(names(.)))
+
+setwd(KeepPath)
+rm(KeepPath)
+```
+
+#Clean and seperate Transport
+
+```{r}
+trans1 <-TransportData[,1:16] %>% 
+  filter(!is.na(Bus.ID))
+
+trans2 <- TransportData[,17:59] %>% 
+  filter(!is.na(Bus.1))
+```
+
+
+
+```{r}
+
+NodeGraph <-trans2 %>%
+  mutate(Node1 = Bus.1,
+         Node2 = Bus.2) %>%
+  select(Node1, Node2) %>%
+  as.matrix() %>% 
+  graph_from_edgelist(., directed = FALSE)
+
+NodeGraph %>% 
+  simplify(., remove.multiple = T, remove.loops = T) %>% 
+  plot(.,vertex.size=.8, edge.arrow.size=.4, vertex.label = NA)
+length(V(SubStatGraph2))
+
+```
+
+#Injection Vector
+```{r}
+InjectionVector <- trans1 %>% arrange(Bus.Name) %>% .$BusTransferB
+```
+
+
+#Create Impedance and Transmission matrix
+
+parallel susceptances are added together. does this mean that when there are multiple lines connecting two nodes they should be added together and have the total capacity added together or should they be help seperate?
+
+the removing of parallel cables may be causing some of the over capacity lines
+
+```{r}
+Impedance <- trans2 %>%
+  mutate(Y = 1/X..Peak.Security.) %>%
+  select(Bus.1, Bus.2, Y)
+
+ 
+ #It looks like using the B2 metric was causing major problems
+ Admat<- Impedance %>% 
+  group_by(Bus.1,Bus.2) %>%   #trying to remove multuple connections
+  summarise(Y = max(Y, na.rm = TRUE)) %>%
+  CreateImpedance
+
+remove <- which.max(diag(Admat))
+Admat[remove, remove] <- Admat[remove, remove] + 50 # add in additional susceptance so it can be inverted
+  
+ Transmission <- Impedance %>%
+ group_by(Bus.1,Bus.2) %>%   #trying to remove multiple connections
+  summarise(Y = max(Y, na.rm = TRUE)) %>%
+  CreateTransmission(., "Bus.1", "Bus.2", "Y")
+
+```
+
+Alternative calc
+```{r}
+
+
+df<- Impedance
+StartNode <- "Bus.1"
+EndNode <- "Bus.2"
+
+AZero <-  Impedance %>%
+  CreateTransmission(., "Bus.1", "Bus.2")
+
+#remove Slack bus, usually the largest generator
+SlackRef<-which.max(trans1$Generation.A.....Peak.Security...Transport.Model.)
+trans1$Bus.Name[SlackRef] #name of node to be removed
+
+A <- AZero[,colnames(A)!=trans1$Bus.Name[SlackRef]]
+
+
+C <- LinePropertiesMatrix(Impedance, "Bus.1", "Bus.2")
+
+B <- t(A) %*% C %*% A
+
+InjectionVector2 <- trans1$BusTransferB[match(colnames(A), trans1$Bus.Name)]
+
+PowerAlt <- C %*% A %*% solve(B) %*% InjectionVector2
+
+```
+
+
+#Power Flow
+
+This contains really big numbers, is this right? The ordering of the multiplication could be wrong
+
+```{r}
+Power <- Transmission %*% Admat %*% InjectionVector
+
+Current <- Admat %*% (trans1 %>% arrange(Bus.Name) %>% .$Voltage)
+
+Power <- Power %>% data.frame(Link = rownames(.), Power = .) %>%
+  #removes the link number as there are some nodes with multiple links between a single pair
+  mutate(Link = sub("(-[0-9]$)", "", Link))
+
+test <- trans2 %>%
+  mutate(Link = paste(Bus.1, Bus.2, sep="-")) %>% 
+  left_join(., Power, by = "Link") %>%
+  mutate(Over = Power>Link.Limit)
+
+#about a third of the lines are over charged.... why?
+table(test$Over)
+
+test2 <- test %>%
+  mutate(Link.Type = tolower(Link.Type)) %>%
+  group_by(Link.Type, Over) %>%
+  summarise(counts = n()) %>%
+  mutate(Over = tolower(Over)) %>%
+  spread(key = Over, value = counts) %>%
+  mutate(Total = true+false)
+
+```
+
+
+#Voltage Matching
+Everyone matches to the same voltage unless it is a transformer.
+There is an excpetion three types called construct also have different volatges, these could be also transformers under construction... this should be tested.
+```{r}
+
+Vmatch <- trans1 %>% select(Bus.Name, Voltage)
+
+Vnet <- trans2 %>% 
+  select(Bus.1, Bus.2, Link.Type) %>%
+  left_join(., Vmatch, by = c("Bus.1"="Bus.Name")) %>%
+  rename(Voltage.1 = Voltage) %>%
+  left_join(., Vmatch, by = c("Bus.2"="Bus.Name")) %>%
+  rename(Voltage.2 = Voltage)
+
+
+Vnet2 <- Vnet %>% filter(Voltage.1 != Voltage.2)
+
+  g <- graph.data.frame(Vnet[,1:2], vertices=Vmatch, directed=FALSE) %>%
+  simplify(., remove.multiple = T, remove.loops = T) 
+  
+V(g)$color <- V(g)$Voltage
+
+plot(g,vertex.size=5, edge.arrow.size=.4, vertex.label = NA)
+  
+
+
+```
+

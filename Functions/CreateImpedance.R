@@ -13,6 +13,10 @@ CreateImpedance <- function(df){
   
   diag(Impmat ) <- -rowSums(Impmat )
   
-  Impmat  <- -Impmat 
+  Impmat  <- -Impmat
+  
+  #order the matrix alphabetically
+  Impmat <-Impmat[order(rownames(Impmat)), order(colnames(Impmat))]
+  
   return(Impmat)
 }

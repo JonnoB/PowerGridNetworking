@@ -1,8 +1,18 @@
-CreateTransmission <- function(df, StartNode, EndNode, edgeweight){
+CreateTransmission <- function(df, StartNode, EndNode, edgeweight = NULL){
   
-  df <- df %>% rename_(Node1 = StartNode,
-                       Node2 = EndNode,
-                       EdgeWeight = edgeweight) %>%
+  #allows weighted and unweughted matrices
+  if(is.null(edgeweight)){
+    df<- df %>% rename_(Node1 = StartNode,
+                        Node2 = EndNode) %>%
+      mutate(EdgeWeight = 1)
+  } else{
+    
+    df<- df %>% rename_(Node1 = StartNode,
+                        Node2 = EndNode,
+                        EdgeWeight = edgeweight)
+  }
+  
+  df <- df %>%
     #mutate(Edgename = paste(Node1,Node2, sep = "-"))
     group_by(Node1, Node2) %>% #trying to stop the non-unique identifier problem
     mutate(Edgename = paste(Node1,Node2, 1:n(),sep = "-")) %>% #This allows multiple edges 
@@ -12,6 +22,7 @@ CreateTransmission <- function(df, StartNode, EndNode, edgeweight){
   
   df2 <- df %>% select(Edgename, Node1, EdgeWeight) 
   df3 <- df %>% select(Edgename, Node2, EdgeWeight) %>%
+    #sets the negative edgeweight
     mutate(EdgeWeight = -EdgeWeight) %>%
     rename(Node1 = Node2)
   
@@ -20,6 +31,9 @@ CreateTransmission <- function(df, StartNode, EndNode, edgeweight){
   
   Transmat <- as.matrix(df[,-1])
   rownames(Transmat)<- df$Edgename
+  
+  #order the matrix alphabetically
+  Transmat <- Transmat[order(rownames(Transmat)), order(colnames(Transmat))]
 
   return(Transmat)
 }
