@@ -108,8 +108,9 @@ SlackRef<- which(ValidNodes$Bus.Order == 0)
 
 PowerAlt <- PowerFlow(Impedance, ValidNodes, SlackRef)
 
-PowerAlt2 <- PowerAlt%>%
-  left_join(., select(trans2, Link, Link.Limit, Link.Type, LineFlow__1 ), by = "Link") %>%
+PowerAlt2 <- trans2 %>%
+  select( Link, Link.Limit, Link.Type, LineFlow__1 )%>%
+  left_join(PowerAlt, ., by = "Link") %>%
   mutate(Over.Limit = abs(MW)>Link.Limit,
          Over.Limitx1.5 = abs(MW)>(Link.Limit*1.5)) %>%
   mutate(MW = round(MW),
@@ -236,15 +237,19 @@ Graph Stats
 ```{r}
 
 NetworkStats <- function(g, colname = "value"){
-data_frame(Metric = c("Nodes", "edges" ,"betweenness", "degree", "assortativity", "clustering", "distance"),
-           value = c(vcount(g), ecount(g), mean(betweenness(g)),mean(degree(g)), assortativity(g, degree(g)),
-                     transitivity(g), mean(shortest.paths(g)))
+data_frame(Metric = c("Nodes", "edges", "Components" ,"betweenness", "degree", "assortativity", "clustering", "distance"),
+           value = c(vcount(g), ecount(g), components(g)$no, mean(betweenness(g)),mean(degree(g)), assortativity(g, degree(g)),
+                     transitivity(g), 1)
 ) %>% setNames(c("Metric", colname))
 
+#This takes forever maybe should replace with *distances* or something else? and custome electrical distance function
+#  mean( ifelse(is.finite(shortest.paths(g)),shortest.paths(g), NA), na.rm = T)
 }
 
 
+test <-ifelse(is.finite(shortest.paths(gImp2)),shortest.paths(gImp2), NA)
 
+mean(test, na.rm = T)
 ```
 
 
@@ -265,17 +270,49 @@ gbase <- graph.data.frame(Impedance[,1:2], directed=FALSE)
   C <- LinePropertiesMatrix(Impedance, "Bus.1", "Bus.2")
   
   B <- t(A) %*% C %*% A
+  
+ecount(gbasemean( ifelse(is.finite(shortest.paths(g)),shortest.paths(g), NA), rm.na =T))
+B2 <- solve(B)
+diag(B2)<-0
+min(B2);max(B2)
+Bvect <-unlist(B2)
 
-gImp <- solve(B) %>% graph.adjacency(., mode="undirected", weighted=TRUE)
+gImp <- B2 %>% graph.adjacency(., mode="undirected", weighted=TRUE)
+ecount(gImp)
+
+min(E(gImp)$weight);max(E(gImp)$weight)
+
+sum(E(gImp)$weight>2)
+
+#Takes ages to calculate tells you where to cut off the edges.
+# Edgedf <- data_frame(cutoff = seq(min(E(gImp)$weight), max(E(gImp)$weight), by = 1/100)) %>%
+#   mutate(index = 1:n(),
+#          Edges = cutoff %>%
+#   map_dbl(~ sum(E(gImp)$weight>.x))
+# )
+
+
+RemoveEdges <- data_frame(valid = E(gImp)$weight > 3.733029) %>%
+  mutate(index = 1:n()) %>%
+  filter(valid == FALSE)
+
+table(RemoveEdges$valid)
+
+gImp2 <- gImp
+gImp2 <- delete_edges(gImp, RemoveEdges$index)
+
+plot(gImp2,vertex.size=1, edge.arrow.size=1, vertex.label = NA)
+
+#keep just non isolated nodes
+iso <- V(gImp2)[degree(gImp2)==0]
+g2 <- delete.vertices(gImp2, iso)
+
 
   gX <- Impedance %>%
   graph.data.frame(., directed=FALSE)
-E(gImp)$weight <- 1/Impedance$Y
-
-test <- NetworkStats(gImp, "Impedance")
 
 
-DiffNetStats <- left_join(NetworkStats(gbase, "Topological"), NetworkStats(gImp, "Impedance"), by= "Metric") %>%
+DiffNetStats <- left_join(NetworkStats(gbase, "Topological"), NetworkStats(gImp2, "Impedance"), by= "Metric") %>%
   left_join(., NetworkStats(gX, "Reactance"), by= "Metric") %>%
   mutate_if(.,is.numeric, funs(format(round(.,3), scientific=F)) )
 
@@ -285,11 +322,115 @@ test <- distances(gImp, weights = "Y")
 ```
 
 
-#geo data
+#Simple Cascade
+
+first try is to make a cascade of random failure until super componant collapses
+
 
 ```{r}
-setwd(file.path(basewd, "Substations"))
+#input networkas_adjacency_matrix(Impmat, attr = "weight")
+gCasc <- gbase
+#set an ImpedanceCascedge weight of 1
+gCasc <- set_edge_attr(gCasc, "weight", index = E(gCasc), 1 )
 
+#node to delete rule
+set.seed(193) #makes testing reproducible
+deletevertex <- sample(V(gCasc)$name, 1)
+
+#remove selected node from network
+gCasc <- delete.vertices(gCasc, deletevertex)
+#maintains graph structure but with edges associtated with the node removed.
+gCasc <- add_vertices(gCasc, 1, name = deletevertex)
+#convert network to matrix
+
+ecount(gCasc) #just to check there are less edges, can be deleted later
+
+#After the next node has been deleted the network is analysed and all over capacity lines are removed
+#need to add in if steatement for networks with weights
+MatCasc <- as_adjacency_matrix(gCasc, attr = "weight") #is this necessary any more?
+
+
+#Why is this longer than the original? is it because of multi links?
+ImpedanceCasc<- as_tibble(get.edgelist(gCasc)) %>%
+  mutate(Y = edge_attr(gCasc, "weight")) %>%
+  rename(Bus.1 = V1, Bus.2 = V2) #%>%
+#they arethe same length until you join them together then they become much longer.. why?  
+#left_join(., Impedance)
+
+
+V(gCasc)
+
+#checks that only inlcuded nodes are being counted removes nodes that shouldn't be there.
+#follows up by balancing demand and gen
+ValidNodesCasc <- ValidNodesFunc(trans1, Impedance) %>%
+  BalencedGenDem2(gCasc, .)
+
+#remove dead islands
+DeadIslandNodes <-ValidNodesCasc$Bus.Name[ValidNodesCasc$DeadIsland]
+
+ImpedanceCasc <- ImpedanceCasc %>% 
+  filter(!(Bus.1 %in% DeadIslandNodes) | !(Bus.2 %in% DeadIslandNodes)  )
+
+ValidNodesCasc <- ValidNodesCasc %>%
+  filter(!DeadIsland)
+
+#this needs to work for multiple islands not just 1
+#remove Slack bus, usually the largest generator
+SlackRefCasc <- which.min(ValidNodesCasc$Bus.Order)
+
+#error for wrong length
+#Get new power flow across the new graph
+PowerFlowMat <- PowerFlow(ImpedanceCasc, ValidNodesCasc, SlackRefCasc)
+
+PowerFlowMat2 <- trans2 %>%
+  select( Link, Link.Limit, Link.Type, LineFlow__1 )%>%
+  left_join(PowerFlowMat, ., by = "Link") %>%
+  mutate(Over.Limit = abs(MW)>Link.Limit,
+         Over.Limitx1.5 = abs(MW)>(Link.Limit*1.5)) %>%
+  mutate(MW = round(MW),
+         LineFlow__1= round(LineFlow__1),
+         ratio = MW/LineFlow__1,
+         diff  = MW-LineFlow__1,
+         absdiff = abs(diff))
+
+
+#The giant componant condition, the process contrinues whilst this is true
+(max(components(gcasc)$csize)/vcount(gcasc)) > 0.8
+
+#repeat
+
+```
+
+
+#Using a weighted graph where weight is the Imp
+```{r}
+#input networkas_adjacency_matrix(Impmat, attr = "weight")
+gCasc <-  Impedance %>%
+  rename(weight = Y) %>%
+  graph.data.frame(., directed=FALSE)
+
+#node to delete rule
+deletevertex <- sample(V(gCasc)$name, 1)
+
+#remove selected node from network
+gCasc <- delete.vertices(gCasc, deletevertex)
+#maintains graph structure but with edges associtated with the node removed.
+gCasc <- add_vertices(gCasc, 1, name = deletevertex)
+#convert network to matrix
+
+#After the next node has been deleted the network is analysed and all over capacity lines are removed
+#need to add in if steatement for networks with weights
+MatCasc <- as_adjacency_matrix(gCasc, attr = "weight") #is this necessary any more?
+
+
+
+
+
+
+#The giant componant condition, the process contrinues whilst this is true
+(max(components(gcasc)$csize)/vcount(gcasc)) > 0.8
+
+#repeat
 
 ```
 
