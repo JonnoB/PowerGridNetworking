@@ -11,7 +11,7 @@ LinePropertiesMatrix <- function(df, StartNode, EndNode){
     filter(Node1 !=Node2) #remove self loops
   
   C <- matrix(data = 0, nrow = nrow(df), ncol = nrow(df))
-  diag(C) <- Impedance$Y
+  diag(C) <- df$Y
   colnames(C)<- df$Edgename
   rownames(C)<- df$Edgename
   

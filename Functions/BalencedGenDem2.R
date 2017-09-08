@@ -1,25 +1,33 @@
-BalencedGenDem2 <- function(g, ValidNodes){
+BalencedGenDem2 <- function(g, ValidNodes, DemandVar, GenerationVar, OutputVar = "NetPower"){
   #Balences the generation and demand across multiple isolated componants
   #g: the graph of the network that is being attacked
-  #ValidNodes: the data frame of valid nodes and there demand and generation
+  #ValidNodes: the data frame of valid nodes and their demand and generation
+  #DemandVar: The Variable name to be used for calculating nodal demand is bare and unquoted
+  #OutputVar: The name of the variable that will be the new balanced power this is a character string
   
-  componentmatcher <- data_frame(Bus.Name = names(components(g)$membership), 
-                                 component = components(g)$membership)
+  DemandVar <- enquo(DemandVar)
+  GenerationVar <- enquo(GenerationVar)
   
-  ValidNodesCasc <- ValidNodes %>%
-    left_join(componentmatcher, by = "Bus.Name") %>%
+  # componentmatcher <- data_frame(Bus.Name = names(components(g)$membership), 
+  #                                component = components(g)$membership)
+  
+  
+  ValidNodesCasc2 <- ValidNodes %>%
+   # left_join(componentmatcher, by = "Bus.Name") %>%
     group_by(component) %>%
-    #remove Dead islands
-    mutate(DeadIsland = sum(Demand)==0 | sum(Generation.B.....Year.Round...Transport.Model.)==0,
-           Demand2 = ifelse(DeadIsland, 0, Demand),
-           Generation.B2 = if_else(DeadIsland, 0, Generation.B.....Year.Round...Transport.Model.)) %>%
+    #Identify Deadislands and set Generation and Demand to 0
+    mutate(DeadIsland = sum(!!DemandVar)==0 | sum(!!GenerationVar)==0,
+           Demand2 = ifelse(DeadIsland, 0, !!DemandVar),
+           Generation2 = if_else(DeadIsland, 0, !!GenerationVar)) %>%
     #rebalence remaining componants
-    mutate(GenBal = sum(Demand2)>sum(Generation.B2),
-           Demand2 = ifelse(GenBal, 
-                            Demand2*(sum(Generation.B2)/sum(Demand2)), Demand2),
-           Generation.B2 = ifelse(GenBal, 
-                                  Generation.B2*(sum(Demand2)/sum(Generation.B2)), Generation.B2),
+    mutate(GenBal = ifelse(is.finite(sum(Demand2)/sum(Generation2)),sum(Demand2)/sum(Generation2),1),
+           Demand3 = ifelse(GenBal>1,
+                            Demand2*(sum(Generation2)/sum(Demand2)), Demand2),
+           Generation3 = ifelse(GenBal<1,
+                                Generation2*(sum(Demand2)/sum(Generation2)), Generation2),
            
-           BusTransferB = Demand2 + Generation.B2)
+           !!OutputVar := Generation3 - Demand3) %>%
+    ungroup %>%
+    select(-Demand2, -Generation2, -GenBal, -Demand3, -Generation3)
   
 }

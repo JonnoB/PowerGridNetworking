@@ -47,6 +47,10 @@ trans2 <- TransportData[,17:59] %>%
   group_by(Bus.1, Bus.2) %>% #trying to stop the non-unique identifier problem
     mutate(Link = paste(Bus.1,Bus.2, 1:n(),sep = "-")) %>% #This allows multiple edges 
     #between the same node pair, it is not certain the data is always correct!
+    ungroup %>%
+  group_by(Bus.1, Bus.2) %>% #trying to stop the non-unique identifier problem
+    mutate(Link = paste(Bus.1,Bus.2, 1:n(),sep = "-")) %>% #This allows multiple edges 
+    #between the same node pair, it is not certain the data is always correct!
     ungroup  %>%
 #set construct line limits really high
   mutate(Link.Type = tolower(Link.Type),
@@ -87,7 +91,7 @@ the removing of parallel cables may be causing some of the over capacity lines
 ```{r}
 Impedance <- trans2 %>%
   mutate(Y = 1/X..Peak.Security.) %>%
-  select(Bus.1, Bus.2, Y)
+  select(Bus.1, Bus.2, Y, Link)
 
 ```
 
@@ -102,9 +106,10 @@ ValidNodes <- trans1 %>%
 
 
 #remove Slack bus, usually the largest generator
-SlackRef<-which.max(ValidNodes$BusTransferA)
-
-SlackRef<- which(ValidNodes$Bus.Order == 0)
+  SlackRef <- ValidNodes %>%
+    arrange(Bus.Order) %>%
+    summarise(Bus.Name = first(Bus.Name),
+              Nodes = n())
 
 PowerAlt <- PowerFlow(Impedance, ValidNodes, SlackRef)
 
@@ -154,7 +159,11 @@ VoltCols <-  with(Vnet,
         data.frame(Link.Voltage = levels(Link.Voltage),
                    color = I(brewer.pal(nlevels(Link.Voltage), name = 'Dark2')))) 
 
-Vnet <-   VoltCols %>%
+Vne%>%
+  group_by(Bus.1, Bus.2) %>% #trying to stop the non-unique identifier problem
+    mutate(Link = paste(Bus.1,Bus.2, 1:n(),sep = "-")) %>% #This allows multiple edges 
+    #between the same node pair, it is not certain the data is always correct!
+    ungroup t <-   VoltCols %>%
   left_join(Vnet,.)
 
 Vnet2 <- Vnet %>% filter(Voltage.1 != Voltage.2)
@@ -256,7 +265,17 @@ mean(test, na.rm = T)
 
 ```{r}
 gbase <- graph.data.frame(Impedance[,1:2], directed=FALSE)
+gbase <- Impedance[,1:2] %>% 
+  as.matrix %>%
+  graph_from_edgelist( directed = FALSE)
+#there is something rum going on here
+gbase <- graph_from_data_frame(Impedance[,1:3], directed=FALSE)
 
+get.edgelist(gbase) %>% as.tibble %>% filter(V1 == "PERS10")
+as_data_frame(gbase) %>% filter(from == "PERS10")
+get.edgelist(gbase2) %>% as.tibble %>% filter(V1 == "PERS10")
+as_data_frame(gbase2) %>% filter(from == "PERS10")
+test <- as_data_frame(gbase2)
 
   AZero <-  Impedance %>%
     CreateTransmission(., "Bus.1", "Bus.2")
@@ -264,7 +283,7 @@ gbase <- graph.data.frame(Impedance[,1:2], directed=FALSE)
   # #remove Slack bus, usually the largest generator
   # SlackRef<-which.max(ValidNodes$BusTransferA)
 
-  A <- AZero[,colnames(AZero)!=trans1$Bus.Name[SlackRef]]
+  A <- AZero[,colnames(AZero)!=SlackRef$Bus.Name]
   
   #Vreate the diagonal matrix of 
   C <- LinePropertiesMatrix(Impedance, "Bus.1", "Bus.2")
@@ -326,12 +345,19 @@ test <- distances(gImp, weights = "Y")
 
 first try is to make a cascade of random failure until super componant collapses
 
+An  importnant point is that there is re-balencing and smart re-balencing. with regular or dum re-balencing the rebalance occurs to try and match the demand of the whole component. This can cause further cables to trip making the cascade worse. Smart-rebalancing rebalences such that brown-outs occur forcing a demand reduction as generation is increaased ony to the point at which a line trip would occur.
+
+This then raises the second point which is that cascades happen almost instantaneously mean demand and generation can't be rebalanced to any practical extent. In order for the power flow to work however there must be a balance, 
+
+We need lit on the causes and effects of sudden imbalences
+
+WHAT is this SNA stuff going on?
 
 ```{r}
 #input networkas_adjacency_matrix(Impmat, attr = "weight")
 gCasc <- gbase
 #set an ImpedanceCascedge weight of 1
-gCasc <- set_edge_attr(gCasc, "weight", index = E(gCasc), 1 )
+#gCasc <- set_edge_attr(gCasc, "weight", index = E(gCasc), 1 )
 
 #node to delete rule
 set.seed(193) #makes testing reproducible
@@ -339,65 +365,45 @@ deletevertex <- sample(V(gCasc)$name, 1)
 
 #remove selected node from network
 gCasc <- delete.vertices(gCasc, deletevertex)
-#maintains graph structure but with edges associtated with the node removed.
-gCasc <- add_vertices(gCasc, 1, name = deletevertex)
-#convert network to matrix
 
-ecount(gCasc) #just to check there are less edges, can be deleted later
-
-#After the next node has been deleted the network is analysed and all over capacity lines are removed
-#need to add in if steatement for networks with weights
-MatCasc <- as_adjacency_matrix(gCasc, attr = "weight") #is this necessary any more?
-
-
-#Why is this longer than the original? is it because of multi links?
+#Create new impedance dataframe using the remaining edges
 ImpedanceCasc<- as_tibble(get.edgelist(gCasc)) %>%
-  mutate(Y = edge_attr(gCasc, "weight")) %>%
-  rename(Bus.1 = V1, Bus.2 = V2) #%>%
-#they arethe same length until you join them together then they become much longer.. why?  
-#left_join(., Impedance)
+  #mutate(Y = edge_attr(gCasc, "weight")) %>%
+  rename(Bus.1 = V1, Bus.2 = V2) %>%
+  group_by(Bus.1, Bus.2) %>% #trying to stop the non-unique identifier problem
+    mutate(Link = paste(Bus.1,Bus.2, 1:n(),sep = "-")) %>% #This allows multiple edges 
+    #between the same node pair, it is not certain the data is always correct!
+    ungroup %>%
+left_join(., select(Impedance, Link, Y), by = "Link") %>%
+  arrange(Link) 
+
+#why is the test and the impedance data frames nnot equal?
+
+ImpedanceCasc <- as_data_frame(gCasc) %>%
+    rename(Bus.1 = from, Bus.2 = to) %>%
+  group_by(Bus.1, Bus.2) %>% #trying to stop the non-unique identifier problem
+    mutate(Link = paste(Bus.1,Bus.2, 1:n(),sep = "-")) %>% #This allows multiple edges 
+    #between the same node pair, it is not certain the data is always correct!
+    ungroup %>%
+  mutate(Y = round(Y,7)) %>%
+  select(Bus.1, Bus.2, Link, Y) %>%
+  arrange(Link)
+
+all_equal(test, ImpedanceCasc)
+
+test2<- test %>% mutate(Y2 = ImpedanceCasc$Y) %>%
+  filter(Y!=Y2) %>% mutate(diff = Y-Y2)
+  
 
 
-V(gCasc)
+#test of Cascade
+test <- Cascade(gbase, trans1, trans2)
 
-#checks that only inlcuded nodes are being counted removes nodes that shouldn't be there.
-#follows up by balancing demand and gen
-ValidNodesCasc <- ValidNodesFunc(trans1, Impedance) %>%
-  BalencedGenDem2(gCasc, .)
-
-#remove dead islands
-DeadIslandNodes <-ValidNodesCasc$Bus.Name[ValidNodesCasc$DeadIsland]
-
-ImpedanceCasc <- ImpedanceCasc %>% 
-  filter(!(Bus.1 %in% DeadIslandNodes) | !(Bus.2 %in% DeadIslandNodes)  )
-
-ValidNodesCasc <- ValidNodesCasc %>%
-  filter(!DeadIsland)
-
-#this needs to work for multiple islands not just 1
-#remove Slack bus, usually the largest generator
-SlackRefCasc <- which.min(ValidNodesCasc$Bus.Order)
-
-#error for wrong length
-#Get new power flow across the new graph
-PowerFlowMat <- PowerFlow(ImpedanceCasc, ValidNodesCasc, SlackRefCasc)
-
-PowerFlowMat2 <- trans2 %>%
-  select( Link, Link.Limit, Link.Type, LineFlow__1 )%>%
-  left_join(PowerFlowMat, ., by = "Link") %>%
-  mutate(Over.Limit = abs(MW)>Link.Limit,
-         Over.Limitx1.5 = abs(MW)>(Link.Limit*1.5)) %>%
-  mutate(MW = round(MW),
-         LineFlow__1= round(LineFlow__1),
-         ratio = MW/LineFlow__1,
-         diff  = MW-LineFlow__1,
-         absdiff = abs(diff))
+test %>% 
+  simplify(., remove.multiple = T, remove.loops = T) %>% 
+  plot(.,vertex.size=.8, edge.arrow.size=.4, vertex.label = NA)
 
 
-#The giant componant condition, the process contrinues whilst this is true
-(max(components(gcasc)$csize)/vcount(gcasc)) > 0.8
-
-#repeat
 
 ```
 

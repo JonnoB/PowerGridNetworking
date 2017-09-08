@@ -7,9 +7,8 @@ PowerFlow <- function(Impedance, ValidNodes, SlackRef){
     CreateTransmission(., "Bus.1", "Bus.2")
   
   # #remove Slack bus, usually the largest generator
-  # SlackRef<-which.max(ValidNodes$BusTransferA)
-
-  A <- AZero[,colnames(AZero)!=trans1$Bus.Name[SlackRef]]
+  #drop = FALSE stops the matrix being converted to a vector when there are only two nodes in the sub-graph
+  A <- AZero[,colnames(AZero)!=SlackRef$Bus.Name, drop = FALSE]
   
   #Create the diagonal matrix of 
   C <- LinePropertiesMatrix(Impedance, "Bus.1", "Bus.2")
@@ -23,7 +22,7 @@ PowerFlow <- function(Impedance, ValidNodes, SlackRef){
   
   PowerAlt <- C %*% A %*% solve(B, InjectionVector)
   
-  PowerAlt<- data.frame(Link = rownames(PowerAlt), MW = PowerAlt[,1])
+  PowerAlt <- data.frame(Link = rownames(PowerAlt), MW = PowerAlt[,1], stringsAsFactors = FALSE )
 
   return(PowerAlt)
 }
