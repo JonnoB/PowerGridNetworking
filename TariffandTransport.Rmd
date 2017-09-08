@@ -395,9 +395,13 @@ test2<- test %>% mutate(Y2 = ImpedanceCasc$Y) %>%
   filter(Y!=Y2) %>% mutate(diff = Y-Y2)
   
 
-
+gbase <- graph_from_data_frame(Impedance[,1:3], directed=FALSE)
 #test of Cascade
 test <- Cascade(gbase, trans1, trans2)
+
+
+
+(max(components(test)$csize)/vcount(gbase)) > 0.8
 
 test %>% 
   simplify(., remove.multiple = T, remove.loops = T) %>% 
@@ -407,36 +411,17 @@ test %>%
 
 ```
 
+Repeated Cascade
 
-#Using a weighted graph where weight is the Imp
+This function selects a node to delete deletes the node, performs the cascade calcs then if there is still a giant component deletes a new node and repeats
 ```{r}
-#input networkas_adjacency_matrix(Impmat, attr = "weight")
-gCasc <-  Impedance %>%
-  rename(weight = Y) %>%
-  graph.data.frame(., directed=FALSE)
-
-#node to delete rule
-deletevertex <- sample(V(gCasc)$name, 1)
-
-#remove selected node from network
-gCasc <- delete.vertices(gCasc, deletevertex)
-#maintains graph structure but with edges associtated with the node removed.
-gCasc <- add_vertices(gCasc, 1, name = deletevertex)
-#convert network to matrix
-
-#After the next node has been deleted the network is analysed and all over capacity lines are removed
-#need to add in if steatement for networks with weights
-MatCasc <- as_adjacency_matrix(gCasc, attr = "weight") #is this necessary any more?
 
 
+RandomAttack <-quo(sample(V(g)$name, 1))
 
 
-
-
-#The giant componant condition, the process contrinues whilst this is true
-(max(components(gcasc)$csize)/vcount(gcasc)) > 0.8
-
-#repeat
+test <- AttackTheGrid(gbase, RandomAttack, trans1, trans2)
 
 ```
+
 

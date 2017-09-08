@@ -117,6 +117,8 @@ Cascade <- function(g, SubstationData, EdgeData, Iteration = 0){
    g2 <- Cascade(g2, SubstationData, EdgeData, Iteration)
   }
 
+  print("Cascade has finished")
+  
 return(g2)
   
 }
