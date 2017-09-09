@@ -88,13 +88,7 @@ Cascade <- function(g, SubstationData, EdgeData, Iteration = 0){
   PowerFlowMat2 <- EdgeData %>%
     select( Link, Link.Limit, Link.Type, LineFlow__1 )%>%
     left_join(PowerFlowMat, ., by = "Link") %>%
-    mutate(Over.Limit = abs(MW)>Link.Limit,
-           Over.Limitx1.5 = abs(MW)>(Link.Limit*1.5)) %>%
-    mutate(MW = round(MW),
-           LineFlow__1= round(LineFlow__1),
-           ratio = MW/LineFlow__1,
-           diff  = MW-LineFlow__1,
-           absdiff = abs(diff))
+    mutate(Over.Limit = abs(MW)>Link.Limit)
   
   #These links are stil safe and can be kept and turn the new Impedance edge matrix back into a graph
   #Using the valid nodes
@@ -114,11 +108,11 @@ Cascade <- function(g, SubstationData, EdgeData, Iteration = 0){
   CascadeContinues <- !((edgesequal==TRUE)[1] & length(edgesequal)==1)
   
   if(CascadeContinues){
-   g2 <- Cascade(g2, SubstationData, EdgeData, Iteration)
+   g <- Cascade(g2, SubstationData, EdgeData, Iteration)
   }
 
   print("Cascade has finished")
   
-return(g2)
+return(g)
   
 }

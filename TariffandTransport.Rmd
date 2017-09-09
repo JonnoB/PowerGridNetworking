@@ -417,10 +417,61 @@ This function selects a node to delete deletes the node, performs the cascade ca
 ```{r}
 
 
-RandomAttack <-quo(sample(V(g)$name, 1))
+RandomAttack <-quo(sample(V(gbase)$name, 1))
 
 
-test <- AttackTheGrid(gbase, RandomAttack, trans1, trans2)
+FinalGrid <- AttackTheGrid(gbase, RandomAttack, trans1, trans2)
+
+
+
+coords1 <-layout_with_fr(gbase)
+
+
+CoordLims <- coords1 %>% as_tibble %>%
+  rename(x= V1, y = V2) %>% 
+  gather %>%
+  group_by(key) %>%
+  summarise(max = min(value)/100,
+            min = max(value)/100) %>%
+  mutate(max = max*1.05,
+         min = min*1.05) %>%
+  ungroup
+
+test <- coords1 %>% as_tibble %>% bind_cols(data_frame(Bus.Name = names(V(gbase))))
+test2 <- data_frame(Bus.Name = names(V(FinalGrid))) %>%
+  left_join(test, by= "Bus.Name")
+
+
+png(filename="test1.png")
+gbase%>% 
+  simplify(., remove.multiple = T, remove.loops = T) %>% 
+  plot(.,
+       layout = as.matrix(test[,1:2]),
+       vertex.size=.8, 
+       edge.arrow.size=.4, 
+       vertex.label = NA#,
+      # xlim = (CoordLims[1,2:3] %>% as.matrix),
+      # ylim = (CoordLims[2,2:3] %>% as.matrix)
+      )
+
+dev.off()
+
+png(filename="test2.png")
+FinalGrid  %>% 
+  simplify(., remove.multiple = T, remove.loops = T) %>% 
+  plot(.,
+       layout = as.matrix(test2[,2:3]),
+       vertex.size=.8, 
+       edge.arrow.size=.4, 
+       vertex.label = NA#,
+      # xlim = (CoordLims[1,2:3] %>% as.matrix),
+      # ylim = (CoordLims[2,2:3] %>% as.matrix)
+      )
+
+dev.off()
+
+im.convert(c("test1.png", "test2.png"), output = "test.gif")
+
 
 ```
 
