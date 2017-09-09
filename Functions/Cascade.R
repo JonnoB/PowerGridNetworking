@@ -1,4 +1,4 @@
-Cascade <- function(g, SubstationData, EdgeData, Iteration = 0){
+Cascade <- function(NetworkList, SubstationData, EdgeData, Iteration = 0){
 #This Function iterates through the network removing edges until there are no further overpower edges to remove
   #This function takes a weighted edge list, the substation data on demand and generation as well as the current network
   
@@ -9,6 +9,8 @@ Cascade <- function(g, SubstationData, EdgeData, Iteration = 0){
   #SubstationData: a dataframe containin Node name, generation and demand.
   #EdgeData: A dataframe containing Bus.1 and Bus.2 as well as Link limit
   #Iteration: the number of iteration number of the cascade, used to keep track of what is going on
+  
+   g <- NetworkList[[length(NetworkList)]]
   
   Iteration <- Iteration + 1
   print(paste("Iteration number", Iteration))
@@ -108,11 +110,14 @@ Cascade <- function(g, SubstationData, EdgeData, Iteration = 0){
   CascadeContinues <- !((edgesequal==TRUE)[1] & length(edgesequal)==1)
   
   if(CascadeContinues){
-   g <- Cascade(g2, SubstationData, EdgeData, Iteration)
+   #add the new network into the list
+    NetworkList <- c(NetworkList, list(g2))
+    #update the list with the new lists created in the cascade
+   NetworkList <- Cascade(NetworkList, SubstationData, EdgeData, Iteration)
   }
 
   print("Cascade has finished")
   
-return(g)
+return(NetworkList)
   
 }
