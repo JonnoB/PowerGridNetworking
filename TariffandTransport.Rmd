@@ -155,15 +155,17 @@ Vnet <- trans2 %>%
   rename(Voltage.2 = Voltage) %>%
   mutate(Link.Voltage = as.factor(ifelse(Voltage.1 == Voltage.2, Voltage.1, 0)))
 
+library(RColorBrewer)
+
 VoltCols <-  with(Vnet,
         data.frame(Link.Voltage = levels(Link.Voltage),
-                   color = I(brewer.pal(nlevels(Link.Voltage), name = 'Dark2')))) 
-
-Vne%>%
+                   color = I(brewer.pal(nlevels(Link.Voltage), name = 'Dark2')))) %>%
   group_by(Bus.1, Bus.2) %>% #trying to stop the non-unique identifier problem
     mutate(Link = paste(Bus.1,Bus.2, 1:n(),sep = "-")) %>% #This allows multiple edges 
     #between the same node pair, it is not certain the data is always correct!
-    ungroup t <-   VoltCols %>%
+    ungroup 
+
+Vnet <-   VoltCols %>%
   left_join(Vnet,.)
 
 Vnet2 <- Vnet %>% filter(Voltage.1 != Voltage.2)
@@ -198,7 +200,6 @@ E(g)$color<-ifelse(PowerAlt2$Over.Limit, "red", "blue")
 
 set.seed(1530)
 plot(g,vertex.size=1, edge.arrow.size=1, vertex.label = NA, main = "Over Capacity My calc")
-
 #Over Capacity Using grid calcs
 
 E(g)$color<-ifelse(PowerAlt2$Over.Limit, "red", "blue")
@@ -377,7 +378,7 @@ ImpedanceCasc<- as_tibble(get.edgelist(gCasc)) %>%
 left_join(., select(Impedance, Link, Y), by = "Link") %>%
   arrange(Link) 
 
-#why is the test and the impedance data frames nnot equal?
+#why is the test and the impedance data frames not equal?
 
 ImpedanceCasc <- as_data_frame(gCasc) %>%
     rename(Bus.1 = from, Bus.2 = to) %>%
@@ -416,86 +417,59 @@ Repeated Cascade
 This function selects a node to delete deletes the node, performs the cascade calcs then if there is still a giant component deletes a new node and repeats
 ```{r}
 
+gbase <- graph_from_data_frame(Impedance[,1:3], directed=FALSE)
 
-test<- Cascade(list(gbase),trans1, trans2)
+CascadeList<- Cascade(list(gbase),trans1, trans2)
 
 RandomAttack <-quo(sample(V(gbase)$name, 1))
 
 
 FinalGrid <- AttackTheGrid(gbase, RandomAttack, trans1, trans2)
 
+#Creates Gif of each step within the Cascade
+dir.create("test")
+CreateCascadeGif(CascadeList, file.path(basewd,"test"), "testme")
 
 
-coords1 <-layout_with_fr(gbase)
 
-
-CoordLims <- coords1 %>% as_tibble %>%
-  rename(x= V1, y = V2) %>% 
-  gather %>%
-  group_by(key) %>%
-  summarise(max = min(value)/100,
-            min = max(value)/100) %>%
-  mutate(max = max*1.05,
-         min = min*1.05) %>%
-  ungroup
-
-test <- coords1 %>% as_tibble %>% bind_cols(data_frame(Bus.Name = names(V(gbase))))
-test2 <- data_frame(Bus.Name = names(V(FinalGrid))) %>%
-  left_join(test, by= "Bus.Name")
-
-
-png(filename="test1.png")
-gbase%>% 
-  simplify(., remove.multiple = T, remove.loops = T) %>% 
-  plot(.,
-       layout = as.matrix(test[,1:2]),
-       vertex.size=.8, 
-       edge.arrow.size=.4, 
-       vertex.label = NA#,
-      # xlim = (CoordLims[1,2:3] %>% as.matrix),
-      # ylim = (CoordLims[2,2:3] %>% as.matrix)
-      )
-
-dev.off()
-
-png(filename="test2.png")
-FinalGrid  %>% 
-  simplify(., remove.multiple = T, remove.loops = T) %>% 
-  plot(.,
-       layout = as.matrix(test2[,2:3]),
-       vertex.size=.8, 
-       edge.arrow.size=.4, 
-       vertex.label = NA#,
-      # xlim = (CoordLims[1,2:3] %>% as.matrix),
-      # ylim = (CoordLims[2,2:3] %>% as.matrix)
-      )
-
-dev.off()
-
-im.convert(c("test1.png", "test2.png"), output = "test.gif")
-
-1:length(test) %>% map(~{
- 
-  networkfile <- paste0("test", .x, ".png")
-  print(networkfile)
-  png(filename=networkfile)
-test[[.x]]  %>% 
-  simplify(., remove.multiple = T, remove.loops = T) %>% 
-  plot(.,
-       layout = as.matrix(test2[,2:3]),
-       vertex.size=.8, 
-       edge.arrow.size=.4, 
-       vertex.label = NA#,
-      # xlim = (CoordLims[1,2:3] %>% as.matrix),
-      # ylim = (CoordLims[2,2:3] %>% as.matrix)
-      )
-
-dev.off()
-  
-  
-})
-
-im.convert(paste0("test", 1:4, ".png"), output = "test.gif")
 ```
 
+
+
+```{r}
+
+library(igraph); library(dplyr)
+
+#generate random graph
+set.seed(500)
+RandomGraph <- sample_gnm(1000, 2500)
+
+#name nodes
+V(RandomGraph)$name <- paste0("Node", 1:1000)
+
+#Get the coordinates of the Nodes
+Coords <- layout_with_fr(RandomGraph) %>% 
+  as_tibble %>%
+    bind_cols(data_frame(names = names(V(RandomGraph))))
+
+#Delete random vertices
+deletevertex <-sample( V(RandomGraph)$name, 400)
+
+RandomGraph2 <-delete.vertices(RandomGraph, deletevertex)
+
+#get the coordinates of the remaining Nodes
+  NetCoords <- data_frame(names = names(V(RandomGraph2))) %>%
+    left_join(Coords, by= "names")
+
+#plot both graphs
+  
+RandomGraph%>% 
+  plot(.,vertex.size=.8, edge.arrow.size=.4, vertex.label = NA, layout = as.matrix(Coords[,1:2]))
+  
+RandomGraph2%>% 
+  plot(.,vertex.size=.8, edge.arrow.size=.4, vertex.label = NA, layout = as.matrix(NetCoords[,2:3]))
+
+#They nodes have the same relationship to each other but are not laid out in the same position in the frame
+  
+```
 

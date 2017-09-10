@@ -88,7 +88,7 @@ Cascade <- function(NetworkList, SubstationData, EdgeData, Iteration = 0){
 
   #Join up Power flow with line limit data to know which lines are overlimit and will be shut down
   PowerFlowMat2 <- EdgeData %>%
-    select( Link, Link.Limit, Link.Type, LineFlow__1 )%>%
+    select( Link, Link.Limit, Link.Type, LineFlow__1 )%>%CascadeList
     left_join(PowerFlowMat, ., by = "Link") %>%
     mutate(Over.Limit = abs(MW)>Link.Limit)
   
