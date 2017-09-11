@@ -35,7 +35,10 @@ CreateCascadeGif <- function(CascadeList, Folder = NULL, filename = NULL){
          layout = as.matrix(NetCoords[,2:3]),
          vertex.size=.8, 
          edge.arrow.size=.4, 
-         vertex.label = NA
+         vertex.label = NA, 
+         rescale = FALSE,
+         xlim = c(min(BaseCoords[,1]), max(BaseCoords[,1])),
+         ylim = c(min(BaseCoords[,2]), max(BaseCoords[,2]))
     )
   
   dev.off()    
@@ -57,7 +60,10 @@ CreateCascadeGif <- function(CascadeList, Folder = NULL, filename = NULL){
            layout = as.matrix(NetCoords[,2:3]),
            vertex.size=.8, 
            edge.arrow.size=.4, 
-           vertex.label = NA
+           vertex.label = NA, 
+           rescale = FALSE,
+           xlim = c(min(BaseCoords[,1]), max(BaseCoords[,1])),
+           ylim = c(min(BaseCoords[,2]), max(BaseCoords[,2]))
       )
     
     dev.off()

@@ -1,0 +1,112 @@
+---
+title: "Graph based functions"
+author: "Jonathan Bourne"
+date: "11 September 2017"
+output: html_document
+---
+
+
+The goal of this script is to create graph objects that contain all the necessary information resulting in the manipulation of graphs performing most of the cleaning.
+
+The hope is that this will make the processes and code more simple and easier to understand
+
+
+#Contact details charging team
+01926 654633 or email charging.enquires@nationalgrid.com
+
+I should change the graph so all information is encoded into it as graph attributes.
+
+##Node attributes
+Generated power <- theoretcial generated max
+power demand
+balanced power
+name
+
+##Edge attributes
+Y
+Power Limit
+Power FLow
+
+With the information above held in the graph each node would contain all necessary information for the analysis and would simplify a lot of the processes
+
+#Setup Chunk
+
+```{r}
+setwd("/home/jonno/Create_ETYS_network/SubCode")
+source("Setup.R")
+
+```
+
+
+#Load Tariff and Trasnport
+ 
+```{r}
+KeepPath <- getwd()
+
+#Load Tariff aka generation data
+setwd(Tariff)
+
+GenerationData <- read_excel("Tariff & Transport Model_2018_19 Tariffs_External.xlsm", sheet =10, skip = 33) %>%
+  setNames(make.names(names(.))) %>%
+  mutate(Site = str_sub(Node.1,1,4))
+
+LocalAssetData <- read_excel("Tariff & Transport Model_2018_19 Tariffs_External.xlsm", sheet =11, skip = 11) %>%
+  setNames(make.names(names(.)))
+
+TransportData <- read_excel("Tariff & Transport Model_2018_19 Tariffs_External.xlsm", sheet =12, skip = 11) %>%
+  setNames(make.names(names(.)))
+
+setwd(KeepPath)
+rm(KeepPath)
+```
+
+#Clean and seperate Transport
+
+```{r}
+trans1 <-TransportData[,1:16] %>% 
+  filter(!is.na(Bus.ID))
+
+trans2 <- TransportData[,17:59] %>% 
+  filter(!is.na(Bus.1)) %>%
+  group_by(Bus.1, Bus.2) %>% #trying to stop the non-unique identifier problem
+    mutate(Link = paste(Bus.1,Bus.2, 1:n(),sep = "-")) %>% #This allows multiple edges 
+    #between the same node pair, it is not certain the data is always correct!
+    ungroup %>%
+  group_by(Bus.1, Bus.2) %>% #trying to stop the non-unique identifier problem
+    mutate(Link = paste(Bus.1,Bus.2, 1:n(),sep = "-")) %>% #This allows multiple edges 
+    #between the same node pair, it is not certain the data is always correct!
+    ungroup  %>%
+#set construct line limits really high
+  mutate(Link.Type = tolower(Link.Type),
+    Link.Limit = ifelse(Link.Type == "construct", 1e5, Link.Limit)) %>%
+  #add in susceptance
+  mutate(Y = 1/X..Peak.Security.) 
+  
+```
+
+
+
+```{r}
+
+VertexMetaData <- trans1 %>%
+  select(Bus.Name, 
+         Voltage, 
+         Demand, 
+         Generation = Generation.A.....Peak.Security...Transport.Model., 
+         BalencedPower = BusTransferB, 
+         Bus.Order)
+
+gbase <- trans2 %>%
+  select(Bus.1, 
+         Bus.2, 
+         Y, 
+         Link.Limit) %>%
+  mutate(PowerFlow = 0) %>%
+  graph_from_data_frame(., directed=FALSE, vertices = VertexMetaData)
+```
+
+
+```{r}
+
+```
+

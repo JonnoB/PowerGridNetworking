@@ -22,7 +22,6 @@ Cascade <- function(NetworkList, SubstationData, EdgeData, Iteration = 0){
     mutate(Link = paste(Bus.1,Bus.2, 1:n(),sep = "-")) %>% #This allows multiple edges 
     #between the same node pair, it is not certain the data is always correct!
     ungroup %>%
-    mutate(Y = round(Y,7)) %>%
     select(Bus.1, Bus.2, Link, Y) %>%
     arrange(Link)
   
@@ -88,7 +87,7 @@ Cascade <- function(NetworkList, SubstationData, EdgeData, Iteration = 0){
 
   #Join up Power flow with line limit data to know which lines are overlimit and will be shut down
   PowerFlowMat2 <- EdgeData %>%
-    select( Link, Link.Limit, Link.Type, LineFlow__1 )%>%CascadeList
+    select( Link, Link.Limit, Link.Type, LineFlow__1 )%>%
     left_join(PowerFlowMat, ., by = "Link") %>%
     mutate(Over.Limit = abs(MW)>Link.Limit)
   

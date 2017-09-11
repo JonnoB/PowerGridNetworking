@@ -5,6 +5,24 @@ date: "1 August 2017"
 output: html_document
 ---
 
+#Contact details charging team
+01926 654633 or email charging.enquires@nationalgrid.com
+
+I should change the graph so all information is encoded into it as graph attributes.
+
+##Node attributes
+Generated power <- theoretcial generated max
+power demand
+balanced power
+name
+
+##Edge attributes
+Y
+Power Limit
+Power FLow
+
+With the information above held in the graph each node would contain all necessary information for the analysis and would simplify a lot of the processes
+
 #Setup Chunk
 
 ```{r}
@@ -154,6 +172,26 @@ Vnet <- trans2 %>%
   left_join(., Vmatch, by = c("Bus.2"="Bus.Name")) %>%
   rename(Voltage.2 = Voltage) %>%
   mutate(Link.Voltage = as.factor(ifelse(Voltage.1 == Voltage.2, Voltage.1, 0)))
+
+#Join with the Power2 data 
+
+test <-trans1 %>% filter( Bus.Name %in% c("KEIT20", "KINT20"))
+
+test <- PowerAlt2 %>%
+  left_join(Vnet, by = "Link")
+
+test2 <- test %>%
+  filter(Link.Limit !=1e5) %>%
+  group_by(Link.Voltage) %>%
+  summarise(mean = mean(Link.Limit),
+            sd = sd(Link.Limit),
+            median = median(Link.Limit))
+
+test %>% 
+  filter(Link.Limit !=1e5) %>%
+  ggplot(aes(x= Link.Voltage, y = Link.Limit)) +
+  geom_boxplot()
+
 
 library(RColorBrewer)
 
@@ -419,7 +457,24 @@ This function selects a node to delete deletes the node, performs the cascade ca
 
 gbase <- graph_from_data_frame(Impedance[,1:3], directed=FALSE)
 
-CascadeList<- Cascade(list(gbase),trans1, trans2)
+EdgeDataTweaked <- trans2 %>%
+  mutate(Link.Limit = case_when(
+    Link == "BRAC20-BONB20-1" ~826,
+    Link == "FAUG10-LAGG1Q-1" ~826,
+    Link == "KEIT20-KINT20-1" ~826,
+    Link == "LAGG1Q-MILW1S-1" ~826,
+    TRUE ~ Link.Limit
+    
+  ))
+  
+
+test <- CalcOverLimit(gbase, trans1, EdgeDataTweaked)
+
+EdgeDataTweaked %>%
+  select(Link, Bus.1, Bus.2, Link.Limit) %>%
+  filter(Link == "KEIT20-KINT20-1")
+
+CascadeList<- Cascade(list(gbase), trans1, EdgeDataTweaked)
 
 RandomAttack <-quo(sample(V(gbase)$name, 1))
 
@@ -428,48 +483,10 @@ FinalGrid <- AttackTheGrid(gbase, RandomAttack, trans1, trans2)
 
 #Creates Gif of each step within the Cascade
 dir.create("test")
+set.seed(129)
 CreateCascadeGif(CascadeList, file.path(basewd,"test"), "testme")
 
 
 
-```
-
-
-
-```{r}
-
-library(igraph); library(dplyr)
-
-#generate random graph
-set.seed(500)
-RandomGraph <- sample_gnm(1000, 2500)
-
-#name nodes
-V(RandomGraph)$name <- paste0("Node", 1:1000)
-
-#Get the coordinates of the Nodes
-Coords <- layout_with_fr(RandomGraph) %>% 
-  as_tibble %>%
-    bind_cols(data_frame(names = names(V(RandomGraph))))
-
-#Delete random vertices
-deletevertex <-sample( V(RandomGraph)$name, 400)
-
-RandomGraph2 <-delete.vertices(RandomGraph, deletevertex)
-
-#get the coordinates of the remaining Nodes
-  NetCoords <- data_frame(names = names(V(RandomGraph2))) %>%
-    left_join(Coords, by= "names")
-
-#plot both graphs
-  
-RandomGraph%>% 
-  plot(.,vertex.size=.8, edge.arrow.size=.4, vertex.label = NA, layout = as.matrix(Coords[,1:2]))
-  
-RandomGraph2%>% 
-  plot(.,vertex.size=.8, edge.arrow.size=.4, vertex.label = NA, layout = as.matrix(NetCoords[,2:3]))
-
-#They nodes have the same relationship to each other but are not laid out in the same position in the frame
-  
 ```
 
