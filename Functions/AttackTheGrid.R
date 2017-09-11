@@ -1,4 +1,4 @@
-AttackTheGrid <- function(g, AttackStrategy, SubstationData, EdgeData, referenceGrid = NULL, MinMaxComp = 0.8){
+AttackTheGrid <- function(NetworkList, AttackStrategy, SubstationData, EdgeData, referenceGrid = NULL, MinMaxComp = 0.8){
   #This function attacks the grid using a given attack strategy
   #g: Network as an igraph object
   #AttackStrategy: A function that calculates which node to delete the function is is in "quo" form
@@ -6,6 +6,9 @@ AttackTheGrid <- function(g, AttackStrategy, SubstationData, EdgeData, reference
   #EdgeData: Data frame of Edge data for the network.
   #referenceGrid: the grid that will be used to test the largest component against if NULL it uses the given network
   #MinMaxComp: The minimum size of the maximum component for the process to continue
+  
+  #gets the last network in the list
+  g<- NetworkList[[length(NetworkList)]]
   
   if(is.null(referenceGrid)){
     referenceGrid  <- g
@@ -16,6 +19,7 @@ AttackTheGrid <- function(g, AttackStrategy, SubstationData, EdgeData, reference
   #remove selected node from network
   gCasc <- delete.vertices(g, deletevertex)
   
+  #this returns a list of networks each of the cascade
   gCasc <- Cascade(gCasc, SubstationData, EdgeData)
   
   #If the largest componant is larger than the MinMaxComp threshold
