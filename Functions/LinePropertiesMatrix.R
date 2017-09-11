@@ -1,19 +1,12 @@
-LinePropertiesMatrix <- function(df, StartNode, EndNode){
-  #This function created a line properties matrix that matches the output of the Transmission matrix function
+LinePropertiesMatrix <- function(g, Edgename = "Link", weight = "Y"){
+  #This function creates the Line properties matrix from the graph
+  #g: Input graph which contains an attribute naming the edges and another that provides the edge weight
   
-  df <- df %>% rename_(Node1 = StartNode,
-                       Node2 = EndNode) %>%
-    #mutate(Edgename = paste(Node1,Node2, sep = "-"))
-    group_by(Node1, Node2) %>% #trying to stop the non-unique identifier problem
-    mutate(Edgename = paste(Node1,Node2, 1:n(),sep = "-")) %>% #This allows multiple edges 
-    #between the same node pair, it is not certain the data is always correct!
-    ungroup %>%
-    filter(Node1 !=Node2) #remove self loops
-  
-  C <- matrix(data = 0, nrow = nrow(df), ncol = nrow(df))
-  diag(C) <- df$Y
-  colnames(C)<- df$Edgename
-  rownames(C)<- df$Edgename
+  Link <- get.edge.attribute(g, Edgename)
+  C <- matrix(data = 0, nrow = length(Link), ncol = length(Link))
+  diag(C) <- get.edge.attribute(g, weight)
+  colnames(C)<- Link
+  rownames(C)<- Link
   
   return(C)
 }

@@ -1,28 +1,25 @@
-PowerFlow <- function(Impedance, ValidNodes, SlackRef){
-  # Takes the impedeance data frame, and a data frame of validnodes and caluclates the powr flow.
-  # Impedance: A three column data frame of the impedeace between each connected node pair
-  # ValidNodes: A data frame containing the columns "BusTransferA", "BusTransferB", "Bus.Name"
+PowerFlow <- function(g, SlackRef){
+#Calculates the PowerFlow from a graph that contains the following attributes
+  #named edges, edgeweights, a balanced power generation and demand column, Powerflow (will be overwritten)
+  #g: an igraph object
+  #SlackRef: the node to remove from the calculations to prevent the matrix being singular
   
-  AZero <-  Impedance %>%
-    CreateTransmission(., "Bus.1", "Bus.2")
+  AZero <- CreateTransmission(g, "Link")
   
   # #remove Slack bus, usually the largest generator
   #drop = FALSE stops the matrix being converted to a vector when there are only two nodes in the sub-graph
-  A <- AZero[,colnames(AZero)!=SlackRef$Bus.Name, drop = FALSE]
+  A <- AZero[,colnames(AZero)!=SlackRef, drop = FALSE]
   
-  #Create the diagonal matrix of 
-  C <- LinePropertiesMatrix(Impedance, "Bus.1", "Bus.2")
-  
-  #The rows and columns have to be re-ordered to match the A matrix
-  C<-C[match(rownames(A),rownames(C)), match(rownames(A),rownames(C))]
+  #Create the diagonal matrix of edge to itself impedance
+  C <- LinePropertiesMatrix(g)
   
   B <- t(A) %*% C %*% A
   
-  InjectionVector <- ValidNodes$BusTransferB[match(colnames(A), ValidNodes$Bus.Name)]
-  
-  PowerAlt <- C %*% A %*% solve(B, InjectionVector)
-  
-  PowerAlt <- data.frame(Link = rownames(PowerAlt), MW = PowerAlt[,1], stringsAsFactors = FALSE )
+  InjectionVector <- get.vertex.attribute(g, "BalencedPower")[get.vertex.attribute(g, "name")!=SlackRef]
 
-  return(PowerAlt)
+  Power <- C %*% A %*% solve(B, InjectionVector)
+  
+    g <- set_edge_attr(g, "PowerFlow", value = Power)
+
+  return(g)
 }
