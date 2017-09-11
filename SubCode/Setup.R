@@ -1,4 +1,4 @@
-packages <- c("tidyverse", "igraph","readr","readxl", "broom", "zoo", "stringr", "xtable", "geomnet", "ggnetwork", "rlang")
+packages <- c("tidyverse", "igraph","readr","readxl", "broom", "zoo", "stringr", "xtable", "geomnet", "ggnetwork", "rlang", "animation")
 
 new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)

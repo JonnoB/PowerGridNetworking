@@ -97,6 +97,7 @@ VertexMetaData <- trans1 %>%
          Bus.Order)
 
 gbase <- trans2 %>%
+<<<<<<< HEAD
   #this mutate is because the base limits cause a rolling blackout due to the below lines being overpowered
   mutate(Link.Limit = case_when(
     Link == "BRAC20-BONB20-1" ~826,
@@ -107,6 +108,9 @@ gbase <- trans2 %>%
     
   )) %>%
     select(Bus.1, 
+=======
+  select(Bus.1, 
+>>>>>>> master
          Bus.2, 
          Y, 
          Link.Limit) %>%
