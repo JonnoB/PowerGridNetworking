@@ -31,7 +31,11 @@ CreateTransmission <- function(g, Edgename){
   #Convert to a matrix
   Transmat <- Transdf %>%
     select(-Link) %>%
-    as.matrix
+    .[match(get.edge.attribute(g, "Link"), Transdf$Link),  
+      match(get.vertex.attribute(g, "name"), names(.)) ] %>%
+    #this step is necessary as tibbles cannot have row names
+    as.matrix(., drop = FALSE)
+
   
   #name the rows.
   rownames(Transmat) <- Transdf$Link
@@ -40,9 +44,10 @@ CreateTransmission <- function(g, Edgename){
   #head(rownames(Transmat)); head(get.edge.attribute(g, "Link"))
   #head(colnames(Transmat)); head(get.vertex.attribute(g, "name"))
 
-    
-  Transmat <- Transmat[match(get.edge.attribute(g, "Link"), rownames(Transmat)),  
-                       match(get.vertex.attribute(g, "name"), colnames(Transmat)) ]
+  # Transmat <- Transmat[match(get.edge.attribute(g, "Link"), rownames(Transmat)),  
+  #                      match(get.vertex.attribute(g, "name"), colnames(Transmat)) ] %>%
+  #   #re-ordering the rows converts it to a numeric if there are only two rows
+  #   as.matrix(., drop = FALSE)    
     
   return(Transmat)
 }

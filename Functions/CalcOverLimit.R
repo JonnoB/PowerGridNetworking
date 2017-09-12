@@ -31,12 +31,18 @@ CalcOverLimit <- function(g){
         g2subset <- PowerFlow(g2subset, SlackRef$name)
       }
       
-      g2subset
-
+      #The combining of the graphs doesn't work as it is causing the attributes to be renamed
+      #g2subset
+      tibble(Link = get.edge.attribute(g2subset, "Link"),
+             PowerFLow = get.edge.attribute(g2subset, "PowerFlow"))
+      
     }) %>%
-    #collapse list of Igraph objects into a single object
-    Reduce(union, .)
+    #collapse list of Igraph objects into a single object....This appears to not be working
+        #Reduce(union, .)
+    bind_rows
   
+  gOut <- set.edge.attribute(g2, "PowerFlow", value = gOut$PowerFLow[match(gOut$Link,  get.edge.attribute(g2, "Link"))])
+    
   return(gOut)
 
 }

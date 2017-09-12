@@ -1,4 +1,4 @@
-Cascade <- function(NetworkList, Iteration = 0){
+Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf){
 #This Function iterates through the network removing edges until there are no further overpower edges to remove
   #This function takes a weighted edge list, the substation data on demand and generation as well as the current network
   
@@ -20,9 +20,11 @@ Cascade <- function(NetworkList, Iteration = 0){
   #Delete Edges that are over the Limit
   
   DeleteEdges <- as_data_frame(g2) %>%
-    mutate(Over.Limit = abs(PowerFlow) > Link.Limit)
+    mutate(index = 1:n(),
+      Over.Limit = abs(PowerFlow) > Link.Limit) %>%
+    filter(Over.Limit)
   #DeleteEdges <- (1:ecount(g2))[abs(get.edge.attribute(g2, "PowerFlow")) > get.edge.attribute(g2, "Link.Limit")]
-  g2 <- delete.edges(g2, DeleteEdges)
+  g2 <- delete.edges(g2, DeleteEdges$index)
   
   #checks the initial network and the final network are equal.
   #If they are not equal then a vector of each element of the graph object is returned, showing which 
@@ -31,12 +33,12 @@ Cascade <- function(NetworkList, Iteration = 0){
   edgesequal <- all_equal(get.edgelist(g), get.edgelist(g2))
   
   CascadeContinues <- !((edgesequal==TRUE)[1] & length(edgesequal)==1)
-  
-  if(CascadeContinues){
+
+  if(CascadeContinues & Iteration != StopCascade){
    #add the new network into the list
     NetworkList <- c(NetworkList, list(g2))
     #update the list with the new lists created in the cascade
-   NetworkList <- Cascade(NetworkList, Iteration)
+   NetworkList <- Cascade(NetworkList, Iteration, StopCascade)
   }
 
   print("Cascade has finished")

@@ -92,7 +92,7 @@ VertexMetaData <- trans1 %>%
   select(Bus.Name, 
          Voltage, 
          Demand, 
-         Generation = Generation.B.....Peak.Security...Transport.Model., 
+         Generation = Generation.B.....Year.Round...Transport.Model., 
          BalencedPower = BusTransferB, 
          Bus.Order)
 
@@ -137,7 +137,20 @@ gbase <- set_edge_attr(gbase, "Voltage", value = EdgeVoltage)
 
 ```{r}
 
+
+#Looking at the below code it seems that the 4 links that are overpowered when there is no tweaking of the line limits are still overpowered, the difference is that they don't cause a massive rolling blackout, but they do cause a small disturbance in the network. By this I think that the code was previously deleting the wrong lines causing major issues.
 CascadeList <- Cascade(list(gbase))
+
+vcount(CascadeList[[1]])
+vcount(CascadeList[[2]])
+vcount(CascadeList[[3]])
+
+ecount(CascadeList[[1]])
+ecount(CascadeList[[2]])
+ecount(CascadeList[[3]])
+sameedges <- (get.edge.attribute(CascadeList[[1]], "Link") %in% get.edge.attribute(CascadeList[[2]], "Link"))
+
+get.edgelist(CascadeList[[1]])[!sameedges,]
 
 setwd(basewd)
 dir.create("test")
@@ -151,28 +164,14 @@ RandomAttack <-quote(sample(V(g)$name, 1))
 set.seed(15)
 test <- list(gbase) %>%
   list %>%
-  AttackTheGrid(., RandomAttack, MinMaxComp = 0.8, StopPoint = 15)
+  AttackTheGrid(., RandomAttack, MinMaxComp = 0.8)
 
 setwd(basewd)
 dir.create("test")
 set.seed(129)
 CreateCascadeGif(unlist(test,recursive=F), file.path(basewd,"test"), "testme")
 
-#NECU10
-test[[1]]
-test[[2]]
-test[[3]]
-test[[4]]
 
-
-test[[4]][[1]] %>% components
-
-gCasc <- delete.vertices(test[[4]][[1]], "NECU10")
-
-gCasc %>% components
-
-g<- gCasc
- components(g)
 
 ```
 
