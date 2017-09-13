@@ -7,48 +7,19 @@ FixedStrategyAttack <- function(g, DeletionOrder, Target = "Nodes", Number = 1){
   #Number: The number of the Target to remove
   
   if(Target == "Nodes"){
-    
-    RemainingVertices <- get.vertex.attribute(g, "name")
-    
-    DeleteVect <- data_frame(OriginalTarget = DeletionOrder) %>%
-      filter( OriginalTarget %in% RemainingVertices) %>%
-      .$OriginalTarget
-    
-    
-    if(vcount(g) > Number ){
-      deletetarget <- DeleteVect[1:Number]
-    } else {
-      
-      deletetarget <- DeleteVect[1] 
-    }
-     
-    #remove selected node from network
-    g2 <- delete.vertices(g, deletetarget)    
-      
+    Remaining <- get.vertex.attribute(g, "name")
   } else {
     
-    RemainingVertices <- get.edge.attribute(g, "name")
-    
-    DeleteVect <- data_frame(OriginalTarget = DeletionOrder) %>%
-      filter( OriginalTarget %in% RemainingVertices) %>%
-      .$OriginalTarget
-    
-    if(ecount(g) > Number ){
-      deletetarget <- DeleteVect[1:Number]
-    } else {
-      
-      deletetarget <- DeleteVect[1] 
-    }
-  
-    #remove selected node from network
-    g2 <- delete.edges(g, deletetarget)    
+    Remaining <- get.edge.attribute(g, "name")
   }
-  
-  print(paste("Delete", Target, deletetarget))
 
+  DeleteVect <- data_frame(OriginalTarget = DeletionOrder) %>%
+    filter( OriginalTarget %in% Remaining) %>%
+    .$OriginalTarget
   
   
-  
+  g2 <- DeleteCarefully(g, Target, DeleteVect, Number)
+
   return(g2)
   
 }

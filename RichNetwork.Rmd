@@ -166,33 +166,7 @@ dir.create("test")
 set.seed(129)
 CreateCascadeGif(CascadeList, file.path(basewd,"test"), "testme")
 
-RandomAttack <-function(graph = g, Nodes = 1, seed = NULL){
-  #This is a simple attack strategy that can be used as an arguement in the "AttackTheGrid" function, it should be made
-  #quosure before deploying it as an argument using quo(RandomAttack)
-  #remmoves a random node from the graph
-  #g: the netowrk which is being attacked
-  #Nodes: the Number of Nodes to Remove
-  #seed: The random number generator to use. This is optional
-  if(is.null(seed)){
-    set.seed(seed)
-  }
-  
-  deletevertex <- sample(V(graph)$name, Nodes)
-  print(deletevertex)
-  #remove selected node from network
-  newgraph <- delete.vertices(graph, deletevertex)
-  return(newgraph)
-  }
-
-
-AttackStrategy <-quo(RandomAttack)               
-
-
-set.seed(15)
-test <- list(gbase) %>%
-  list %>%
-  AttackTheGrid(., AttackStrategy, MinMaxComp = 0.8)
-
+       
 setwd(basewd)
 dir.create("test")
 set.seed(129)
@@ -209,100 +183,35 @@ make a non-adaptive  strategy extractor
 ```{r}
 g<- gbase
 
-# RandomNodeAttack <-function(g, Nodes = 1){
-#   sample(V(g)$name, Nodes)
-# }
-
-
 DeleteNodes <- RandomAttack(gbase, Target = "Nodes", Number = vcount(gbase))
 DeleteEdges <-RandomAttack(gbase, Target = "Edges", Number = ecount(gbase))
 
+FixedNodes <- quo(FixedStrategyAttack(g, DeleteNodes))
+FixedEdges <- quo(FixedStrategyAttack(g, DeleteEdges, Target = "Edges"))
+
 set.seed(15)
 test <- list(gbase) %>%
   list %>%
-  AttackTheGrid(., FixedStrategyAttack, MinMaxComp = 0.8, DeletionOrder = DeleteNodes, Target = "Nodes")
-
-set.seed(15)
-testEdges <- list(gbase) %>%
-  list %>%
-  AttackTheGrid(., FixedStrategyAttack, MinMaxComp = 0.8, DeletionOrder = DeleteEdges, Target = "Edges")
-
-
-
-
-AdaptiveStrategyAttack <- function(g, AttackStrategy, Target = "Nodes", Number = 1, seed = NULL){
-  
-  #g: the netowrk which is being attacked
-  #Nodes: the Number of Nodes to Remove
-  #seed: The random number generator to use. This is optional
-  
-  if(is.null(seed)){
-    set.seed(seed)
-  }
-  
-  deletevertex <- quo(UQ(AttackStrategy)(g, Target, Number)) %>%
-    eval_tidy 
-  
-  print(deletevertex)
-  #remove selected node from network
-  newgraph <- delete.vertices(graph, deletevertex)
-  return(newgraph)
-  }
-
-
-S1 <- quo(AdaptiveStrategyAttack(g, RandomAttack2))
-
-S2<- quo(RandomAttack)
-S2 <- quo(AdaptiveStrategyAttack())
+  AttackTheGrid(., FixedNodes, MinMaxComp = 0.8)
 
 
 set.seed(15)
 test <- list(gbase) %>%
   list %>%
-  AttackTheGrid(., S1, MinMaxComp = 0.8)
+  AttackTheGrid(., FixedNodes, MinMaxComp = 0.8)
+
+AdaptiveRandomEdgeAttack <- quo(RandomAttack(g, Target , Number))
+AdaptiveStrat <- quo(AdaptiveStrategyAttack(g, AdaptiveRandomEdgeAttack))
 
 
+AdaptiveRandomEdgeAttack <- quo(RandomAttack(g, Target, Number))
+AdaptiveStrat <- quo(AdaptiveStrategyAttack(g, AdaptiveRandomEdgeAttack))
 
-AdaptiveStrategyAttack <- function(g, AttackStrategy, Nodes = 1, seed = NULL){
+set.seed(15)
+test <- list(gbase) %>%
+  list %>%
+  AttackTheGrid(., AdaptiveStrat, MinMaxComp = 0.8)
 
-    DeleteVect <- quo(UQ(AttackStrategy)(g)) %>%
-    eval_tidy 
-
-  #Stops crash caused by removing more nodes than there are... is this possible?
-  if(vcount(g) > DeleteVect ){
-    deletevertex <- DeleteVect[1:length(DeleteVect)]
-  } else {
-    
-    deletevertex <- DeleteVect[1] 
-  }
-  
-  print(deletevertex)
-  #remove selected node from network
-  g2 <- delete.vertices(g, deletevertex)
-  return(g2)
-  
-}
-
-
-
-AdaptiveStrategyAttack <- function(g, AttackStrategy, Nodes = 1, seed = NULL){
-print(AttackStrategy)
-    DeleteVect <- AttackStrategy(g) 
-
-  #Stops crash caused by removing more nodes than there are... is this possible?
-  if(vcount(g) > DeleteVect ){
-    deletevertex <- DeleteVect[1:length(DeleteVect)]
-  } else {
-    
-    deletevertex <- DeleteVect[1] 
-  }
-  
-  print(deletevertex)
-  #remove selected node from network
-  g2 <- delete.vertices(g, deletevertex)
-  return(g2)
-  
-}
 
 ```
 
