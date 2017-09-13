@@ -1,4 +1,11 @@
-AttackTheGrid <- function(NetworkList, AttackStrategy, referenceGrid = NULL, MinMaxComp = 0.8, NodesRemoved = NULL, StopPoint=Inf){
+AttackTheGrid <- function(NetworkList, 
+                          AttackStrategy, 
+                          referenceGrid = NULL, 
+                          MinMaxComp = 0.8, 
+                          NodesRemoved = NULL, 
+                          StopPoint=Inf,
+                          DeletionOrder,
+                          Target = "Nodes",...){
   #This function attacks the grid using a given attack strategy
   #g: Network as an igraph object
   #AttackStrategy: A function that calculates which node to delete the function is is in "quo" form
@@ -23,10 +30,11 @@ AttackTheGrid <- function(NetworkList, AttackStrategy, referenceGrid = NULL, Min
     referenceGrid  <- g
   }
   
-  deletevertex <- eval(AttackStrategy)
-  print(deletevertex)
   #remove selected node from network
-  gCasc <- delete.vertices(g, deletevertex)
+  gCasc <- quo(UQ(AttackStrategy)(g, DeletionOrder, Target)) 
+
+  gCasc<- gCasc %>%
+    eval_tidy 
   
   #this returns a list of networks each of the cascade
   gCasc <- Cascade(list(gCasc))
@@ -46,7 +54,8 @@ AttackTheGrid <- function(NetworkList, AttackStrategy, referenceGrid = NULL, Min
    print(paste("Fraction of total nodes in GC", FractGC))
          
     if( !(FractGC < MinMaxComp | length(NetworkList2)==StopPoint) ){
-    NetworkList2 <- AttackTheGrid(NetworkList2, AttackStrategy, referenceGrid, MinMaxComp, NodesRemoved+1,StopPoint)
+    NetworkList2 <- AttackTheGrid(NetworkList2, AttackStrategy, referenceGrid, MinMaxComp, NodesRemoved+1,StopPoint, DeletionOrder,
+                                  Target)
   }
   
   return(NetworkList2)
