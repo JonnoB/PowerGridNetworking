@@ -4,8 +4,8 @@ AttackTheGrid <- function(NetworkList,
                           MinMaxComp = 0.8, 
                           NodesRemoved = NULL, 
                           StopPoint=Inf,
-                          DeletionOrder,
-                          Target = "Nodes",...){
+                          Target = "Nodes",
+                          DeletionOrder = NULL){
   #This function attacks the grid using a given attack strategy
   #g: Network as an igraph object
   #AttackStrategy: A function that calculates which node to delete the function is is in "quo" form
@@ -31,7 +31,7 @@ AttackTheGrid <- function(NetworkList,
   }
   
   #remove selected node from network
-  gCasc <- quo(UQ(AttackStrategy)(g, DeletionOrder, Target)) 
+  gCasc <-quo(UQ(AttackStrategy)(g, DeletionOrder, Target)) 
 
   gCasc<- gCasc %>%
     eval_tidy 
