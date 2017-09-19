@@ -34,7 +34,7 @@ DeleteCarefully <- function(g, Target, DeleteVect, Number){
     g2 <- delete.edges(g, deletetarget)    
   }
   
-  print(paste("Delete", Target, deletetarget))
+  message(paste("Delete", Target, deletetarget))
   
   return(g2)
   

@@ -1,11 +1,7 @@
 CalcOverLimit <- function(g){
   #This function calculates which edges are over the limit for the current network configuration and demand
   #production profile.
-  #g: a graph with multiple edge and vertex attributes.
-  
-    #Balance Power
-  #need to double check that dead islands are being removed properly
-  g2 <- BalencedGenDem(g, "Demand", "Generation")
+  #g: a graph with multiple edge and vertex attributes. The graph is assumed to be balenced in demand and production.
   
   #finds the slack reference in each component
   SlackRefCasc <-  tibble(name = get.vertex.attribute(g2, "name"),

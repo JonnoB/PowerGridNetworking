@@ -3,7 +3,8 @@ AttackTheGrid <- function(NetworkList,
                           referenceGrid = NULL, 
                           MinMaxComp = 0.8, 
                           NodesRemoved = NULL, 
-                          StopPoint=Inf){
+                          StopPoint=Inf,
+                          CascadeMode = TRUE){
   #This function attacks the grid using a given attack strategy
   #g: Network as an igraph object
   #AttackStrategy: A function that calculates which node to delete the function is is in "quo" form
@@ -15,19 +16,15 @@ AttackTheGrid <- function(NetworkList,
     NodesRemoved <- 1
   }
   
-  print(NodesRemoved)
-  
   #gets the last network in the list
   g <- NetworkList[[length(NetworkList)]]
-  print(paste("list of lists length", length(NetworkList)))
-  print(paste("list length", length(g)))  
+
    g <- g[[length(g)]]
   
 
   if(is.null(referenceGrid)){
     referenceGrid  <- g
   }
-  
   #Set the environment of the Attack strategy to inside the function so that the correct g is used
   AttackStrategy <- set_env(AttackStrategy, get_env())
 
@@ -35,8 +32,16 @@ AttackTheGrid <- function(NetworkList,
   gCasc<- AttackStrategy %>% 
     eval_tidy 
   
+  #Rebalence network
+  #This means that the Cascade calc takes a balanced network which is good.
+  gCasc <- BalencedGenDem(gCasc, "Demand", "Generation")
+
+  gCasc <- list(gCasc)
+  
+  if(CascadeMode){
   #this returns a list of networks each of the cascade
-  gCasc <- Cascade(list(gCasc))
+  gCasc <- Cascade(gCasc)
+  }
   
   #concatanate the new list with the list of lists
   NetworkList2 <- NetworkList
@@ -47,13 +52,15 @@ AttackTheGrid <- function(NetworkList,
     
   #If the largest componant is larger than the MinMaxComp threshold
   #call the function again and delete a new node.
+
+  FractGC <-max(components(gCascLast)$csize)/vcount(referenceGrid)
   
-   print(paste("Number of nodes Remaining", vcount(gCascLast)))
-   FractGC <-max(components(gCascLast)$csize)/vcount(referenceGrid)
-   print(paste("Fraction of total nodes in GC", FractGC))
+    
+  message(paste("Iteration ",NodesRemoved, " Nodes Remaining", vcount(gCascLast), " GC Fract", round(FractGC,2)))
+  
          
     if( !(FractGC < MinMaxComp | length(NetworkList2)==StopPoint) ){
-    NetworkList2 <- AttackTheGrid(NetworkList2, AttackStrategy, referenceGrid, MinMaxComp, NodesRemoved+1,StopPoint)
+    NetworkList2 <- AttackTheGrid(NetworkList2, AttackStrategy, referenceGrid, MinMaxComp, NodesRemoved+1,StopPoint, CascadeMode)
   }
   
   return(NetworkList2)

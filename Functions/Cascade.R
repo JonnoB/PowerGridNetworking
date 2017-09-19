@@ -26,6 +26,9 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf){
   #DeleteEdges <- (1:ecount(g2))[abs(get.edge.attribute(g2, "PowerFlow")) > get.edge.attribute(g2, "Link.Limit")]
   g2 <- delete.edges(g2, DeleteEdges$index)
   
+  #Balence grid after over powered lines and edges are removed
+  g2 <- BalencedGenDem(g2, "Demand", "Generation")
+  
   #checks the initial network and the final network are equal.
   #If they are not equal then a vector of each element of the graph object is returned, showing which 
   #parts are equal and which are not. If the vector is longer than 1 then it they are not equal
