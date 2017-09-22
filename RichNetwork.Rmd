@@ -45,6 +45,10 @@ done no work
 
 Do a non-cascading montecarlo removal , compare with a cascading network.
 
+Things to do
+create 1 node cascade check
+node pair cascade check
+
 
 #Setup Chunk
 
@@ -148,6 +152,14 @@ EdgeVoltage <- ifelse(
        0)
 
 gbase <- set_edge_attr(gbase, "Voltage", value = EdgeVoltage)
+
+```
+
+
+#produce subgraph k jumps away from named node
+```{r}
+
+KNearestNodes(gbase, "ALVE4A", 2) %>% induced_subgraph(gbase, .) %>% plot
 
 ```
 
@@ -267,8 +279,8 @@ I think that dead islands are a major cause of grid collapse.
 #  
 # }
 #   )
-
-testcompare <- 1:2 %>%  map_df(~{
+set.seed(123)G <- wheel %m% sstar
+Nodesims <- 1:2 %>%  map_df(~{
   
 Bigdf <- data.frame(Nodes = NULL, GCfract = NULL, Simulation = NULL)
 
@@ -311,7 +323,7 @@ return(Bigdf)
 }
 )
 
-
+saveRDS(Nodesims, "100simulationsRandomAttackto0015Nodes.rds")
 #Nodesims <- readRDS( "100simulationsRandomAttackto0005or440.rds" )
 
 
@@ -353,8 +365,9 @@ ggplot(aes(x= ID, y = mPGfract, colour = Cascade)) +geom_line() +
 Need to talk about what is being removed etc where does balance gen go?
 
 ```{r}
-
-testcompare <- 1:2 %>%  map_df(~{
+gc()
+set.seed(1234)
+Edgesims <- 1:2 %>%  map_df(~{
   
 Bigdf <- data.frame(Nodes = NULL, GCfract = NULL, Simulation = NULL)
 
@@ -367,7 +380,11 @@ for(n in 1:100){
   sim <- paste0("Simulation_", n)
   print(sim)
 
-  GridList <- suppressMessages(AttackTheGrid(list(list(gbase)), FixedNodes, MinMaxComp = 0.005, CascadeMode =  c(TRUE,FALSE)[.x])) %>%
+  GridList <- suppressMessages(AttackTheGrid(list(list(gbase)), 
+                                             FixedNodes, 
+                                             MinMaxComp = 0.15, #
+                                             StopPoint = Inf, 
+                                             CascadeMode =  c(TRUE,FALSE)[.x])) %>%
     map_df(~{
       #find the last element of the list which is the final network for that Cascade
       g <- .x[[length(.x)]] 
@@ -382,6 +399,8 @@ for(n in 1:100){
   mutate(NodesRemaining = vcount(gbase) -0:(n()-1),
          GCfract = MaxComp/vcount(gbase),
          Simulation = n)
+  #To try and prevent crashing
+  gc()
   
   Bigdf <- bind_rows(Bigdf, GridList) %>%
     mutate(Cascade = c(TRUE,FALSE)[.x])
@@ -393,7 +412,7 @@ return(Bigdf)
 
 
 
-SummaryofGC <- testcompare %>% 
+SummaryofGCEdge <- Edgesims %>% 
   mutate(PGfract = PowerGen/max(PowerGen)) %>%
   group_by(NodesRemaining, Cascade) %>%
 summarise(mean = mean(GCfract),
@@ -410,6 +429,41 @@ summarise(mean = mean(GCfract),
 
 %>%
   filter(count == 100)
+
+
+saveRDS(Edgesims,"100simulationsRandomAttackto0015Edges.rds")
+
+
+SummaryofGCEdge %>%
+  filter(ID<150) %>%
+ggplot(aes(x= ID, y = mean, colour = Cascade)) +geom_line() +
+    geom_ribbon(aes(ymin=GC05, ymax=GC95, fill = Cascade), alpha = 0.3)+
+  labs(title = "Largest componant as a % of Original Giant Component\n under different removal regimes" , x = "Number of nodes removed from Grid", y = "Largest component as a % GC")
+
+
+SummaryofGCEdge %>%
+ggplot(aes(x= ID, y = mPGfract, colour = Cascade)) +geom_line() +
+      geom_ribbon(aes(ymin=PG05, ymax=PG95, fill = Cascade), alpha = 0.3)+
+      labs(title = "Percentage of demand that the grid can meet in current state" , x = "Number of nodes removed from Grid", y = "Total generating capacity as % of demand")
+
+```
+
+
+```{r}
+
+testgraph <- KNearestNodes(gbase, "ALVE4A", 2) %>% induced_subgraph(gbase, .)
+
+  DeleteNodes <- RandomAttack(testgraph,Target = "Edges",Number = ecount(testgraph))
+  FixedNodes <- quo(FixedStrategyAttack(g, DeleteNodes, Target = "Edges"))
+
+Output <- AttackTheGrid(list(list(testgraph)), 
+                                             FixedNodes, 
+                                             MinMaxComp = 0, #
+                                             TotalAttackRounds = 10, 
+                                             CascadeMode =  TRUE)
+
+ CreateCascadeGif(unlist(Output, recursive = F))
+ 
 
 ```
 

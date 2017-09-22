@@ -3,6 +3,8 @@ CalcOverLimit <- function(g){
   #production profile.
   #g: a graph with multiple edge and vertex attributes. The graph is assumed to be balenced in demand and production.
   
+  g2 <-g
+  
   #finds the slack reference in each component
   SlackRefCasc <-  tibble(name = get.vertex.attribute(g2, "name"),
                           Bus.Order = get.vertex.attribute(g2, "Bus.Order"),
@@ -11,12 +13,12 @@ CalcOverLimit <- function(g){
     arrange(Bus.Order) %>%
     summarise(name = first(name),
               Nodes = n())
-  
+
   #Calculate power flow for each component of the network as seperate networks
   gOut <- 1:nrow(SlackRefCasc) %>%
     map(~{
       
-      print(paste("PowerFlow for componant", .x))
+      #print(paste("PowerFlow for componant", .x))
       
       SlackRef <- SlackRefCasc %>% slice(.x)
       
@@ -27,17 +29,11 @@ CalcOverLimit <- function(g){
         g2subset <- PowerFlow(g2subset, SlackRef$name)
       }
       
-      #The combining of the graphs doesn't work as it is causing the attributes to be renamed
-      #g2subset
-      tibble(Link = get.edge.attribute(g2subset, "Link"),
-             PowerFLow = get.edge.attribute(g2subset, "PowerFlow"))
-      
+      g2subset
+
     }) %>%
-    #collapse list of Igraph objects into a single object....This appears to not be working
-        #Reduce(union, .)
-    bind_rows
-  
-  gOut <- set.edge.attribute(g2, "PowerFlow", value = gOut$PowerFLow[match(gOut$Link,  get.edge.attribute(g2, "Link"))])
+    Reduce(union, .)
+
     
   return(gOut)
 

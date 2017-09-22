@@ -13,7 +13,10 @@ DeleteCarefully <- function(g, Target, DeleteVect, Number){
       
       deletetarget <- DeleteVect[1:Number]
       
-    } else {
+    }  else if(vcount(g) == 0){
+      deletetarget <- NULL
+      
+    }else {
       
       deletetarget <- DeleteVect[1:(vcount(g)-1)] 
     }
@@ -25,7 +28,11 @@ DeleteCarefully <- function(g, Target, DeleteVect, Number){
     
     if(ecount(g) > Number ){
       deletetarget <- DeleteVect[1:Number]
-    } else {
+    } else if(ecount(g) == 0){
+      
+      deletetarget <- NULL
+      
+    }else {
       
       deletetarget <- DeleteVect[1:(ecount(g)-1)] 
     }

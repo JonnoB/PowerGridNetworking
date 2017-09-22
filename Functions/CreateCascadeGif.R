@@ -1,17 +1,20 @@
-CreateCascadeGif <- function(CascadeList, Folder = NULL, filename = NULL){
+CreateCascadeGif <- function(CascadeList, VertexNames = "Bus.Name", Folder = NULL, filename = NULL){
   
 #creates a GIF from a Cascade list
   #CascadeList:  a list of igraph objects
   #Folder: optional argument specifying Folder path for created files 
   
+  #uses the first graph as the reference graph
+  g<- CascadeList[[1]]
+  
   BaseCoords <- layout_with_fr(CascadeList[[1]]) %>% 
     as_tibble %>% 
-    bind_cols(data_frame(Bus.Name = names(V(gbase))))
+    bind_cols(data_frame(Bus.Name = names(V(g))))
   
  CurrentPath <-getwd()
   
-  if(!is.null(Folder)){
-    setwd(Folder)
+  if(is.null(Folder)){
+    Folder<-getwd()
   }
   
  if(!is.null(filename)){
@@ -24,11 +27,11 @@ CreateCascadeGif <- function(CascadeList, Folder = NULL, filename = NULL){
   PlotGraph <- CascadeList[[.x]]
   E(PlotGraph)$color <- "black"
   
-  networkfile <- paste0(filename, .x*2 - 1, ".png")
+  networkfile <- file.path(Folder, paste0(filename, .x*2 - 1, ".png"))
   png(filename = networkfile )
   
   NetCoords <- data_frame(Bus.Name = names(V(CascadeList[[.x]]))) %>%
-    left_join(BaseCoords, by= "Bus.Name")
+    left_join(BaseCoords, by= VertexNames)
   
   PlotGraph %>% 
     plot(.,
@@ -50,7 +53,7 @@ CreateCascadeGif <- function(CascadeList, Folder = NULL, filename = NULL){
     png(filename=networkfile)
     
     NetCoords <- data_frame(Bus.Name = names(V(CascadeList[[.x]]))) %>%
-      left_join(BaseCoords, by= "Bus.Name")
+      left_join(BaseCoords, by= VertexNames)
     
     
     PlotGraph <- ColourDeletedEdges(CascadeList[[.x]], CascadeList[[.x+1]])
@@ -74,7 +77,9 @@ CreateCascadeGif <- function(CascadeList, Folder = NULL, filename = NULL){
 })
 
 
-  im.convert(paste0(filename, 1:(length(CascadeList)*2-1), ".png"), output = paste0(filename, ".gif"))
+  im.convert(file.path(Folder,
+                       paste0(filename, 1:(length(CascadeList)*2-1)), ".png"), 
+             output = file.path(Folder,paste0(filename, ".gif")))
   
-  setwd(CurrentPath)
+ #setwd(CurrentPath)
 }

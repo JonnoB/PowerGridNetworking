@@ -1,9 +1,9 @@
-AttackTheGrid <- function(NetworkList, 
+AttackTheGrid2 <- function(NetworkList, 
                           AttackStrategy, 
                           referenceGrid = NULL, 
                           MinMaxComp = 0.8, 
-                          CumulativeAttacks = NULL, 
-                          TotalAttackRounds=100,
+                          NodesRemoved = NULL, 
+                          StopPoint=Inf,
                           CascadeMode = TRUE){
   #This function attacks the grid using a given attack strategy
   #g: Network as an igraph object
@@ -12,7 +12,10 @@ AttackTheGrid <- function(NetworkList,
   #EdgeData: Data frame of Edge data for the network.
   #referenceGrid: the grid that will be used to test the largest component against if NULL it uses the given network
   #MinMaxComp: The minimum size of the maximum component for the process to continue
-
+  if(is.null(NodesRemoved)){
+    NodesRemoved <- 1
+  }
+  
   #gets the last network in the list
   g <- NetworkList[[length(NetworkList)]]
 
@@ -22,7 +25,6 @@ AttackTheGrid <- function(NetworkList,
   if(is.null(referenceGrid)){
     referenceGrid  <- g
   }
-  
   #Set the environment of the Attack strategy to inside the function so that the correct g is used
   AttackStrategy <- set_env(AttackStrategy, get_env())
 
@@ -33,35 +35,14 @@ AttackTheGrid <- function(NetworkList,
   #Rebalence network
   #This means that the Cascade calc takes a balanced network which is good.
   gCasc <- BalencedGenDem(gCasc, "Demand", "Generation")
-  
-  
-
-  GridCollapsed<- ecount(gCasc)==0
 
   gCasc <- list(gCasc)
   
-  #This If statement prevents Cascading if theire are no cascadable components
-  if(!GridCollapsed){
-  
   if(CascadeMode){
   #this returns a list of networks each of the cascade
-  gCasc <- Cascade(gCasc)
+    gCasc <- Cascade2(gCasc, gComp = g)
   }
   
-  message(paste("Attack ",CumulativeAttacks, " Nodes Remaining", vcount(gCasc[[length(gCasc)]])))
-  
-  } else{
-   
-    message("Grid completely collapsed continuing until stop conditions met")
-    
-  }
-  
-  if(is.null(CumulativeAttacks)){
-    CumulativeAttacks <- 1
-  } else {
-    CumulativeAttacks <- CumulativeAttacks +1
-  }
-    
   #concatanate the new list with the list of lists
   NetworkList2 <- NetworkList
   NetworkList2[[length(NetworkList2)+1]] <-gCasc
@@ -72,19 +53,14 @@ AttackTheGrid <- function(NetworkList,
   #If the largest componant is larger than the MinMaxComp threshold
   #call the function again and delete a new node.
 
-  #when the grid has collapsed problems arise this helps deal with that
-  MaxComp <- suppressWarnings(max(components(gCascLast)$csize))
+  FractGC <-max(components(gCascLast)$csize)/vcount(referenceGrid)
   
-  FractGC <-ifelse(is.finite(MaxComp),MaxComp/vcount(referenceGrid), 0)
-
-    if( !(FractGC < MinMaxComp | length(NetworkList2)-1==TotalAttackRounds) ){
-    NetworkList2 <- AttackTheGrid(NetworkList2, 
-                                  AttackStrategy, 
-                                  referenceGrid, 
-                                  MinMaxComp, 
-                                  CumulativeAttacks,
-                                  TotalAttackRounds, 
-                                  CascadeMode)
+    
+  message(paste("Iteration ",NodesRemoved, " Nodes Remaining", vcount(gCascLast), " GC Fract", round(FractGC,2)))
+  
+         
+    if( !(FractGC < MinMaxComp | length(NetworkList2)==StopPoint) ){
+    NetworkList2 <- AttackTheGrid2(NetworkList2, AttackStrategy, referenceGrid, MinMaxComp, NodesRemoved+1,StopPoint, CascadeMode)
   }
   
   return(NetworkList2)

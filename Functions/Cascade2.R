@@ -1,4 +1,4 @@
-Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf){
+Cascade2 <- function(NetworkList, Iteration = 0, StopCascade = Inf, gComp = NULL){
 #This Function iterates through the network removing edges until there are no further overpower edges to remove
   #This function takes a weighted edge list, the substation data on demand and generation as well as the current network
   
@@ -13,9 +13,9 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf){
    g <- NetworkList[[length(NetworkList)]]
   
   Iteration <- Iteration + 1
-  #print(paste("Cascade Iteration", Iteration))
+  print(paste("Iteration number", Iteration))
   
-  g2 <- CalcOverLimit(g)
+  g2 <- CalcOverLimit(g, gComp)
   
   #Delete Edges that are over the Limit
   
@@ -35,17 +35,16 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf){
   #If the list is only 1 long and is FALSE then it is also FALSE
   edgesequal <- all_equal(get.edgelist(g), get.edgelist(g2))
   
-  #Checking there are edges left prevents trying to find a component in the Slackref and throwing an error.
-  CascadeContinues <- !isTRUE(edgesequal) |ecount(g2)==0
+  CascadeContinues <- !((edgesequal==TRUE)[1] & length(edgesequal)==1)
 
   if(CascadeContinues & Iteration != StopCascade){
    #add the new network into the list
     NetworkList <- c(NetworkList, list(g2))
     #update the list with the new lists created in the cascade
-   NetworkList <- Cascade(NetworkList, Iteration, StopCascade)
+   NetworkList <- Cascade(NetworkList, Iteration, StopCascade, gComp = g)
   }
 
-  print(paste("Cascade has completed with", Iteration, "iterations"))
+  print("Cascade has finished")
   
 return(NetworkList)
   
