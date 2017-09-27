@@ -37,28 +37,6 @@ simple starter explnation
 
 
 
-##Node attributes
-Generated power <- theoretcial generated max
-power demand
-balanced power
-name
-
-##Edge attributes
-Y
-Power Limit
-Power FLow
-
-With the information above held in the graph each node would contain all necessary information for the analysis and would simplify a lot of the processesMelibe Viridis,
-
-unrealistic rfesearch questions
-
-done no work
-
-Do a non-cascading montecarlo removal , compare with a cascading network.
-
-Things to do
-create 1 node cascade check
-node pair cascade check
 
 
 #Setup Chunk
@@ -251,6 +229,7 @@ Nodesims <- c(TRUE, FALSE) %>% map_df(~{
   MonteCarloAttack(gbase, 
                          simulations = 10,
                          AttackStrategy = RandomAttack,
+                         Type = "Fixed",
                          MinMaxComp = 0.0, 
                          TotalAttackRounds = 30,
                          Target = "Edges",

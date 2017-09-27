@@ -1,4 +1,4 @@
-MonteCarloAttack <- function(g, simulations = 100, AttackStrategy, MinMaxComp, TotalAttackRounds, Target = Nodes, CascadeMode ){
+MonteCarloAttack <- function(g, simulations = 100, AttackStrategy, Type ="Fixed", MinMaxComp, TotalAttackRounds, Target = Nodes, CascadeMode ){
   #This function performs a montevcarlo simulation of attack the grid. It out puts a dataframe of graph statistics and the full
   #deletion order for each simulation. The deletion order is the order in which the nodes were actually deleted, which is 
   #different to the order they were planned to be deleted. Some nodes will be removed due to cascade effects or, 
@@ -12,24 +12,36 @@ MonteCarloAttack <- function(g, simulations = 100, AttackStrategy, MinMaxComp, T
   #Target: wheather nodes or edges are being deleted
   #CascadeMode: Whether the power flow equations will be used to check line-overloading or not
   Bigdf <- list()
+  
+  if(!(Type == "Fixed"| Type == "Adaptive")){
+    message("Type must be 'Fixed' or 'Adaptive'")
+    stop()
+  }
+  
+  if(Type == "Fixed"){
   DeletionMatrix <- 1:simulations %>% map( ~
                                    AttackStrategy(g, Target, Number)
   )
+  }
 
   for(n in 1:simulations){ # ready for paralellization
     
-    DeleteNodes <- DeletionMatrix[[n]]
-
-    FixedNodes <- quo(FixedStrategyAttack(g, DeleteNodes, UQS(list(Target = Target))))
+    #Choose the appropriate method for fixed or adaptive
+    if(Type == "Fixed"){    
+      DeleteNodes <- DeletionMatrix[[n]]
+      RemoveStrategy <- quo(FixedStrategyAttack(g, DeleteNodes, UQS(list(Target = Target))))
+      } else {
+        RemoveStrategy <- quo(AdaptiveStrategyAttack(g, AttackStrategy, UQS(list(Target = Target))))
+    }
     
     sim <- paste0("Simulation_", n)
     print(sim)
 
     GridList <- AttackTheGrid(list(list(g)), 
-                                               FixedNodes, 
-                                               MinMaxComp = MinMaxComp,
-                                               TotalAttackRounds = TotalAttackRounds,
-                                               CascadeMode =  CascadeMode) %>%
+                              RemoveStrategy, 
+                              MinMaxComp = MinMaxComp,
+                              TotalAttackRounds = TotalAttackRounds,
+                              CascadeMode =  CascadeMode) %>%
       ExtractNetworkStats(.) %>%
       mutate( Simulation = n)
     #Calling gc prevents memory being eating up over the course of the simulation
