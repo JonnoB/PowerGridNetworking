@@ -246,44 +246,27 @@ I think that dead islands are a major cause of grid collapse.
 ```{r}
 
 set.seed(123)
-DeletionMatrix <- 1:100 %>% map( ~
-                                   RandomAttack(gbase, Target = "Nodes", Number = vcount(gbase))
-                                 )
-
 
 Nodesims <- c(TRUE, FALSE) %>% map_df(~{ 
   MonteCarloAttack(gbase, 
-                         simulations = 100, 
-                         DeletionMatrix ,
+                         simulations = 10,
+                         AttackStrategy = RandomAttack,
                          MinMaxComp = 0.0, 
-                         TotalAttackRounds = 30, 
-                         CascadeMode = .x ) %>%
+                         TotalAttackRounds = 30,
+                         Target = "Edges",
+                         CascadeMode = .x) %>%
   mutate(Cascade = .x)
 }
 )
-
-
 
 setwd(basewd)
 saveRDS(Nodesims, "100simulationsRandomAttackto30Nodes.rds")
 #Nodesims <- readRDS( "100simulationsRandomAttackto0005or440.rds" )
 
+quo(mean(UQS(list(x = 1:4)))) %>% eval_tidy
 
 SummaryofGC <- Nodesims %>% 
-  mutate(PGfract = PowerGen/max(PowerGen)) %>%
-  group_by(NodesRemaining, Cascade) %>%
-summarise(mean = mean(GCfract),
-          sd = sd(GCfract),
-          GC95 = quantile(GCfract, .95),
-          GC05 = quantile(GCfract, .05),
-          count = n(),
-          mPGfract = mean(PGfract),
-          PG95 = quantile(PGfract, .95),
-          PG05 = quantile(PGfract, .05)) %>%
-  ungroup %>%
-  group_by(Cascade) %>%
-  mutate(ID =n():1)
-
+  SummariseMonteCarlo
 
 SummaryofGC %>%
   #filter(ID<50) %>%
@@ -341,23 +324,9 @@ return(Bigdf)
 
 
 
-SummaryofGCEdge <- Edgesims %>% 
-  mutate(PGfract = PowerGen/max(PowerGen)) %>%
-  group_by(NodesRemaining, Cascade) %>%
-summarise(mean = mean(GCfract),
-          sd = sd(GCfract),
-          GC95 = quantile(GCfract, .95),
-          GC05 = quantile(GCfract, .05),
-          count = n(),
-          mPGfract = mean(PGfract),
-          PG95 = quantile(PGfract, .95),
-          PG05 = quantile(PGfract, .05)) %>%
-  ungroup %>%
-  group_by(Cascade) %>%
-  mutate(ID =n():1)
+SummaryofGCEdge <-  %>% 
+  SummariseMonteCarlo
 
-%>%
-  filter(count == 100)
 
 setwd(basewd)
 saveRDS(Edgesims,"100simulationsRandomAttackto30Edges.rds")
