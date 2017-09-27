@@ -26,6 +26,17 @@ http://digitalcommons.uri.edu/cgi/viewcontent.cgi?article=1279&context=oa_diss
 
 I should change the graph so all information is encoded into it as graph attributes.
 
+
+#next week
+
+each node and each edge removed
+re-do figures
+small hand example
+get extreme node list - can save and dump files
+simple starter explnation
+
+
+
 ##Node attributes
 Generated power <- theoretcial generated max
 power demand
@@ -202,33 +213,8 @@ FixedNodes <- quo(FixedStrategyAttack(g, DeleteNodes))
 FixedEdges <- quo(FixedStrategyAttack(g, DeleteEdges, Target = "Edges"))
 
 set.seed(15)
-testattack <- suppressMessages(AttackTheGrid(list(list(gbase)), FixedNodes, MinMaxComp = 0.8, CascadeMode = TRUE)) 
+testattack <- AttackTheGrid(list(list(gbase)), FixedNodes, MinMaxComp = 0, TotalAttackRounds = 200, CascadeMode = TRUE) 
 
-test2 <- testattack  %>%
-    map_df(~{
-      #find the last element of the list which is the final network for that Cascade
-      .x[[length(.x)]] %>%
-        #extract maximum component size
-       data.frame(MaxComp = components(.)$csize %>% max,
-                  TotalNodes = vcount(.),
-                  TotalEdges = ecount(.)
-                  )
-    }
-    ) %>%
-  mutate(NodesRemoved = vcount(gbase) -0:(n()-1),
-         GCfract = MaxComp/vcount(gbase),
-         Simulation = n)
-
-
-test <- testattack[[1]]
-
-test <- test  %>% .[[length(.)]] 
-class(test)
-        #extract maximum component size
-       data.frame(MaxComp = components(test)$csize %>% max,
-                  TotalNodes = vcount(test),
-                  TotalEdges = ecount(test)
-                  )
 
 set.seed(15)
 test <- list(gbase) %>%
@@ -258,72 +244,28 @@ test <- list(gbase) %>%
 I think that dead islands are a major cause of grid collapse.
 
 ```{r}
-#create an output statistic for the grid to look at it's shape and stuff
-# The below doesn' twork due to not searching in the right environment
-# set.seed(123)
-# Bigdf <- 1:30 %>% map_df(~{
-#   
-#   print(paste("Simulation", .x))
-# GridList <- suppressMessages(AttackTheGrid(list(list(gbase)), FixedNodes, MinMaxComp = 0.10, CascadeMode = FALSE)) %>%
-#   unlist(., recursive = FALSE)
-# 
-#  GridList2<- GridList %>% map_dbl(~{
-#  components(.x)$csize %>% max
-# }
-# ) %>% tibble(MaxComp = .) %>%
-#   mutate(Nodes = vcount(gbase) -0:(n()-1),
-#          GCfract = MaxComp/vcount(gbase),
-#          Simulation = .x)
-# 
-# return(GridList2)
-#  
-# }
-#   )
-set.seed(123)G <- wheel %m% sstar
-Nodesims <- 1:2 %>%  map_df(~{
-  
-Bigdf <- data.frame(Nodes = NULL, GCfract = NULL, Simulation = NULL)
 
-for(n in 1:100){
-  
-  #These need to be double assigned so that they are assigned outside the map function. Otherwise only the values in the global environment are used... I don't know why.
-  DeleteNodes <<- RandomAttack(gbase, Target = "Nodes", Number = vcount(gbase))
-  FixedNodes <<- quo(FixedStrategyAttack(g, DeleteNodes))
-  
-  sim <- paste0("Simulation_", n)
-  print(sim)
-  
-  GridList <- suppressMessages(AttackTheGrid(list(list(gbase)), 
-                                             FixedNodes, 
-                                             MinMaxComp = 0.15, #
-                                             StopPoint = Inf, 
-                                             CascadeMode =  c(TRUE,FALSE)[.x])) %>%
-    map_df(~{
-      #find the last element of the list which is the final network for that Cascade
-      g <- .x[[length(.x)]] 
-      
-      #extract maximum component size
-      data.frame(MaxComp = components(g)$csize %>% max,
-                  TotalNodes = vcount(g),
-                  TotalEdges = ecount(g),
-                  PowerGen = sum(abs(get.vertex.attribute(g, "BalencedPower"))/2))
-    }
-    ) %>%
-  mutate(NodesRemaining = vcount(gbase) -0:(n()-1),
-         GCfract = MaxComp/vcount(gbase),
-         Simulation = n)
-  #To try and prevent crashing
-  gc()
-  
-  Bigdf <- bind_rows(Bigdf, GridList) %>%
-    mutate(Cascade = c(TRUE,FALSE)[.x])
-}
+set.seed(123)
+DeletionMatrix <- 1:100 %>% map( ~
+                                   RandomAttack(gbase, Target = "Nodes", Number = vcount(gbase))
+                                 )
 
-return(Bigdf)
+
+Nodesims <- c(TRUE, FALSE) %>% map_df(~{ 
+  MonteCarloAttack(gbase, 
+                         simulations = 100, 
+                         DeletionMatrix ,
+                         MinMaxComp = 0.0, 
+                         TotalAttackRounds = 30, 
+                         CascadeMode = .x ) %>%
+  mutate(Cascade = .x)
 }
 )
 
-saveRDS(Nodesims, "100simulationsRandomAttackto0015Nodes.rds")
+
+
+setwd(basewd)
+saveRDS(Nodesims, "100simulationsRandomAttackto30Nodes.rds")
 #Nodesims <- readRDS( "100simulationsRandomAttackto0005or440.rds" )
 
 
@@ -342,17 +284,16 @@ summarise(mean = mean(GCfract),
   group_by(Cascade) %>%
   mutate(ID =n():1)
 
-%>%
-  filter(count == 100)
 
 SummaryofGC %>%
-  filter(ID<50) %>%
+  #filter(ID<50) %>%
 ggplot(aes(x= ID, y = mean, colour = Cascade)) +geom_line() +
     geom_ribbon(aes(ymin=GC05, ymax=GC95, fill = Cascade), alpha = 0.3)+
   labs(title = "Largest componant as a % of Original Giant Component\n under different removal regimes" , x = "Number of nodes removed from Grid", y = "Largest component as a % GC")
 
 
 SummaryofGC %>%
+  #  filter(ID<50) %>%
 ggplot(aes(x= ID, y = mPGfract, colour = Cascade)) +geom_line() +
       geom_ribbon(aes(ymin=PG05, ymax=PG95, fill = Cascade), alpha = 0.3)+
       labs(title = "Percentage of demand that the grid can meet in current state" , x = "Number of nodes removed from Grid", y = "Total generating capacity as % of demand")
@@ -382,23 +323,11 @@ for(n in 1:100){
 
   GridList <- suppressMessages(AttackTheGrid(list(list(gbase)), 
                                              FixedNodes, 
-                                             MinMaxComp = 0.15, #
-                                             StopPoint = Inf, 
+                                             MinMaxComp = 0.0, #
+                                             TotalAttackRounds = 30, 
                                              CascadeMode =  c(TRUE,FALSE)[.x])) %>%
-    map_df(~{
-      #find the last element of the list which is the final network for that Cascade
-      g <- .x[[length(.x)]] 
-      
-      #extract maximum component size
-      data.frame(MaxComp = components(g)$csize %>% max,
-                  TotalNodes = vcount(g),
-                  TotalEdges = ecount(g),
-                  PowerGen = sum(abs(get.vertex.attribute(g, "BalencedPower"))/2))
-    }
-    ) %>%
-  mutate(NodesRemaining = vcount(gbase) -0:(n()-1),
-         GCfract = MaxComp/vcount(gbase),
-         Simulation = n)
+   ExtractNetworkStats(.) %>%
+  mutate( Simulation = n)
   #To try and prevent crashing
   gc()
   
@@ -430,8 +359,8 @@ summarise(mean = mean(GCfract),
 %>%
   filter(count == 100)
 
-
-saveRDS(Edgesims,"100simulationsRandomAttackto0015Edges.rds")
+setwd(basewd)
+saveRDS(Edgesims,"100simulationsRandomAttackto30Edges.rds")
 
 
 SummaryofGCEdge %>%

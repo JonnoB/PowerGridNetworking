@@ -32,7 +32,7 @@ CalcOverLimit <- function(g){
       g2subset
 
     }) %>%
-    Reduce(union, .)
+    Reduce(union2, .)
 
     
   return(gOut)

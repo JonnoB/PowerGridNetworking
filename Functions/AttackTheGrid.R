@@ -2,17 +2,20 @@ AttackTheGrid <- function(NetworkList,
                           AttackStrategy, 
                           referenceGrid = NULL, 
                           MinMaxComp = 0.8, 
-                          CumulativeAttacks = NULL, 
                           TotalAttackRounds=100,
-                          CascadeMode = TRUE){
+                          CascadeMode = TRUE, 
+                          CumulativeAttacks = NULL){
   #This function attacks the grid using a given attack strategy
-  #g: Network as an igraph object
-  #AttackStrategy: A function that calculates which node to delete the function is is in "quo" form
-  #SubstationData: Dataframe that contains data on the susbtations
-  #EdgeData: Data frame of Edge data for the network.
+  #NetworkList: A list of lists where each element of the sub list is an igraph object, the first time it is used the
+    #the network list is simply list(list(g))
+  #AttackStrategy: A function that calculates which node to delete the function is is in "quo" form and embedded in an
+    #attack type
   #referenceGrid: the grid that will be used to test the largest component against if NULL it uses the given network
-  #MinMaxComp: The minimum size of the maximum component for the process to continue
-
+  #MinMaxComp: The minimum size of the maximum component, as a fraction, for the process to continue, the default is set to 0.8
+  #TotalAttackRounds: The maximum number of nodes to be removed before the process stops
+  #CascadeMode: Whether the power flow equations will be used to check line-overloading or not
+  #CumulativeAttacks = The total number of attacks that have taken place so far
+  
   #gets the last network in the list
   g <- NetworkList[[length(NetworkList)]]
 
@@ -22,13 +25,11 @@ AttackTheGrid <- function(NetworkList,
   if(is.null(referenceGrid)){
     referenceGrid  <- g
   }
-  
-  #Set the environment of the Attack strategy to inside the function so that the correct g is used
-  AttackStrategy <- set_env(AttackStrategy, get_env())
 
+   
   #Remove the desired part of the network.
   gCasc<- AttackStrategy %>% 
-    eval_tidy 
+    eval_tidy(., data = list(g = g)) #The caputure environment contains delete nodes, however the current g is fed in here
   
   #Rebalence network
   #This means that the Cascade calc takes a balanced network which is good.
@@ -56,12 +57,14 @@ AttackTheGrid <- function(NetworkList,
     
   }
   
+
   if(is.null(CumulativeAttacks)){
-    CumulativeAttacks <- 1
+    CumulativeAttacks2 <- 1
   } else {
-    CumulativeAttacks <- CumulativeAttacks +1
+    CumulativeAttacks2 <- CumulativeAttacks + 1
   }
-    
+
+
   #concatanate the new list with the list of lists
   NetworkList2 <- NetworkList
   NetworkList2[[length(NetworkList2)+1]] <-gCasc
@@ -78,15 +81,16 @@ AttackTheGrid <- function(NetworkList,
   FractGC <-ifelse(is.finite(MaxComp),MaxComp/vcount(referenceGrid), 0)
 
     if( !(FractGC < MinMaxComp | length(NetworkList2)-1==TotalAttackRounds) ){
-    NetworkList2 <- AttackTheGrid(NetworkList2, 
+    NetworkList2 <- AttackTheGrid(NetworkList = NetworkList2, 
                                   AttackStrategy, 
-                                  referenceGrid, 
-                                  MinMaxComp, 
-                                  CumulativeAttacks,
-                                  TotalAttackRounds, 
-                                  CascadeMode)
+                                  referenceGrid = referenceGrid, 
+                                  MinMaxComp = MinMaxComp,
+                                  TotalAttackRounds = TotalAttackRounds, 
+                                  CascadeMode = CascadeMode,
+                                  CumulativeAttacks = CumulativeAttacks2
+                                  )
   }
-  
+
   return(NetworkList2)
   
 }
