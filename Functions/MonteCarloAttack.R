@@ -11,7 +11,12 @@ MonteCarloAttack <- function(g, simulations = 100, AttackStrategy, Type ="Fixed"
   #TotalAttackRounds: The maximum number of nodes to be removed before the process stops
   #Target: wheather nodes or edges are being deleted
   #CascadeMode: Whether the power flow equations will be used to check line-overloading or not
-  Bigdf <- list()
+  
+  #Calling gc prevents memory being eating up over the course of the simulation
+  #It is called first to clean from the previous iterations memory use
+  gc()
+  
+  Outlist <- list()
   
   if(!(Type == "Fixed"| Type == "Adaptive")){
     message("Type must be 'Fixed' or 'Adaptive'")
@@ -20,38 +25,53 @@ MonteCarloAttack <- function(g, simulations = 100, AttackStrategy, Type ="Fixed"
   
   if(Type == "Fixed"){
   DeletionMatrix <- 1:simulations %>% map( ~
-                                   AttackStrategy(g, Target, Number)
+                                   AttackStrategy(g, Target, vcount(g))
   )
   }
-
   for(n in 1:simulations){ # ready for paralellization
     
     #Choose the appropriate method for fixed or adaptive
     if(Type == "Fixed"){    
+  
       DeleteNodes <- DeletionMatrix[[n]]
       RemoveStrategy <- quo(FixedStrategyAttack(g, DeleteNodes, UQS(list(Target = Target))))
-      } else {
+   
+         } else {
         RemoveStrategy <- quo(AdaptiveStrategyAttack(g, AttackStrategy, UQS(list(Target = Target))))
     }
     
     sim <- paste0("Simulation_", n)
     print(sim)
 
-    GridList <- AttackTheGrid(list(list(g)), 
-                              RemoveStrategy, 
+    GridList <- AttackTheGrid(NetworkList = list(list(g)), 
+                              AttackStrategy =  RemoveStrategy, 
                               MinMaxComp = MinMaxComp,
                               TotalAttackRounds = TotalAttackRounds,
-                              CascadeMode =  CascadeMode) %>%
+                              CascadeMode =  CascadeMode) 
+    
+    Netstats <- GridList%>%
       ExtractNetworkStats(.) %>%
       mutate( Simulation = n)
-    #Calling gc prevents memory being eating up over the course of the simulation
-    gc()
+
+    NodesAttacked <- NodesTargeted(GridList, DeleteNodes)
     
-    Bigdf[[n]] <- GridList
+    Outlist[[n]] <- list(NetStats = Netstats , NodesTargeted = NodesAttacked)
   }
   
-  Bigdf <- Bigdf %>% bind_rows
-  
-  return(Bigdf)
+  #COmbine all the simualtion network statistics into a single dataframe
+  NetData <- Outlist %>%
+    modify_depth(., 1, keep, is.data.frame ) %>%
+    flatten %>%
+    bind_rows() %>%
+  mutate(Cascade = CascadeMode)
+
+  #Combine all the deleted nodes into a single list
+  AttackedNodes <- Outlist %>%
+    modify_depth(., 1, keep, is.character ) %>%
+    flatten  %>% flatten
+
+  Outlist <- list(NetData = NetData, AttackedNodes = AttackedNodes)
+
+  return(Outlist)
 }
 

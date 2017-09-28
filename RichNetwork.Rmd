@@ -5,7 +5,7 @@ date: "11 September 2017"
 output: html_document
 ---
 
-
+Just under 20 node attacks an hour
 
 The goal of this script is to create graph objects that contain all the necessary information resulting in the manipulation of graphs performing most of the cleaning.
 
@@ -51,7 +51,6 @@ source("Setup.R")
 #Load Tariff and Trasnport
  
 ```{r}
-KeepPath <- getwd()
 
 #Load Tariff aka generation data
 setwd(Tariff)
@@ -66,8 +65,6 @@ LocalAssetData <- read_excel("Tariff & Transport Model_2018_19 Tariffs_External.
 TransportData <- read_excel("Tariff & Transport Model_2018_19 Tariffs_External.xlsm", sheet =12, skip = 11) %>%
   setNames(make.names(names(.)))
 
-setwd(KeepPath)
-rm(KeepPath)
 ```
 
 #Clean and seperate Transport
@@ -153,66 +150,21 @@ KNearestNodes(gbase, "ALVE4A", 2) %>% induced_subgraph(gbase, .) %>% plot
 ```
 
 
-
-```{r}
-
-
-#Looking at the below code it seems that the 4 links that are overpowered when there is no tweaking of the line limits are still overpowered, the difference is that they don't cause a massive rolling blackout, but they do cause a small disturbance in the network. By this I think that the code was previously deleting the wrong lines causing major issues.
-CascadeList <- Cascade(list(gbase))
-
-vcount(CascadeList[[1]])
-vcount(CascadeList[[2]])
-vcount(CascadeList[[3]])
-
-ecount(CascadeList[[1]])
-ecount(CascadeList[[2]])
-ecount(CascadeList[[3]])
-sameedges <- (get.edge.attribute(CascadeList[[1]], "Link") %in% get.edge.attribute(CascadeList[[2]], "Link"))
-
-get.edgelist(CascadeList[[1]])[!sameedges,]
-
-setwd(basewd)
-dir.create("test")
-set.seed(129)
-CreateCascadeGif(CascadeList, file.path(basewd,"test"), "testme")
-
-
-
-```
-
 make a non-adaptive  strategy extractor
 ```{r}
-g<- gbase
-
+set.seed(15)
 DeleteNodes <- RandomAttack(gbase, Target = "Nodes", Number = vcount(gbase))
 DeleteEdges <-RandomAttack(gbase, Target = "Edges", Number = ecount(gbase))
 
 FixedNodes <- quo(FixedStrategyAttack(g, DeleteNodes))
 FixedEdges <- quo(FixedStrategyAttack(g, DeleteEdges, Target = "Edges"))
 
-set.seed(15)
-testattack <- AttackTheGrid(list(list(gbase)), FixedNodes, MinMaxComp = 0, TotalAttackRounds = 200, CascadeMode = TRUE) 
+
+testattack <- AttackTheGrid(list(list(gbase)), FixedNodes, MinMaxComp = 0, TotalAttackRounds = 10, CascadeMode = FALSE) 
 
 
-set.seed(15)
-test <- list(gbase) %>%
-  list %>%
-  AttackTheGrid(., FixedNodes, MinMaxComp = 0.8)
-
-AdaptiveRandomEdgeAttack <- quo(RandomAttack(g, Target , Number))
-AdaptiveStrat <- quo(AdaptiveStrategyAttack(g, AdaptiveRandomEdgeAttack))
-
-
-AdaptiveRandomEdgeAttack <- quo(RandomAttack(g, Target, Number))
-AdaptiveStrat <- quo(AdaptiveStrategyAttack(g, AdaptiveRandomEdgeAttack))
-
-set.seed(15)
-test <- list(gbase) %>%
-  list %>%
-  AttackTheGrid(., AdaptiveStrat, MinMaxComp = 0.8)
-
-
- test <- microbenchmark(suppressMessages(AttackTheGrid(list(list(gbase)), FixedNodes, MinMaxComp = 0.005, StopPoint = c(170, 440)[1], CascadeMode =  c(TRUE,FALSE)[1])), times = 1)
+#extract the number of nodes in the last of each list, precursor to finding the deleted node
+NodesTargeted(testattack)
 
 ```
 
@@ -223,28 +175,30 @@ I think that dead islands are a major cause of grid collapse.
 
 ```{r}
 
-set.seed(123)
+input <- c(FALSE)
 
-Nodesims <- c(TRUE, FALSE) %>% map_df(~{ 
-  MonteCarloAttack(gbase, 
-                         simulations = 10,
-                         AttackStrategy = RandomAttack,
-                         Type = "Fixed",
-                         MinMaxComp = 0.0, 
-                         TotalAttackRounds = 30,
-                         Target = "Edges",
-                         CascadeMode = .x) %>%
-  mutate(Cascade = .x)
-}
-)
+  Nodesims <- input %>% map(~{ 
+    MonteCarloAttack(gbase, 
+                           simulations = 10,
+                           AttackStrategy = RandomAttack,
+                           Type = "Fixed",
+                           MinMaxComp = 0.0, 
+                           TotalAttackRounds = 30,
+                           Target = "Nodes",
+                           CascadeMode = .x)
+    
+
+    }
+   ) %>% set_names(paste0("v.", input))
 
 setwd(basewd)
 saveRDS(Nodesims, "100simulationsRandomAttackto30Nodes.rds")
 #Nodesims <- readRDS( "100simulationsRandomAttackto0005or440.rds" )
 
-quo(mean(UQS(list(x = 1:4)))) %>% eval_tidy
-
-SummaryofGC <- Nodesims %>% 
+SummaryofGC <- Nodesims %>%
+    modify_depth(., 1, keep, is.data.frame ) %>%
+  flatten %>%
+  bind_rows() %>% 
   SummariseMonteCarlo
 
 SummaryofGC %>%
@@ -322,6 +276,40 @@ SummaryofGCEdge %>%
 ggplot(aes(x= ID, y = mPGfract, colour = Cascade)) +geom_line() +
       geom_ribbon(aes(ymin=PG05, ymax=PG95, fill = Cascade), alpha = 0.3)+
       labs(title = "Percentage of demand that the grid can meet in current state" , x = "Number of nodes removed from Grid", y = "Total generating capacity as % of demand")
+
+```
+
+
+#Analysing worst collapse
+
+```{r}
+input <- c(FALSE)
+
+  Nodesims <- input %>% map(~{ 
+    MonteCarloAttack(gbase, 
+                           simulations = 10,
+                           AttackStrategy = RandomAttack,
+                           Type = "Fixed",
+                           MinMaxComp = 0.0, 
+                           TotalAttackRounds = 30,
+                           Target = "Nodes",
+                           CascadeMode = .x)
+    
+
+    }
+   ) %>% set_names(paste0("v.", input))
+  
+CollapseRank <- BiggestCollapse(Nodesims$v.FALSE$NetData, PowerGen)
+
+FixedNodes <- quo(FixedStrategyAttack(g, Nodesims$v.FALSE$AttackedNodes[[5]]))
+
+CheckCollapse <- AttackTheGrid(list(list(gbase)), FixedNodes, MinMaxComp = 0, TotalAttackRounds = 30, CascadeMode = FALSE) 
+
+#not sure what to check now but there are two components and about 44 nodes have been lost
+CheckCollapse[[31]][[1]] %>% components()
+
+#perhaps making a gif would help understand what has happened?
+
 
 ```
 
