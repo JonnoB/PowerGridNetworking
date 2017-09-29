@@ -11,11 +11,14 @@ BalencedGenDem <- function(g, DemandVar, GenerationVar, OutputVar = "BalencedPow
     Generation = get.vertex.attribute(g, GenerationVar),
     component = components(g)$membership) %>%
     group_by(component) %>%
-    #Identify Deadislands and set Generation and Demand to 0
+    #Identify Deadislands and set Generation and Demand to 
+    #Net generation is used as this minimises network strain when there is a node
+    #that prodices and consumes power. This can occure for an induced subgraph
     mutate(DeadIsland = sum(Demand)==0 | sum(Generation)==0,
-           Demand2 = ifelse(DeadIsland, 0, Demand),
-           Generation2 = if_else(DeadIsland, 0, Generation)) %>%
-    #rebalence remaining componants
+           NetGen = Generation - Demand,
+           Demand2 = ifelse(!DeadIsland & NetGen < 0, abs(NetGen), 0),
+           Generation2 = if_else(!DeadIsland & NetGen > 0, NetGen, 0 )) %>%
+    #rebalence remaining components
     mutate(GenBal = ifelse(is.finite(sum(Demand2)/sum(Generation2)),sum(Demand2)/sum(Generation2),1),
            Demand3 = ifelse(GenBal>1,
                             Demand2*(sum(Generation2)/sum(Demand2)), Demand2),

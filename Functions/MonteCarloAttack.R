@@ -1,4 +1,11 @@
-MonteCarloAttack <- function(g, simulations = 100, AttackStrategy, Type ="Fixed", MinMaxComp, TotalAttackRounds, Target = Nodes, CascadeMode ){
+MonteCarloAttack <- function(g, simulations = 100, 
+                             AttackStrategy, 
+                             Type ="Fixed", 
+                             MinMaxComp, 
+                             TotalAttackRounds, 
+                             Target = Nodes, 
+                             CascadeMode,
+                             cores = 1){
   #This function performs a montevcarlo simulation of attack the grid. It out puts a dataframe of graph statistics and the full
   #deletion order for each simulation. The deletion order is the order in which the nodes were actually deleted, which is 
   #different to the order they were planned to be deleted. Some nodes will be removed due to cascade effects or, 
@@ -11,6 +18,8 @@ MonteCarloAttack <- function(g, simulations = 100, AttackStrategy, Type ="Fixed"
   #TotalAttackRounds: The maximum number of nodes to be removed before the process stops
   #Target: wheather nodes or edges are being deleted
   #CascadeMode: Whether the power flow equations will be used to check line-overloading or not
+  #cores: the number of cores to use, 1 is defualt and runs in parallel. all other numbers use a doMC back end. 
+          #currently doesn't run on windows
   
   #Calling gc prevents memory being eating up over the course of the simulation
   #It is called first to clean from the previous iterations memory use
@@ -25,40 +34,56 @@ MonteCarloAttack <- function(g, simulations = 100, AttackStrategy, Type ="Fixed"
   
   if(Type == "Fixed"){
   DeletionMatrix <- 1:simulations %>% map( ~
-                                   AttackStrategy(g, Target, vcount(g))
+                                   AttackStrategy(g, Target, ifelse(Target == "Nodes", vcount(g), ecount(g)))
   )
   }
-  for(n in 1:simulations){ # ready for paralellization
-    
-    #Choose the appropriate method for fixed or adaptive
-    if(Type == "Fixed"){    
   
-      DeleteNodes <- DeletionMatrix[[n]]
-      RemoveStrategy <- quo(FixedStrategyAttack(g, DeleteNodes, UQS(list(Target = Target))))
-   
-         } else {
-        RemoveStrategy <- quo(AdaptiveStrategyAttack(g, AttackStrategy, UQS(list(Target = Target))))
+  #Quoting this expression allows the for loop to be easily paralellised
+  InsideForLoop <- quo(   { sim <- paste0("Simulation_", n)
+                           print(sim)
+                           
+                           #Choose the appropriate method for fixed or adaptive
+                           if(Type == "Fixed"){    
+                             
+                             DeleteNodes <- DeletionMatrix[[n]]
+                             RemoveStrategy <- quo(FixedStrategyAttack(g, DeleteNodes, UQS(list(Target = Target))))
+                             
+                           } else {
+                             RemoveStrategy <- quo(AdaptiveStrategyAttack(g, AttackStrategy, UQS(list(Target = Target))))
+                           }
+                           
+                           GridList <- AttackTheGrid(NetworkList = list(list(g)), 
+                                                     AttackStrategy =  RemoveStrategy, 
+                                                     MinMaxComp = MinMaxComp,
+                                                     TotalAttackRounds = TotalAttackRounds,
+                                                     CascadeMode =  CascadeMode) 
+                      
+                          Netstats <- GridList%>%
+                             ExtractNetworkStats(.) %>%
+                             mutate( Simulation = n)
+                      
+                          NodesAttacked <- NodesTargeted(GridList, DeleteNodes)
+                           
+                          list(NetStats = Netstats , NodesTargeted = NodesAttacked)}
+                           )
+  
+  if(cores ==1 ){
+  
+    for(n in 1:simulations){ # ready for paralellization
+    Outlist[[n]]<- eval_tidy( InsideForLoop, data = list(n=n))
     }
     
-    sim <- paste0("Simulation_", n)
-    print(sim)
-
-    GridList <- AttackTheGrid(NetworkList = list(list(g)), 
-                              AttackStrategy =  RemoveStrategy, 
-                              MinMaxComp = MinMaxComp,
-                              TotalAttackRounds = TotalAttackRounds,
-                              CascadeMode =  CascadeMode) 
+  } else{
+    print(cores)
+    registerDoMC(cores) 
+    Outlist <- foreach(n = 1:simulations) %dopar% {
+       eval_tidy( InsideForLoop, data = list(n=n))
+    }
     
-    Netstats <- GridList%>%
-      ExtractNetworkStats(.) %>%
-      mutate( Simulation = n)
-
-    NodesAttacked <- NodesTargeted(GridList, DeleteNodes)
     
-    Outlist[[n]] <- list(NetStats = Netstats , NodesTargeted = NodesAttacked)
   }
-  
-  #COmbine all the simualtion network statistics into a single dataframe
+
+    #Combine all the simualtion network statistics into a single dataframe
   NetData <- Outlist %>%
     modify_depth(., 1, keep, is.data.frame ) %>%
     flatten %>%

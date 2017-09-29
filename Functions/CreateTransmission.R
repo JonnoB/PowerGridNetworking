@@ -38,7 +38,7 @@ CreateTransmission <- function(g, Edgename){
 
   
   #name the rows.
-  rownames(Transmat) <- Transdf$Link
+  rownames(Transmat) <- Transdf$Link[match(get.edge.attribute(g, "Link"), Transdf$Link)]
   
   #Reorder the rows and columns so they are in the same order
   #head(rownames(Transmat)); head(get.edge.attribute(g, "Link"))

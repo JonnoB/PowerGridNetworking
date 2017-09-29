@@ -27,12 +27,15 @@ http://digitalcommons.uri.edu/cgi/viewcontent.cgi?article=1279&context=oa_diss
 I should change the graph so all information is encoded into it as graph attributes.
 
 
+A stress metric or loading metric, that gives some sort of measure of how close the network is to having black outs would be really useful, that would help identify nodes that increase stress but don't actually cause any blackouts themselves. Preperation nodes
+
 #next week
 
 each node and each edge removed
 re-do figures
-small hand example
 get extreme node list - can save and dump files
+
+small hand example
 simple starter explnation
 
 
@@ -45,107 +48,35 @@ simple starter explnation
 setwd("/home/jonno/Create_ETYS_network/SubCode")
 source("Setup.R")
 
-```
+source("LoadData2.R")
 
-
-#Load Tariff and Trasnport
- 
-```{r}
-
-#Load Tariff aka generation data
-setwd(Tariff)
-
-GenerationData <- read_excel("Tariff & Transport Model_2018_19 Tariffs_External.xlsm", sheet =10, skip = 33) %>%
-  setNames(make.names(names(.))) %>%
-  mutate(Site = str_sub(Node.1,1,4))
-
-LocalAssetData <- read_excel("Tariff & Transport Model_2018_19 Tariffs_External.xlsm", sheet =11, skip = 11) %>%
-  setNames(make.names(names(.)))
-
-TransportData <- read_excel("Tariff & Transport Model_2018_19 Tariffs_External.xlsm", sheet =12, skip = 11) %>%
-  setNames(make.names(names(.)))
 
 ```
-
-#Clean and seperate Transport
-
-```{r}
-trans1 <-TransportData[,1:16] %>% 
-  filter(!is.na(Bus.ID))
-
-trans2 <- TransportData[,17:59] %>% 
-  filter(!is.na(Bus.1)) %>%
-  group_by(Bus.1, Bus.2) %>% #trying to stop the non-unique identifier problem
-    mutate(Link = paste(Bus.1,Bus.2, 1:n(),sep = "-")) %>% #This allows multiple edges 
-    #between the same node pair, it is not certain the data is always correct!
-    ungroup %>%
-  group_by(Bus.1, Bus.2) %>% #trying to stop the non-unique identifier problem
-    mutate(Link = paste(Bus.1,Bus.2, 1:n(),sep = "-")) %>% #This allows multiple edges 
-    #between the same node pair, it is not certain the data is always correct!
-    ungroup  %>%
-#set construct line limits really high
-  mutate(Link.Type = tolower(Link.Type),
-    Link.Limit = ifelse(Link.Type == "construct", 1e5, Link.Limit)) %>%
-  #add in susceptance
-  mutate(Y = 1/X..Peak.Security.) 
-  
-```
-
-
-
-```{r}
-
-VertexMetaData <- trans1 %>%
-  select(Bus.Name, 
-         Voltage, 
-         Demand, 
-         Generation = Generation.B.....Year.Round...Transport.Model., 
-         BalencedPower = BusTransferB, 
-         Bus.Order)
-
-gbase <- trans2 %>%
-  #this mutate is because the base limits cause a rolling blackout due to the below lines being overpowered
-  # mutate(Link.Limit = case_when(
-  #   Link == "BRAC20-BONB20-1" ~826,
-  #   Link == "FAUG10-LAGG1Q-1" ~826,
-  #   Link == "KEIT20-KINT20-1" ~500,
-  #   Link == "LAGG1Q-MILW1S-1" ~826,
-  #   TRUE ~ Link.Limit
-  # )) %>%
-  select(Bus.1, 
-         Bus.2, 
-         Y, 
-         Link.Limit,
-         Link) %>%
-  mutate(PowerFlow = 0) %>%
-  graph_from_data_frame(., directed=FALSE, vertices = VertexMetaData)
-
-gbase <- set.vertex.attribute(gbase, "component", value = components(gbase)$membership)
-gbase <- set.edge.attribute(gbase, "name", value = get.edge.attribute(gbase, "Link"))
-
-```
-
-
-create the edge voltage
-
-This code block creates the line voltage attribute using the vertex meta data
-```{r}
-
-#If the voltage of the from node is equal to the voltage of the two node then the line voltage is also the same, otherwise the line is a transformer and the voltage is 0
-EdgeVoltage <- ifelse(
-  get.vertex.attribute(gbase, "Voltage", get.edgelist(gbase)[,1])== get.vertex.attribute(gbase, "Voltage", get.edgelist(gbase)[,2]), 
-       get.vertex.attribute(gbase, "Voltage", get.edgelist(gbase)[,1]),
-       0)
-
-gbase <- set_edge_attr(gbase, "Voltage", value = EdgeVoltage)
-
-```
-
 
 #produce subgraph k jumps away from named node
 ```{r}
 
-KNearestNodes(gbase, "ALVE4A", 2) %>% induced_subgraph(gbase, .) %>% plot
+KNearestNodes(gbase, "TAUN4A", 2) %>% induced_subgraph(gbase, .) %>% plot
+
+#Connector nodes can produce the maximum power allowed by the power limit of thier connecting lines
+Southwest <- str_split("EXET40 ALVE4B ALVE4A TAUN4A TAUN4B ABHA4B ABHA4A LAGA40 LAND4A LAND4B INDQ40", pattern = " ", simplify = T) 
+
+Southwestg <- CreateSubgraph(gbase, Southwest[8:11] )
+
+get.vertex.attribute(Southwestg)
+Southwestg %>% plot
+
+
+SlackRef <-"LAND4A"# "EXET40"
+AZero <- CreateTransmission(Southwestg, "Link")
+A <- AZero[,colnames(AZero)!=SlackRef, drop = FALSE]
+C <- LinePropertiesMatrix(Southwestg)
+
+B <- t(A) %*% C %*% A
+  
+InjectionVector <- get.vertex.attribute(Southwestg, "BalencedPower")[get.vertex.attribute(Southwestg, "name")!=SlackRef]
+
+Power <- C %*% A %*% solve(B, InjectionVector)
 
 ```
 
@@ -169,23 +100,61 @@ NodesTargeted(testattack)
 ```
 
 
+#delete each node see what happens
+
+This code cycles throug all nodes and edges and measures the effect of the GCfract and PowerGen for a single outage.
+
+```{r}
+EdgeNodeDeleteion <- c("Nodes", "Edges") %>% map_df(~{
+
+  Target = .x
+  Number <- ifelse(Target == "Nodes", vcount(gbase), ecount(gbase))
+  
+    DeleteNodes <- RandomAttack(gbase, Target = Target, Number = Number)
+    Out <- DeleteNodes %>% 
+      map2_df(.x = ., .y = Target, ~{
+      
+       DeleteNodes <- .x
+       #FixedNodes <- quo(FixedStrategyAttack(g, DeleteNodes))
+      
+       FixedNodes <- quo(FixedStrategyAttack(g, DeleteNodes, UQS(list(Target = .y))))
+       
+       AttackTheGrid(list(list(gbase)), 
+                     FixedNodes, 
+                     MinMaxComp = 0, 
+                     TotalAttackRounds = 1, 
+                     CascadeMode = TRUE) %>% 
+        ExtractNetworkStats(.) %>%
+        mutate(Deleted = .x,
+               Type = .y)
+        
+      }
+    )
+
+  }
+)
+
+```
+
+
 #test non cascadeing grid demolition
 
 I think that dead islands are a major cause of grid collapse.
 
 ```{r}
 
-input <- c(FALSE)
+input <- c(TRUE,FALSE)
 
   Nodesims <- input %>% map(~{ 
     MonteCarloAttack(gbase, 
-                           simulations = 10,
+                           simulations = 100,
                            AttackStrategy = RandomAttack,
                            Type = "Fixed",
                            MinMaxComp = 0.0, 
                            TotalAttackRounds = 30,
                            Target = "Nodes",
-                           CascadeMode = .x)
+                           CascadeMode = .x,
+                           cores = 7)
     
 
     }
@@ -209,7 +178,7 @@ ggplot(aes(x= ID, y = mean, colour = Cascade)) +geom_line() +
 
 
 SummaryofGC %>%
-  #  filter(ID<50) %>%
+  #  filter(ID<50) %>%set.vertex.attribute(., "OldDegree", value = degree(.))
 ggplot(aes(x= ID, y = mPGfract, colour = Cascade)) +geom_line() +
       geom_ribbon(aes(ymin=PG05, ymax=PG95, fill = Cascade), alpha = 0.3)+
       labs(title = "Percentage of demand that the grid can meet in current state" , x = "Number of nodes removed from Grid", y = "Total generating capacity as % of demand")
@@ -285,23 +254,24 @@ ggplot(aes(x= ID, y = mPGfract, colour = Cascade)) +geom_line() +
 ```{r}
 input <- c(FALSE)
 
-  Nodesims <- input %>% map(~{ 
+  Analysims <- input %>% map(~{ 
     MonteCarloAttack(gbase, 
-                           simulations = 10,
+                           simulations = 20,
                            AttackStrategy = RandomAttack,
                            Type = "Fixed",
                            MinMaxComp = 0.0, 
-                           TotalAttackRounds = 30,
+                           TotalAttackRounds = 10,
                            Target = "Nodes",
-                           CascadeMode = .x)
+                           CascadeMode = .x,
+                     cores = 1)
     
 
     }
    ) %>% set_names(paste0("v.", input))
   
-CollapseRank <- BiggestCollapse(Nodesims$v.FALSE$NetData, PowerGen)
+CollapseRank <- BiggestCollapse(Analysims$v.FALSE$NetData, PowerGen)
 
-FixedNodes <- quo(FixedStrategyAttack(g, Nodesims$v.FALSE$AttackedNodes[[5]]))
+FixedNodes <- quo(FixedStrategyAttack(g, Analysims$v.FALSE$AttackedNodes[[5]]))
 
 CheckCollapse <- AttackTheGrid(list(list(gbase)), FixedNodes, MinMaxComp = 0, TotalAttackRounds = 30, CascadeMode = FALSE) 
 

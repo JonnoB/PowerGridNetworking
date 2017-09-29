@@ -5,10 +5,15 @@ BiggestCollapse <- function(df, var){
   
   var <- enquo(var)
   
+  
   df %>%
     group_by(Simulation) %>%
-    filter( UQ(var) == min(!!(var))) %>%
-    ungroup %>%
-    arrange(!!(var))
+    arrange(!!(var)) %>%
+    mutate(rank = 1:n()) %>%
+    filter(rank == 1) %>%
+    select(-rank) %>%
+    ungroup
   
+  #This code is all here as I can't get top n to work with quosure
+
 }
