@@ -2,13 +2,11 @@ CalcOverLimit <- function(g){
   #This function calculates which edges are over the limit for the current network configuration and demand
   #production profile.
   #g: a graph with multiple edge and vertex attributes. The graph is assumed to be balenced in demand and production.
-  
-  g2 <-g
-  
+
   #finds the slack reference in each component
-  SlackRefCasc <-  tibble(name = get.vertex.attribute(g2, "name"),
-                          Bus.Order = get.vertex.attribute(g2, "Bus.Order"),
-                          component = components(g2)$membership) %>%
+  SlackRefCasc <-  tibble(name = get.vertex.attribute(g, "name"),
+                          Bus.Order = get.vertex.attribute(g, "Bus.Order"),
+                          component = components(g)$membership) %>%
     group_by(component) %>%
     arrange(Bus.Order) %>%
     summarise(name = first(name),
@@ -22,14 +20,14 @@ CalcOverLimit <- function(g){
       
       SlackRef <- SlackRefCasc %>% slice(.x)
       
-      g2subset <- delete.vertices(g2, components(g2)$membership != .x)
+      gsubset <- delete.vertices(g, components(g)$membership != .x)
       
       if(SlackRef$Nodes > 1){
         
-        g2subset <- PowerFlow(g2subset, SlackRef$name)
+        gsubset <- PowerFlow(gsubset, SlackRef$name)
       }
       
-      g2subset
+      gsubset
 
     }) %>%
     Reduce(union2, .)

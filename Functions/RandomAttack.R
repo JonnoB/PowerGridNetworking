@@ -5,14 +5,13 @@ RandomAttack <-function(g, Target = "Nodes", Number = 1){
   #Number the total number of nodes/edges to remove
   
   if(Target == "Nodes"){
-    AllTargets <- V(g)$name
+    Out <- sample(V(g)$name, Number)
   } else if (Target =="Edges") {
-    AllTargets <- E(g)$name
+    Out <- sample(E(g)$name, Number)
   } else {
     
     stop("Target must be either 'Nodes' or 'Edges'")
   }
   
-  
-  sample(AllTargets, Number)
+  return(Out)
 }

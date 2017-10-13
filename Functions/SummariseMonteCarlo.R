@@ -1,7 +1,7 @@
 SummariseMonteCarlo <- function(df){
  df %>% 
     mutate(PGfract = PowerGen/max(PowerGen)) %>%
-    group_by(NodesRemaining, Cascade) %>%
+    group_by(NodesAttacked, Cascade) %>%
     summarise(mean = mean(GCfract),
               sd = sd(GCfract),
               GC95 = quantile(GCfract, .95),

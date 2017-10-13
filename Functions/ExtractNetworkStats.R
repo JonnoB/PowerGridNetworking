@@ -14,8 +14,9 @@ ExtractNetworkStats <- function( NetworkList){
                PowerGen = sum(abs(get.vertex.attribute(g, "BalencedPower"))/2))
   }
    ) %>%
-    mutate(NodesRemaining = first(TotalNodes) -0:(n()-1),
-           GCfract = MaxComp/first(TotalNodes)
+    mutate(NodesAttacked = 0:(n()-1),
+           GCfract = MaxComp/max(TotalNodes),
+           Powerfract = PowerGen/max(PowerGen)
            )
   
 }

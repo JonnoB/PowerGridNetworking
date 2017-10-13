@@ -5,6 +5,9 @@ date: "11 September 2017"
 output: html_document
 ---
 
+
+
+
 Just under 20 node attacks an hour
 
 The goal of this script is to create graph objects that contain all the necessary information resulting in the manipulation of graphs performing most of the cleaning.
@@ -14,6 +17,10 @@ The hope is that this will make the processes and code more simple and easier to
 
 Get attack lists. check the extreme ends
 re-order grid balancing
+
+
+
+https://www.forbes.com/sites/katevinton/2014/07/10/hacking-gets-physical-utilities-at-risk-for-cyber-attacks/#5131cd657af9
 
 #some isreali dudes did something on the american grid
 https://www.scientificamerican.com/article/us-electrical-grid-on-failure/
@@ -53,10 +60,42 @@ source("LoadData2.R")
 
 ```
 
-#produce subgraph k jumps away from named node
+
+#Change basic graph line limits
+
+The line limits for 4 edges are such that they are over the limit in the DC power loads under normal operation both in my calculuations and those of the national grid. These line limits are lower than the average for that voltage class. I am going to increase the line limit to ensure that each line has not exceeded it's limit under the dc calculations of normal operations.
+The solution has already been put in the loading data phase and this code is kept for methodical clarity
 ```{r}
 
+# g <- CalcOverLimit(gbase)
+# 
+# fixedge <- g %>% as_data_frame %>%
+#   mutate(over.limit = Link.Limit < abs(PowerFlow))
+# 
+# Voltageav <- fixedge %>%
+#   filter(Link.Limit !=max(Link.Limit)) %>%#simulated links have extremly high limits and should be ignored
+#   group_by(Voltage) %>%
+#   summarise(median = median(Link.Limit),
+#             mean = mean(Link.Limit))
+# 
+# Voltage132 <- fixedge %>%
+#   filter(Link.Limit !=max(Link.Limit), Voltage == 132) %>%
+#   group_by(Link.Limit) %>%
+#   summarise(counts = n())
+
+```
+
+
+
+#produce subgraph k jumps away from named node
+
+```{r}
 KNearestNodes(gbase, "TAUN4A", 2) %>% induced_subgraph(gbase, .) %>% plot
+```
+
+#Create a Hand solvable power flow
+
+```{r}
 
 #Connector nodes can produce the maximum power allowed by the power limit of thier connecting lines
 Southwest <- str_split("EXET40 ALVE4B ALVE4A TAUN4A TAUN4B ABHA4B ABHA4A LAGA40 LAND4A LAND4B INDQ40", pattern = " ", simplify = T) 
@@ -65,44 +104,149 @@ Southwestg <- CreateSubgraph(gbase, Southwest[8:11] )
 
 get.vertex.attribute(Southwestg)
 Southwestg %>% plot
-
+dev.copy(pdf,file.path(FiguresFolder, 'exampleIndianQueens.pdf'))
+dev.off()
 
 SlackRef <-"LAND4A"# "EXET40"
 AZero <- CreateTransmission(Southwestg, "Link")
 A <- AZero[,colnames(AZero)!=SlackRef, drop = FALSE]
-C <- LinePropertiesMatrix(Southwestg)
+C <- LinePropertiesMatrix(Southwestg) %>% round(., 1)
 
 B <- t(A) %*% C %*% A
   
+InjectionVector <- get.vertex.attribute(Southwestg, "BalencedPower")[get.vertex.attribute(Southwestg, "name")!=SlackRef] %>%
+  round(., 1)
+
+Power <- C %*% A %*% solve(B, InjectionVector) %>% round(.,1)
+
+
+PrintLatexMatrix <- function(df, name, Folder = MatricesFolder){
+  xtable(df,align=rep("",ncol(df)+1)) %>%
+  print(., file = file.path(Folder, paste0(name, ".txt")), floating=FALSE, tabular.environment="bmatrix", 
+  hline.after=NULL, include.rownames=FALSE, include.colnames=FALSE)
+
+}
+
+rownames(A) <- rownames(A) %>% gsub("-1", "",.)
+xtable(A, format = "latex",label = "tab:A", caption = "Line transmission matrix")  %>%
+  print(., file = file.path(MatricesFolder, "A.txt"))
+
+xtable(B, format = "latex",label = "tab:B", caption = "The susceptance matrix") %>%
+  print(., file = file.path(MatricesFolder, "B.txt"))
+  
+rownames(C) <- rownames(C) %>% gsub("-1", "",.)
+#colnames(C) <-colnames(rep(" ", ncol(C)))# colnames(C) %>% gsub("-1", "",.)
+xtable(C, format = "latex",label = "tab:C", caption = "Line properties matrix") %>% 
+  print(., file = file.path(MatricesFolder, "C.txt"),include.colnames = FALSE)
+
+PrintLatexMatrix(A, "Amat")
+
+PrintLatexMatrix(B, "Bmat")
+
+PrintLatexMatrix(C, "Cmat")
+
+PrintLatexMatrix(t(A), "AmatTrans")
+
+PrintLatexMatrix(Power, "Powermat")
+
+Inject <- get.vertex.attribute(Southwestg, "BalencedPower") %>%
+  round(., 1) %>% as.matrix()
+
+colnames(Inject) <-"Power"
+rownames(Inject) <-  get.vertex.attribute(Southwestg, "name")
+
+  xtable(Inject, format = "latex",label = "tab:Inject", caption = "Power balence") %>% 
+    print(., file = file.path(MatricesFolder, "Inject.txt"))
+
+  InjectionVector %>% as.matrix %>%
+PrintLatexMatrix(., "Injmat")
+  
+ LinkLimits <- data_frame(name = get.edge.attribute(Southwestg, "name"), Power = Power[,1], Limits = get.edge.attribute(Southwestg, "Link.Limit")) 
+ 
+ LinkLimits %>% 
+   mutate('Over Limit? ' = Power> Limits) %>%
+   xtable(., format = "latex",label = "tab:PowerRes", caption = "Result of power flow equations") %>% 
+  print(., file = file.path(MatricesFolder, "PowerRes.txt"))
+   
+    
+```
+
+#Implementing net-ability and entropic degree from Bompard et al 2009
+
+The netability score must be calculated using the ORIGINAL number of generator and demand nodes on the network, this is not possible using my current setup as all the nodes that are seperated from the network are removed to reducing the computational complexity.
+
+However as Attack the grid produces a list of all the networks, the data of the original network can be used to calculate the netability of all subsequent networks.
+
+It might be interesting to rank the link limits and then select links by limit rank... or reverse rank?
+```{r}
+PTDF <- C %*% A %*% solve(B)
+Imp <- solve(B)
+ElecDist <- ElectricalDistance(Imp)
+
 InjectionVector <- get.vertex.attribute(Southwestg, "BalencedPower")[get.vertex.attribute(Southwestg, "name")!=SlackRef]
 
-Power <- C %*% A %*% solve(B, InjectionVector)
+CapacityMatrix <- TransferCapacity(Southwestg, PTDF)
+
+  Numerator <- CapacityMatrix/ElecDist
+  
+  Numerator[!is.finite(Numerator)] <- 0
+  
+  Denominator <- sum(InjectionVector>0)*sum(InjectionVector<0)
+  
+  NetAb <- sum(Numerator)/Denominator
+
+
+Net_Ability(Southwestg)
+
+wholgridNet<- Net_Ability(gbase,SlackRef)
+
+test <- ElectricalDistance(gbase)
+
+```
+
+##Implementing Entropic degree
+
+```{r}
+
+EntropicDegree <- function(g, Scale = TRUE){
+  
+  ED <- diversity(g)*strength(g)
+  
+  if(!Scale){
+    ED <- ED * log(degree(g))
+  }
+  
+  return(ED)
+}
+
 
 ```
 
 
-make a non-adaptive  strategy extractor
+#Test various fixed strategies
 ```{r}
 set.seed(15)
-DeleteNodes <- RandomAttack(gbase, Target = "Nodes", Number = vcount(gbase))
+#DeleteNodes <- RandomAttack(gbase, Target = "Nodes", Number = vcount(gbase))
+DeleteNodes <- DegreeAttack(gbase, Number = vcount(g))
+DeleteNodes <- BetweenessAttack(gbase, Target = "Nodes", Number = vcount(gbase))
 DeleteEdges <-RandomAttack(gbase, Target = "Edges", Number = ecount(gbase))
 
 FixedNodes <- quo(FixedStrategyAttack(g, DeleteNodes))
 FixedEdges <- quo(FixedStrategyAttack(g, DeleteEdges, Target = "Edges"))
 
 
-testattack <- AttackTheGrid(list(list(gbase)), FixedNodes, MinMaxComp = 0, TotalAttackRounds = 10, CascadeMode = FALSE) 
+testattack <- AttackTheGrid(list(list(gbase)), FixedNodes, MinMaxComp = 0, TotalAttackRounds = 10, CascadeMode = TRUE) 
 
 
 #extract the number of nodes in the last of each list, precursor to finding the deleted node
-NodesTargeted(testattack)
+NodesTarget, Folder = "worst", filename = "worst"ed(testattack)
 
 ```
 
 
-#delete each node see what happens
+#Delete each node see what happens
 
-This code cycles throug all nodes and edges and measures the effect of the GCfract and PowerGen for a single outage.
+This code cycles through all nodes and edges and measures the effect of the GCfract and PowerGen for a single outage.
 
 ```{r}
 EdgeNodeDeleteion <- c("Nodes", "Edges") %>% map_df(~{
@@ -134,14 +278,20 @@ EdgeNodeDeleteion <- c("Nodes", "Edges") %>% map_df(~{
   }
 )
 
+setwd(basewd)
+saveRDS(EdgeNodeDeleteion, "CheckAllEdgeNodes.rds")
+
 ```
 
 
-#test non cascadeing grid demolition
+#Node collapse
 
 I think that dead islands are a major cause of grid collapse.
 
+In certain cases you can see that edges get removed in cascade even when they are not close to the nodes/edges that were have been removed in the previous iteration, this finding is also seen by yang et al
+
 ```{r}
+set.seed(1234)
 
 input <- c(TRUE,FALSE)
 
@@ -151,7 +301,7 @@ input <- c(TRUE,FALSE)
                            AttackStrategy = RandomAttack,
                            Type = "Fixed",
                            MinMaxComp = 0.0, 
-                           TotalAttackRounds = 30,
+                           TotalAttackRounds = 100,
                            Target = "Nodes",
                            CascadeMode = .x,
                            cores = 7)
@@ -162,7 +312,7 @@ input <- c(TRUE,FALSE)
 
 setwd(basewd)
 saveRDS(Nodesims, "100simulationsRandomAttackto30Nodes.rds")
-#Nodesims <- readRDS( "100simulationsRandomAttackto0005or440.rds" )
+#Nodesims <- readRDS( "100simulationsRandomAttackto30Nodes.rds" )
 
 SummaryofGC <- Nodesims %>%
     modify_depth(., 1, keep, is.data.frame ) %>%
@@ -172,16 +322,18 @@ SummaryofGC <- Nodesims %>%
 
 SummaryofGC %>%
   #filter(ID<50) %>%
-ggplot(aes(x= ID, y = mean, colour = Cascade)) +geom_line() +
+ggplot(aes(x= NodesAttacked, y = mean, colour = Cascade)) +geom_line() +
     geom_ribbon(aes(ymin=GC05, ymax=GC95, fill = Cascade), alpha = 0.3)+
   labs(title = "Largest componant as a % of Original Giant Component\n under different removal regimes" , x = "Number of nodes removed from Grid", y = "Largest component as a % GC")
-
+ggsave(file.path(FiguresFolder, "GCNodeRemoval30.pdf"))
 
 SummaryofGC %>%
-  #  filter(ID<50) %>%set.vertex.attribute(., "OldDegree", value = degree(.))
-ggplot(aes(x= ID, y = mPGfract, colour = Cascade)) +geom_line() +
+  #  filter(ID<50) %>% set.vertex.attribute(., "OldDegree", value = degree(.))
+ggplot(aes(x= NodesAttacked, y = mPGfract, colour = Cascade)) +geom_line() +
       geom_ribbon(aes(ymin=PG05, ymax=PG95, fill = Cascade), alpha = 0.3)+
       labs(title = "Percentage of demand that the grid can meet in current state" , x = "Number of nodes removed from Grid", y = "Total generating capacity as % of demand")
+
+ggsave(file.path(FiguresFolder, "CapacityNodeRemoval30.pdf"))
 
 ```
 
@@ -193,58 +345,49 @@ Need to talk about what is being removed etc where does balance gen go?
 ```{r}
 gc()
 set.seed(1234)
-Edgesims <- 1:2 %>%  map_df(~{
-  
-Bigdf <- data.frame(Nodes = NULL, GCfract = NULL, Simulation = NULL)
 
-for(n in 1:100){
-  
-  #These need to be double assigned so that they are assigned outside the map function. Otherwise only the values in the global environment are used... I don't know why.
-  DeleteNodes <<- RandomAttack(gbase, Target = "Edges", Number = ecount(gbase))
-  FixedNodes <<- quo(FixedStrategyAttack(g, DeleteNodes, Target = "Edges"))
-  
-  sim <- paste0("Simulation_", n)
-  print(sim)
+input <- c(TRUE,FALSE)
 
-  GridList <- suppressMessages(AttackTheGrid(list(list(gbase)), 
-                                             FixedNodes, 
-                                             MinMaxComp = 0.0, #
-                                             TotalAttackRounds = 30, 
-                                             CascadeMode =  c(TRUE,FALSE)[.x])) %>%
-   ExtractNetworkStats(.) %>%
-  mutate( Simulation = n)
-  #To try and prevent crashing
-  gc()
-  
-  Bigdf <- bind_rows(Bigdf, GridList) %>%
-    mutate(Cascade = c(TRUE,FALSE)[.x])
-}
+  Edgesims <- input %>% map(~{ 
+    MonteCarloAttack(gbase, 
+                           simulations = 100,
+                           AttackStrategy = RandomAttack,
+                           Type = "Fixed",
+                           MinMaxComp = 0.0, 
+                           TotalAttackRounds = 100,
+                           Target = "Edges",
+                           CascadeMode = .x,
+                           cores = 7)
+    
 
-return(Bigdf)
-}
-)
-
-
-
-SummaryofGCEdge <-  %>% 
-  SummariseMonteCarlo
+    }
+   ) %>% set_names(paste0("v.", input))
 
 
 setwd(basewd)
 saveRDS(Edgesims,"100simulationsRandomAttackto30Edges.rds")
+#Edgesims <- readRDS("100simulationsRandomAttackto30Edges.rds")
+
+SummaryofGCEdge <- Edgesims %>%
+    modify_depth(., 1, keep, is.data.frame ) %>%
+  flatten %>%
+  bind_rows() %>% 
+  SummariseMonteCarlo
 
 
 SummaryofGCEdge %>%
   filter(ID<150) %>%
-ggplot(aes(x= ID, y = mean, colour = Cascade)) +geom_line() +
+ggplot(aes(x= NodesAttacked, y = mean, colour = Cascade)) +geom_line() +
     geom_ribbon(aes(ymin=GC05, ymax=GC95, fill = Cascade), alpha = 0.3)+
   labs(title = "Largest componant as a % of Original Giant Component\n under different removal regimes" , x = "Number of nodes removed from Grid", y = "Largest component as a % GC")
+ggsave(file.path(FiguresFolder, "GCEdgeRemoval30.pdf"))
 
 
 SummaryofGCEdge %>%
-ggplot(aes(x= ID, y = mPGfract, colour = Cascade)) +geom_line() +
+ggplot(aes(x= NodesAttacked, y = mPGfract, colour = Cascade)) +geom_line() +
       geom_ribbon(aes(ymin=PG05, ymax=PG95, fill = Cascade), alpha = 0.3)+
       labs(title = "Percentage of demand that the grid can meet in current state" , x = "Number of nodes removed from Grid", y = "Total generating capacity as % of demand")
+ggsave(file.path(FiguresFolder, "CapacityEdgeRemoval30.pdf"))
 
 ```
 
@@ -252,35 +395,41 @@ ggplot(aes(x= ID, y = mPGfract, colour = Cascade)) +geom_line() +
 #Analysing worst collapse
 
 ```{r}
-input <- c(FALSE)
 
-  Analysims <- input %>% map(~{ 
-    MonteCarloAttack(gbase, 
-                           simulations = 20,
-                           AttackStrategy = RandomAttack,
-                           Type = "Fixed",
-                           MinMaxComp = 0.0, 
-                           TotalAttackRounds = 10,
-                           Target = "Nodes",
-                           CascadeMode = .x,
-                     cores = 1)
-    
-
-    }
-   ) %>% set_names(paste0("v.", input))
+Analysims <- Nodesims
   
+#Rank the different simulations by order of most extreme
 CollapseRank <- BiggestCollapse(Analysims$v.FALSE$NetData, PowerGen)
 
-FixedNodes <- quo(FixedStrategyAttack(g, Analysims$v.FALSE$AttackedNodes[[5]]))
+#extract the simulation number of the most extreme collapse
+ExtremeSimulation <- CollapseRank$Simulation[which.min(CollapseRank$PowerGen)]
 
-CheckCollapse <- AttackTheGrid(list(list(gbase)), FixedNodes, MinMaxComp = 0, TotalAttackRounds = 30, CascadeMode = FALSE) 
+#Find the nodes removed in the most extreme attack
+ExtremeNodes <- Analysims$v.FALSE$AttackedNodes[[ExtremeSimulation]]
+
+#Resimulate the attack to extract the details
+FixedNodes <- quo(FixedStrategyAttack(g, ExtremeNodes ))
+CheckCollapse <- AttackTheGrid(list(list(gbase)), FixedNodes, MinMaxComp = 0, TotalAttackRounds = length(ExtremeNodes), CascadeMode = TRUE) 
 
 #not sure what to check now but there are two components and about 44 nodes have been lost
 CheckCollapse[[31]][[1]] %>% components()
 
+CheckCollapse[[31]][[1]] %>%
+  get.vertex.attribute(name= "BalencedPower") %>% abs %>% sum(.)/2
+
 #perhaps making a gif would help understand what has happened?
 
+test <-  ExtractNetworkStats(CheckCollapse) 
+ 
+ChangeInNet <- CheckCollapse %>% squash %>% map_dbl(~Net_Ability(.x,gbase))
 
+ test %>%
+   ggplot(aes(x=NodesAttacked, y = Powerfract)) + geom_line()
+
+ CreateCascadeGif(CheckCollapse)
+
+ 
+ 
 ```
 
 
@@ -296,8 +445,13 @@ Output <- AttackTheGrid(list(list(testgraph)),
                                              MinMaxComp = 0, #
                                              TotalAttackRounds = 10, 
                                              CascadeMode =  TRUE)
+giftest <- unlist(CheckCollapse, recursive = F)
+ 
 
- CreateCascadeGif(unlist(Output, recursive = F))
+CascadeList <- giftest
+
+
+CreateCascadeGif(unlist(CheckCollapse, recursive = F))
  
 
 ```

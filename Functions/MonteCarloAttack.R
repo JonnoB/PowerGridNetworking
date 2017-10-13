@@ -3,7 +3,7 @@ MonteCarloAttack <- function(g, simulations = 100,
                              Type ="Fixed", 
                              MinMaxComp, 
                              TotalAttackRounds, 
-                             Target = Nodes, 
+                             Target = "Nodes", 
                              CascadeMode,
                              cores = 1){
   #This function performs a montevcarlo simulation of attack the grid. It out puts a dataframe of graph statistics and the full

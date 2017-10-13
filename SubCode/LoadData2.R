@@ -40,14 +40,15 @@ VertexMetaData <- trans1 %>%
          Bus.Order)
 
 gbase <- trans2 %>%
-  #this mutate is because the base limits cause a rolling blackout due to the below lines being overpowered
-  # mutate(Link.Limit = case_when(
-  #   Link == "BRAC20-BONB20-1" ~826,
-  #   Link == "FAUG10-LAGG1Q-1" ~826,
-  #   Link == "KEIT20-KINT20-1" ~500,
-  #   Link == "LAGG1Q-MILW1S-1" ~826,
-  #   TRUE ~ Link.Limit
-  # )) %>%
+  #"KEIT20-KINT20-1" takes 229 on am more or less arbirary basis, it is a value higher than 203 and 
+  #  there are a relatively large number with that limit. The remaining 3 lines take the voltage median
+  mutate(Link.Limit = case_when(
+    Link == "BRAC20-BONB20-1" ~910,
+    Link == "FAUG10-LAGG1Q-1" ~229,
+    Link == "KEIT20-KINT20-1" ~910,
+    Link == "LAGG1Q-MILW1S-1" ~132,
+    TRUE ~ Link.Limit
+  )) %>%
   select(Bus.1, 
          Bus.2, 
          Y, 
