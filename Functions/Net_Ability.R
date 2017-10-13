@@ -26,15 +26,23 @@ Net_Ability <- function(g, gOrig = NULL){
       
       gsubset <- delete.vertices(g, components(g)$membership != .x)
       
-     CapEdist <- CapacityAndElecdist(gsubset, SlackRef$name)
-
-     Numerator <- CapacityMatrix/ElecDist
-     
-     Numerator[!is.finite(Numerator)] <- 0
-     
-     Numerator <-sum(Numerator)
-     
-     return(Numerator)
+      lemma <- ImpPTDF(gsubset, SlackRef$name)
+      
+      message("Calculating the electrical distance") #these two can take a long time so a message is given
+      
+      ElecDist <- ElectricalDistance(lemma$Imp)
+      
+      message("Calculating the Capacity Matrix")
+      
+      CapacityMatrix <- TransferCapacity(gsubset, lemma$PTDF) 
+      
+      Numerator <- CapacityMatrix/ElecDist
+      
+      Numerator[!is.finite(Numerator)] <- 0
+      
+      Numerator <-sum(Numerator)
+      
+      return(Numerator)
      
     }) %>%
     unlist %>% 

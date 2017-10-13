@@ -67,7 +67,8 @@ gbase <- set.edge.attribute(graph = gbase, name = "Link",
                               mutate(Link = paste(V1, V2, 1:n(),sep = "-")) %>% #This allows multiple edges 
                               ungroup %>% .$Link
 )
-gbase <- set.edge.attribute(gbase, "name", value = get.edge.attribute(gbase, "Link"))
+gbase <- set.edge.attribute(gbase, "name", value = get.edge.attribute(gbase, "Link")) %>%
+  set.edge.attribute(., "weight", value = get.edge.attribute(gbase, "Link.Limit"))
 
 
 #If the voltage of the from node is equal to the voltage of the two node then the line voltage is also the same, otherwise the line is a transformer and the voltage is 0

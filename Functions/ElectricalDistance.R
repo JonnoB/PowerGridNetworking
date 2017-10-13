@@ -4,10 +4,15 @@ ElectricalDistance <- function(Imp){
   #Imp: the impedance matrix of the network
   
   nums  <- ncol(Imp)
-  Combos <- expand.grid(1:nums, 1:nums)
-  Z <-  map2_dbl(.x = Combos$Var1, .y = Combos$Var2, ~Imp[.x,.x] + Imp[.y,.y] -2*Imp[.x,.y]) %>%
-    matrix(., nrow = nrow(Imp))
+  Combos <-as.matrix( expand.grid(1:nums, 1:nums))
+  
+  Z<- Imp
+  Z[] <- Imp[cbind(Combos[,1], Combos[,1])] + Imp[cbind(Combos[,2], Combos[,2])] -2*Imp[Combos]
+  
+
+
   
   return(Z)
   
 }
+

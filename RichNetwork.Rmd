@@ -15,8 +15,10 @@ The goal of this script is to create graph objects that contain all the necessar
 The hope is that this will make the processes and code more simple and easier to understand
 
 
-Get attack lists. check the extreme ends
-re-order grid balancing
+This work is simmilar to Wang et al "An Electrical Betweenness approach for vulnerability assement of power grids considering the capacity of generators and load"
+
+Changing the assement metrix to loss of load and removing 20% of nodes e.g about 200.
+
 
 
 
@@ -119,7 +121,6 @@ InjectionVector <- get.vertex.attribute(Southwestg, "BalencedPower")[get.vertex.
 
 Power <- C %*% A %*% solve(B, InjectionVector) %>% round(.,1)
 
-
 PrintLatexMatrix <- function(df, name, Folder = MatricesFolder){
   xtable(df,align=rep("",ncol(df)+1)) %>%
   print(., file = file.path(Folder, paste0(name, ".txt")), floating=FALSE, tabular.environment="bmatrix", 
@@ -204,31 +205,15 @@ test <- ElectricalDistance(gbase)
 
 ```
 
-##Implementing Entropic degree
-
-```{r}
-
-EntropicDegree <- function(g, Scale = TRUE){
-  
-  ED <- diversity(g)*strength(g)
-  
-  if(!Scale){
-    ED <- ED * log(degree(g))
-  }
-  
-  return(ED)
-}
-
-
-```
-
 
 #Test various fixed strategies
 ```{r}
 set.seed(15)
-#DeleteNodes <- RandomAttack(gbase, Target = "Nodes", Number = vcount(gbase))
-DeleteNodes <- DegreeAttack(gbase, Number = vcount(g))
+DeleteNodes <- RandomAttack(gbase, Target = "Nodes", Number = vcount(gbase))
+DeleteNodes <- DegreeAttack(gbase, Number = vcount(gbase))
 DeleteNodes <- BetweenessAttack(gbase, Target = "Nodes", Number = vcount(gbase))
+DeleteNodes <- EntropicDegreeAttack(gbase, Target = "Nodes", Number = vcount(gbase))
+
 DeleteEdges <-RandomAttack(gbase, Target = "Edges", Number = ecount(gbase))
 
 FixedNodes <- quo(FixedStrategyAttack(g, DeleteNodes))
@@ -236,10 +221,52 @@ FixedEdges <- quo(FixedStrategyAttack(g, DeleteEdges, Target = "Edges"))
 
 
 testattack <- AttackTheGrid(list(list(gbase)), FixedNodes, MinMaxComp = 0, TotalAttackRounds = 10, CascadeMode = TRUE) 
-
+ExtractNetworkStats(testattack)
 
 #extract the number of nodes in the last of each list, precursor to finding the deleted node
-NodesTarget, Folder = "worst", filename = "worst"ed(testattack)
+ NodesTargeted(testattack)
+
+```
+
+
+```{r}
+#going to add on a new node then remove it as the slackbuss
+
+g <- Southwestg
+SlackRef <-  "LAND4A"
+
+testg <- add_vertices(Southwestg, 1, name = "Slack", Demand = 50, Generation = 0, BalencedPower = -50) %>%
+  add_edges(c(1, vcount(.), 2, vcount(.))) %>%
+  BalencedGenDem(., "Demand", "Generation")
+
+test <- ImpPTDF(g, SlackRef)
+
+a <-ElectricalDistance(test$Imp)
+
+rank.a <- a
+rank.a[] <- rank(-a, ties.method = "random")
+colnames(rank.a) <- rownames(rank.a)<- get.vertex.attribute(g)$name[get.vertex.attribute(g)$name!=SlackRef ]
+
+adjmat <- rank.a <=ecount(g)
+g2 <-a * adjmat 
+
+g2 <- graph_from_adjacency_matrix(g2, weighted = TRUE , mode = "undirected") 
+
+betweenness(g2) %>% density %>% plot
+
+data_frame(name = get.vertex.attribute(g2, "name"), betweeness = betweenness(g2)) %>%
+  arrange(desc(betweeness))
+
+delete.vertices(simplify(g2), degree(g2)==0) %>% betweenness %>% table
+
+g3 <- BalencedGenDem(g2, "Demand", "Generation")
+
+g2 %>% plot
+
+a1 <- a
+rank.a1 <- rank.a
+
+
 
 ```
 
@@ -451,7 +478,7 @@ giftest <- unlist(CheckCollapse, recursive = F)
 CascadeList <- giftest
 
 
-CreateCascadeGif(unlist(CheckCollapse, recursive = F))
+CreateCascadeGif(CheckCollapse)
  
 
 ```
