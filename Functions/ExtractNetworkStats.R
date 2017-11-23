@@ -15,8 +15,8 @@ ExtractNetworkStats <- function( NetworkList){
   }
    ) %>%
     mutate(NodesAttacked = 0:(n()-1),
-           GCfract = MaxComp/max(TotalNodes),
-           Powerfract = PowerGen/max(PowerGen)
+           GCfract = (max(TotalNodes) - MaxComp)/max(TotalNodes),
+           Powerfract = (max(PowerGen) - PowerGen)/max(PowerGen)
            )
   
 }
