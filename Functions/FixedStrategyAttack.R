@@ -1,6 +1,6 @@
 FixedStrategyAttack <- function(g, DeletionOrder, Target = "Nodes", Number = 1){
-  #This function is used for fixed strategy attacks. It takes as an argument the grid in it's current configuration
-  #and delets the next available target on the DeletionOrder vector
+  #This function is used for fixed strategy attacks. It takes as an argument a graph g
+  #and deletes the next available target on the DeletionOrder vector, it outputs a graph g2
   #g: network, an Igraph object
   #DeletionOrder: acharacter vector with the target names in order of deletion
   #Target: an optional string the type of Target is either "Nodes" or Edges"

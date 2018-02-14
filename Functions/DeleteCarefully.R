@@ -1,6 +1,6 @@
 DeleteCarefully <- function(g, Target, DeleteVect, Number){
-  #This is a helper fucntion for the FIxed and adaptive strategies. It deletes nodes/edges without trying to delete more nodes/edges
-  #Than there are, it is a bit long and fiddly so is broken out for ease of maintenance.
+  #This is a helper fucntion for the Fixed and Adaptive strategies. It deletes nodes/edges without trying to delete more nodes/edges
+  #than there are in the graph. It is a bit long and fiddly so is broken out for ease of maintenance.
   #It takes in a graph and out puts a smaller graph
   #g: the graph that is going to be modified
   #Target: whether Nodes or Edges are being targeted.
@@ -24,7 +24,7 @@ DeleteCarefully <- function(g, Target, DeleteVect, Number){
     #remove selected node from network
     g2 <- delete.vertices(g, deletetarget)    
     
-  } else {
+  } else { #if nodes aren't being deleted logically edges are being deleted
     
     if(ecount(g) > Number ){
       deletetarget <- DeleteVect[1:Number]
@@ -42,6 +42,9 @@ DeleteCarefully <- function(g, Target, DeleteVect, Number){
   }
   
   message(paste("Delete", Target, deletetarget))
+
+  #add a graph attribute that names the deleted node.this makes it possible to track what was deleted and what overloaded  
+ g2 <- set.graph.attribute(g2, "Removed", deletetarget)
   
   return(g2)
   

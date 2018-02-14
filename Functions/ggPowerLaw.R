@@ -1,8 +1,12 @@
 ggPowerLaw<- function(df){
   #takes a dataframe of two columns. One column is a numeric that contains the graph metric to be plotted as a 
-  #power law graph. the other column names the metric. multiple metrixa can be included in a single dataframe
+  #power law graph. the other column names the metric. multiple metrics can be included in a single dataframe
   #and will be plotted with thier own curve.
   #df: data frame with two columns called "values" and "metric"
+  
+  #Does not work if the columns don't have the right names!
+
+  
   
  PowerInfo <- unique(df$metric) %>%
     map(~{

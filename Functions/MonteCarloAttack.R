@@ -62,9 +62,10 @@ MonteCarloAttack <- function(g, simulations = 100,
                              ExtractNetworkStats(.) %>%
                              mutate( Simulation = n)
                       
-                          NodesAttacked <- NodesTargeted(GridList, DeleteNodes)
+                          NodesAttacked <- NodesTargeted(GridList)
                            
-                          list(NetStats = Netstats , NodesTargeted = NodesAttacked)}
+                          list(NetStats = Netstats , NodesTargeted = NodesAttacked)
+                          }
                            )
   
   if(cores ==1 ){
@@ -76,8 +77,8 @@ MonteCarloAttack <- function(g, simulations = 100,
   } else{
     print(cores)
     registerDoMC(cores) 
-    Outlist <- foreach(n = 1:simulations) %dopar% {
-       eval_tidy( InsideForLoop, data = list(n=n))
+    Outlist <- foreach(iter = 1:simulations) %dopar% {
+       eval_tidy( InsideForLoop, data = list(n=iter))
     }
     
     

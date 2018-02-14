@@ -11,12 +11,13 @@ ExtractNetworkStats <- function( NetworkList){
     data.frame(MaxComp = components(g)$csize %>% max,
                TotalNodes = vcount(g),
                TotalEdges = ecount(g),
-               PowerGen = sum(abs(get.vertex.attribute(g, "BalencedPower"))/2))
+               PowerGen = sum(abs(get.vertex.attribute(g, "BalencedPower"))/2),
+               GridLoading = mean(LoadLevel(g)$LineLoading))
   }
    ) %>%
     mutate(NodesAttacked = 0:(n()-1),
            GCfract = (max(TotalNodes) - MaxComp)/max(TotalNodes),
-           Powerfract = (max(PowerGen) - PowerGen)/max(PowerGen)
+           Blackout = (max(PowerGen) - PowerGen)/max(PowerGen)
            )
   
 }

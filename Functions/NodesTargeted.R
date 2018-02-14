@@ -1,32 +1,11 @@
-NodesTargeted <-function(NetworkList, DeleteNodes){
-  #extracts the nodes deleted accounting for the fact that the deletion order may be messed up due to cascades
+NodesTargeted <-function(NetworkList){
+  #Gets the name of the deleted target node/edge from the named attribute in each attack list.
   #Networklist: a list of lists of networks. The output of Attack the grid
-  #DeleteNodes: The order in which nodes will be deleted
-  
-  AllremovedNodes <- NetworkList %>%
-    map2(.x =., 
-         .y = map_dbl(.x = ., .f =length), 
-         ~ {
-           V(.x[[.y]])$name # extract names in each graph
-         } ) 
 
-  Out <- AllremovedNodes %>%
-    length(.) %>% 2:. %>% 
-    map_chr(~{
-      
-      
-      DiffBetweenSteps <- !(AllremovedNodes[[.x-1]] %in% AllremovedNodes[.x])
-      
-      remainingNodes <- DeleteNodes %>%
-        data_frame(Nodes = .) %>%
-        mutate(order = 1:n()) %>%
-        filter(Nodes %in% AllremovedNodes[[.x-1]][DiffBetweenSteps ])
-      
-      remainingNodes$Nodes[1]
-      
-    }
-    )
-  
+  Out <- NetworkList %>% 
+    map(~ get.graph.attribute(.x[[1]], "Removed")) %>% 
+    unlist(.) %>% 
+    c("None", .) #adds on the first element where there was nothing deleted.
   return(Out)
   
 }
