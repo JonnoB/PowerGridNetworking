@@ -7,6 +7,10 @@
 #' @param g the netowrk which is being attacked
 #' @param Nodes the Number of Nodes to Remove
 #' @param seed the random number generator to use. This is optional
+#' @keywords
+#' @export
+#' @examples
+#' AdaptiveStrategyAttack <- function(g, AttackStrategy, Target = "Nodes", Number = 1)
 
 #Set the environment of the Attack strategy to inside the function so that the correct g is used
 
