@@ -4,9 +4,9 @@
 #'     This means that it will be re-evaluated every
 #'     round to choose the most effective point of attack
 #'     according to that metric
-#' @param g the netowrk which is being attacked
+#' @param g the network which is being attacked
 #' @param Nodes the Number of Nodes to Remove
-#' @param seed the random number generator to use. This is optional
+#' @param seed the random number generator seed to use. This is optional
 #' @keywords
 #' @export
 #' @examples
