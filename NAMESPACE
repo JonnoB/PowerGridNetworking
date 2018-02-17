@@ -2,5 +2,12 @@
 
 export(AdaptiveStrategyAttack)
 export(AttackTheGrid)
+export(BalencedGenDem)
 export(GenerateAttackOrder)
+export(ImpPTDF)
+export(LoadLevel)
 export(MultiAttackOrder)
+export(PowerFlow)
+export(RandomAttack)
+export(SaveMultiAttacks)
+export(union2)

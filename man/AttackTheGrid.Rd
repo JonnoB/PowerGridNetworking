@@ -24,3 +24,6 @@ AttackTheGrid(NetworkList, AttackStrategy, SubstationData, EdgeData,
 This function simulates an attack on the power grid using the parameter settings you choose
    the outut of the function is a nested list of igraph objects.
 }
+\examples{
+AttackTheGrid(NetworkList, AttackStrategy, SubstationData, EdgeData, referenceGrid = NULL, MinMaxComp = 0.8)
+}
