@@ -4,10 +4,11 @@
 #'     This means that it will be re-evaluated every
 #'     round to choose the most effective point of attack
 #'     according to that metric
-#' @param g the network which is being attacked
-#' @param Nodes the Number of Nodes to Remove
-#' @param seed the random number generator seed to use. This is optional
-#' @keywords
+#' @param g The network which is being attacked
+#' @param Nodes The Number of Nodes to Remove
+#' @param seed The random number generator seed to use. This is optional
+#' @param Number The Number of targets to generate
+#' @keywords removal regime
 #' @export
 #' @examples
 #' AdaptiveStrategyAttack <- function(g, AttackStrategy, Target = "Nodes", Number = 1)

@@ -11,7 +11,7 @@
 #' @keywords
 #' @export
 #' @examples
-#' AttackTheGrid(NetworkList, AttackStrategy, SubstationData, EdgeData, referenceGrid = NULL, MinMaxComp = 0.8){
+#' AttackTheGrid(NetworkList, AttackStrategy, SubstationData, EdgeData, referenceGrid = NULL, MinMaxComp = 0.8)
 
 AttackTheGrid <- function(NetworkList, AttackStrategy, SubstationData, EdgeData, referenceGrid = NULL, MinMaxComp = 0.8){
   #This function attacks the grid using a given attack strategy

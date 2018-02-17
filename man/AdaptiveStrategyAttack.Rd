@@ -7,11 +7,13 @@
 AdaptiveStrategyAttack(g, AttackStrategy, Target = "Nodes", Number = 1)
 }
 \arguments{
-\item{g}{the netowrk which is being attacked}
+\item{g}{The network which is being attacked}
 
-\item{Nodes}{the Number of Nodes to Remove}
+\item{Number}{The Number of targets to generate}
 
-\item{seed}{the random number generator to use. This is optional}
+\item{Nodes}{The Number of Nodes to Remove}
+
+\item{seed}{The random number generator seed to use. This is optional}
 }
 \description{
 This implements an attack strategy to be adaptive.
@@ -22,3 +24,5 @@ This implements an attack strategy to be adaptive.
 \examples{
 AdaptiveStrategyAttack <- function(g, AttackStrategy, Target = "Nodes", Number = 1)
 }
+\keyword{regime}
+\keyword{removal}
