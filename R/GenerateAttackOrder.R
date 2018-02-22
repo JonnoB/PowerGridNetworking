@@ -1,9 +1,11 @@
 #' Generate Attack order in multiple simulations
 #'
 #' Takes the output from the 'MultiAttackOrder' function and produces an attack vector of the next simulation to be run
-#' The function is used when a large number of simulations are being run and saved to a folder for reuse.
+#'    The function is used when a large number of simulations are being run and saved to a folder for reuse.
+#'    This function is usally only used as part of \code{\link{SaveMultiAttacks}}
+#'
 #' @param SimOrder The dataframe produced by the MultiAttackOrder
-#' @param foler the folder that the attack simuations are being saved to
+#' @param folder the folder that the attack simuations are being saved to
 #' @keywords
 #' @export
 #' @seealso MultiAttackOrder
