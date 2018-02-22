@@ -1,3 +1,12 @@
+#' Find which edges are over the limit
+#'
+#'This function checks to see which lines are over limit and removes them and re-calculates power flow in the network
+#'
+#'The function uses a node attribute "Bus.Order" to identify the slack bus. This may be changed in later versions
+#'
+#' @param g An igraph object that represents a power-grid
+#' @export
+
 CalcOverLimit <- function(g){
   #This function calculates which edges are over the limit for the current network configuration and demand
   #production profile.
@@ -13,26 +22,28 @@ CalcOverLimit <- function(g){
               Nodes = n())
 
   #Calculate power flow for each component of the network as seperate networks
-  gOut <- 1:nrow(SlackRefCasc) %>%
+  gList <- 1:nrow(SlackRefCasc) %>%
     map(~{
-      
+
       #print(paste("PowerFlow for componant", .x))
-      
+
       SlackRef <- SlackRefCasc %>% slice(.x)
-      
+
       gsubset <- delete.vertices(g, components(g)$membership != .x)
-      
+
       if(SlackRef$Nodes > 1){
-        
+
         gsubset <- PowerFlow(gsubset, SlackRef$name)
       }
-      
+
       gsubset
 
-    }) %>%
-    Reduce(union2, .)
+    })
 
-    
+  gOut <- gList %>%
+   Reduce(union2, .)
+
+
   return(gOut)
 
 }

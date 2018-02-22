@@ -9,11 +9,12 @@ GenerateAttackOrder(SimOrder, folder)
 \arguments{
 \item{SimOrder}{The dataframe produced by the MultiAttackOrder}
 
-\item{foler}{the folder that the attack simuations are being saved to}
+\item{folder}{the folder that the attack simuations are being saved to}
 }
 \description{
 Takes the output from the 'MultiAttackOrder' function and produces an attack vector of the next simulation to be run
-The function is used when a large number of simulations are being run and saved to a folder for reuse.
+   The function is used when a large number of simulations are being run and saved to a folder for reuse.
+   This function is usally only used as part of \code{\link{SaveMultiAttacks}}
 }
 \examples{
 GenerateAttackOrder(SimOrder, folder)

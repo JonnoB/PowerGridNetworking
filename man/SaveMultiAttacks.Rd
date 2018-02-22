@@ -23,13 +23,13 @@ recorded.}
 \item{CascadeMode}{See AttackTheGrid. Default is set to FALSE}
 }
 \description{
-When creating many attack simulations it can be conveniant to save the resulting graphs to a folder 
-   so that re-runs are not required if further analysis is needed. This function saves the 
+When creating many attack simulations it can be conveniant to save the resulting graphs to a folder
+   so that re-runs are not required if further analysis is needed. This function saves the
    results of AttackTheGrid, and also allows the process to be interrupted.
-   When the process is started again after and interuption the function finds the last 
+   When the process is started again after and interuption the function finds the last
    save attack and starts the simulation process from there.
 }
 \seealso{
-\code{\link{AttackTheGrid}},\code{\link{MultiAttackOrder}}
+\code{\link{AttackTheGrid}}, \code{\link{MultiAttackOrder}}
 }
 \keyword{multi-attack,}

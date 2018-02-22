@@ -4,21 +4,27 @@
 \alias{AttackTheGrid}
 \title{Initiate power-grid attack simulation}
 \usage{
-AttackTheGrid(NetworkList, AttackStrategy, SubstationData, EdgeData,
-  referenceGrid = NULL, MinMaxComp = 0.8)
+AttackTheGrid(NetworkList, AttackStrategy, referenceGrid = NULL,
+  MinMaxComp = 0.8, TotalAttackRounds = 100, CascadeMode = TRUE,
+  CumulativeAttacks = NULL)
 }
 \arguments{
-\item{NetworkList}{a list of lists of networks, when initiating the attack use list(list(g))}
+\item{NetworkList}{A list of lists where each element of the sub list is an igraph object, the first time it is used the
+the network list is simply list(list(g)).}
 
-\item{AttackStrategy}{A function that calculates which node to delete the function is is in "quo" form}
+\item{AttackStrategy}{A function that calculates which node to delete the function is is in "quo" form and embedded in an
+attack type.}
 
-\item{SubstationData}{Dataframe that contains data on the susbtations}
+\item{referenceGrid}{The grid that will be used to test the largest component against if NULL it uses the given network.}
 
-\item{EdgeData}{Data frame of Edge data for the network.}
+\item{MinMaxComp}{The minimum size of the maximum component, as a fraction, for the process to continue, the default is set
+to 0.8.}
 
-\item{referenceGrid}{the grid that will be used to test the largest component against if NULL it uses the given network}
+\item{TotalAttackRounds}{The maximum number of nodes to be removed before the process stops.}
 
-\item{MinMaxComp}{The minimum size of the maximum component for the process to continue}
+\item{CascadeMode}{Whether the power flow equations will be used to check line-overloading or not.}
+
+\item{CumulativeAttacks}{The total number of attacks that have taken place so far.}
 }
 \description{
 This function simulates an attack on the power grid using the parameter settings you choose
@@ -26,4 +32,11 @@ This function simulates an attack on the power grid using the parameter settings
 }
 \examples{
 AttackTheGrid(NetworkList, AttackStrategy, SubstationData, EdgeData, referenceGrid = NULL, MinMaxComp = 0.8)
+Out <- AttackTheGrid(NetworkList,
+AttackStrategy,
+referenceGrid = NULL,
+MinMaxComp = 0.8,
+TotalAttackRounds=100,
+CascadeMode = TRUE,
+CumulativeAttacks = NULL)
 }

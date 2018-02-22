@@ -9,7 +9,7 @@ union2(g1, g2)
 \arguments{
 \item{g1}{Igraph object}
 
-\item{g1}{Igraph object}
+\item{g2}{Igraph object}
 }
 \value{
 A new graph object
@@ -22,11 +22,6 @@ This function is an upgrade to the \pkg{igraph} function "union".
    It creates the union of two networks, and merges attributes with the same name.
    In the original union the graph attributes were lost.
    In the case where there are overlapping nodes the attributes of g1 take precedence
-}
-\examples{
-union2(g1,g2)
-Reduce(union2, list(g1,g2,g3))
-
 }
 \seealso{
 \code{\link[igraph]{union.igraph}}

@@ -9,16 +9,17 @@
 #'
 #' @return A new graph object
 #' @param g1 Igraph object
-#' @param g1 Igraph object
+#' @param g2 Igraph object
 #' @seealso \code{\link[igraph]{union.igraph}}
 #' @export
-#' @examples
+#' @example
 #' union2(g1,g2)
 #' Reduce(union2, list(g1,g2,g3))
 #'
 union2<-function(g1, g2){
 
-    g <- union(g1, g2)
+  #The explicit igraph function needed to be included as it was being overwritten by other functions causing an error
+    g <- igraph::union(g1, g2)
 
 #Looks to see which attributes need cleaning
 CleanEdgeAttr <- get.edge.attribute(g) %>% names() %>% grepl("(_\\d)$", . )
@@ -29,7 +30,6 @@ EdgeNames  <- get.edge.attribute(g) %>% names() %>% gsub("(_\\d)$", "", .)
 CleanVertexAttr <- get.vertex.attribute(g) %>% names() %>% grepl("(_\\d)$", . )
 
 VertexNames  <- get.vertex.attribute(g) %>% names() %>% gsub("(_\\d)$", "", .)
-
 
 #Clean up Edges
 for( i in unique(EdgeNames[CleanEdgeAttr])){
