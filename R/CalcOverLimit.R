@@ -21,6 +21,7 @@ CalcOverLimit <- function(g){
     summarise(name = first(name),
               Nodes = n())
 
+  print(paste("Total network components ", nrow(SlackRefCasc)))
   #Calculate power flow for each component of the network as seperate networks
   gList <- 1:nrow(SlackRefCasc) %>%
     map(~{
