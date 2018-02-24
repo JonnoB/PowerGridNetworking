@@ -57,7 +57,7 @@ AttackTheGrid <- function(NetworkList,
 
     if(CascadeMode){
       #this returns a list of networks each of the cascade
-      gCasc <- Cascade(gCasc)
+      gCasc <- Cascade(gCasc, g0 = g)
     }
 
     message(paste("Attack ",CumulativeAttacks, " Nodes Remaining", vcount(gCasc[[length(gCasc)]])))

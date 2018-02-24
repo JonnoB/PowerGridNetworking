@@ -31,6 +31,11 @@ CleanVertexAttr <- get.vertex.attribute(g) %>% names() %>% grepl("(_\\d)$", . )
 
 VertexNames  <- get.vertex.attribute(g) %>% names() %>% gsub("(_\\d)$", "", .)
 
+#Looks to see which attributes need cleaning
+CleanGraphAttr <- get.graph.attribute(g) %>% names() %>% grepl("(_\\d)$", . )
+
+GraphNames  <- get.graph.attribute(g) %>% names() %>% gsub("(_\\d)$", "", .)
+
 #Clean up Edges
 for( i in unique(EdgeNames[CleanEdgeAttr])){
 
@@ -54,6 +59,19 @@ for( i in unique(VertexNames[CleanVertexAttr])){
 
   g <- remove.vertex.attribute(g, paste0(i, "_1"))
   g <- remove.vertex.attribute(g, paste0(i, "_2"))
+
+}
+
+#Clean up graph attributes
+for( i in unique(GraphNames[CleanGraphAttr])){
+
+  attr1 <- get.graph.attribute(g, paste0(i, "_1"))
+  attr2 <- get.graph.attribute(g, paste0(i, "_2"))
+
+  g <- set.graph.attribute(g, i, value = ifelse(is.na(attr1), attr2, attr1))
+
+  g <- remove.graph.attribute(g, paste0(i, "_1"))
+  g <- remove.graph.attribute(g, paste0(i, "_2"))
 
 }
 

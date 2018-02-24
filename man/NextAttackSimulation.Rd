@@ -6,14 +6,16 @@
 \usage{
 NextAttackSimulation(SimOrder, folder)
 }
+\arguments{
+\item{SimOrder}{The output dataframe of MultiAttackOrder}
+
+\item{folder}{The folder where the attack simulations are saved}
+}
 \description{
 When multiple attack simulations are being performed the operation can be interrupted.
   This function searches the folder where the simulations are being stored and returns
-  the next attack simulation. 
-  @param SimOrder The output dataframe of MultiAttackOrder
-  @param folder The folder where the attack simulations are saved
-  @export
-  @seealso MultiAttackOrder
-  @example 
-  NextAttackSimulation(SimOrder, folder)
+  the next attack simulation.
+}
+\seealso{
+MultiAttackOrder
 }

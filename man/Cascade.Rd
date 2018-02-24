@@ -4,7 +4,7 @@
 \alias{Cascade}
 \title{Calculate the effects of a cascade}
 \usage{
-Cascade(NetworkList, Iteration = 0, StopCascade = Inf)
+Cascade(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL)
 }
 \arguments{
 \item{NetworkList}{A list of power-grid networks.}

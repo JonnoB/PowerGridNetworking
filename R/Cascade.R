@@ -11,7 +11,14 @@
 #' @export
 #' @seealso \code{\link{AttackTheGrid}}
 
-Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf){
+############
+
+#Remove the cascade2 from the recurseive process at the bottom!
+
+
+##########
+
+Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL){
   #This Function iterates through the network removing edges until there are no further overpower edges to remove
   #This function uses the Bus order to choose the slack reference should this be changed?
   #Iteration: the number of iteration number of the cascade, used to keep track of what is going on
@@ -19,27 +26,47 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf){
   g <- NetworkList[[length(NetworkList)]]
 
   Iteration <- Iteration + 1
-  #print(paste("Cascade Iteration", Iteration))
+  print(paste("Using previous graph", !is.null(g0)))
 
-  g2 <- CalcOverLimit(g)
+  #if graph comparison is being used then the process starts here.
+  #This stops needless subgraphs being recalculated then joined.
+  #The rejoining process is slow so this speeds it up
+  if(!is.null(g0)){
+    #find components that need to be recalculuated
+    RecalcFlow <- (1:components(g)$no)[Components_differ(g, g0)]
+    #create a subgraph of elements that do not need to be recalculated
+    gNochange <- delete.vertices(g, (1:vcount(g))[components(g)$membership %in% RecalcFlow])
+    #create a subgraph of parts that do need to be recalculated
+    g <- delete.vertices(g,( 1:vcount(g))[!(components(g)$membership %in% RecalcFlow)])
+    print(paste("components changed since previous", paste(RecalcFlow, collapse = ",")))
+  }
+
+
+  g <- CalcOverLimit(g)
+
+
+  if(!is.null(g0)){
+    print("Joining pre and post")
+    g <- union2(gNochange, g)
+    print("Join complete")
+  }
 
   #Delete Edges that are over the Limit
 
-  DeleteEdges <- as_data_frame(g2) %>%
+  DeleteEdges <- as_data_frame(g) %>%
     mutate(index = 1:n(),
            Over.Limit = abs(PowerFlow) > Link.Limit) %>%
     filter(Over.Limit)
 
-  g2 <- delete.edges(g2, DeleteEdges$index)
+  #g us structurally changed here and becomes g2
+  g2 <- delete.edges(g, DeleteEdges$index)
 
   #Balence grid after over powered lines and edges are removed
   g2 <- BalencedGenDem(g2, "Demand", "Generation")
 
-  #checks the initial network and the final network are equal.
-  #If they are not equal then a vector of each element of the graph object is returned, showing which
-  #parts are equal and which are not. If the vector is longer than 1 then it they are not equal
-  #If the list is only 1 long and is FALSE then it is also FALSE
-  edgesequal <- all_equal(get.edgelist(g), get.edgelist(g2))
+  #Checks to see if there are any changes in the edges of the network by component.
+  #If all the edges are the same returns TRUE
+  edgesequal <- all(!Components_differ(g2,g))
 
   #Checking there are edges left prevents trying to find a component in the Slackref and throwing an error.
   CascadeContinues <- !isTRUE(edgesequal)
@@ -48,7 +75,7 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf){
     #add the new network into the list
     NetworkList <- c(NetworkList, list(g2))
     #update the list with the new lists created in the cascade
-    NetworkList <- Cascade(NetworkList, Iteration, StopCascade)
+    NetworkList <- Cascade(NetworkList, Iteration, StopCascade, g0 = g)
   }
 
   print(paste("Cascade has completed with", Iteration, "iterations"))

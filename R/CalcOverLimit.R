@@ -22,6 +22,10 @@ CalcOverLimit <- function(g){
               Nodes = n())
 
   print(paste("Total network components ", nrow(SlackRefCasc)))
+
+
+  #Sometimes the Slackref df has 0 rows throwing an errors. so this code prevents that
+  if(nrow(SlackRefCasc)!=0){
   #Calculate power flow for each component of the network as seperate networks
   gList <- 1:nrow(SlackRefCasc) %>%
     map(~{
@@ -43,7 +47,10 @@ CalcOverLimit <- function(g){
 
   gOut <- gList %>%
    Reduce(union2, .)
-
+} else
+{
+  gOut <- g
+}
 
   return(gOut)
 
