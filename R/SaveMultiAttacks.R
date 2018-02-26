@@ -33,6 +33,8 @@ SaveMultiAttacks <- function(g, AttackVectors, folder, MinMaxComp = 0, TotalAtta
     AttackSeries <- AttackTheGrid(list(list(g)), FixedNodes, referenceGrid = NULL, MinMaxComp, TotalAttackRounds, CascadeMode)
 
     saveRDS(AttackSeries, file = file.path(folder, paste0(NextSim, ".rds")))
+    rm(AttackSeries)
+    gc()
   }
   )
 }
