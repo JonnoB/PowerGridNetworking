@@ -64,7 +64,7 @@ AttackTheGrid <- function(NetworkList,
 
   } else{
 
-    message("Grid completely collapsed continuing until stop conditions met")
+    message("Grid collapsed simulation complete")
 
   }
 
@@ -89,7 +89,7 @@ AttackTheGrid <- function(NetworkList,
 
   FractGC <-ifelse(is.finite(MaxComp),MaxComp/vcount(referenceGrid), 0)
 
-  if( !(FractGC < MinMaxComp | length(NetworkList2)-1==TotalAttackRounds) ){
+  if( !(FractGC < MinMaxComp | length(NetworkList2)-1==TotalAttackRounds| GridCollapsed) ){
     NetworkList2 <- AttackTheGrid(NetworkList = NetworkList2,
                                   AttackStrategy,
                                   referenceGrid = referenceGrid,

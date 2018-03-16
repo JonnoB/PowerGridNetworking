@@ -8,7 +8,7 @@
 #' @param folder the folder that the attack simuations are being saved to
 #' @keywords
 #' @export
-#' @seealso MultiAttackOrder
+#' @seealso \code{\link{MultiAttackOrder}}
 #' @examples
 #' GenerateAttackOrder(SimOrder, folder)
 
