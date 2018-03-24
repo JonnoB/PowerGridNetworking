@@ -2,11 +2,11 @@
 #'
 #' When multiple attack simulations are being performed the operation can be interrupted.
 #'   This function searches the folder where the simulations are being stored and returns
-#'   the next attack simulation.
+#'   the next attack simulation. This function is mostly only used as part of the MultiAttack function
 #' @param SimOrder The output dataframe of MultiAttackOrder
 #' @param folder The folder where the attack simulations are saved
 #' @export
-#' @seealso MultiAttackOrder
+#' @seealso \code{\link{MultiAttackOrder}}, \code{\link{MultiAttack}}
 #' @example
 #'   NextAttackSimulation(SimOrder, folder)
 #'

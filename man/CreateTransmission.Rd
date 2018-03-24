@@ -6,6 +6,11 @@
 \usage{
 CreateTransmission(g, Edgename)
 }
+\arguments{
+\item{g}{an igraph object with attribute of named edges. This is an igraph object}
+
+\item{Edgename}{The attribute name of the edges. This is a string}
+}
 \description{
 This function creates the transmission matrix between the edges and the In and Out Nodes
 }
@@ -14,11 +19,7 @@ The function follows the method described in Pepyne 2007.
    It takes a graph an ouputs a matrix which has -1,0-1 values which describe the nominal direction of flow.
    The function is typically used in conjunction with the LinePropertiesMatrix function. The function
    is a key part of calculating ImpPTDF.
-
-@param g an igraph object with attribute of named edges. This is an igraph object
- @param Edgename The attribute name of the edges. This is a string
- @export
- @seealso \code{\link{LinePropertiesMatrix}} \code{\link{ImpPTDF}}
- @example
- CreateTransmission(g, "Edgename")
+}
+\seealso{
+\code{\link{LinePropertiesMatrix}} \code{\link{ImpPTDF}}
 }

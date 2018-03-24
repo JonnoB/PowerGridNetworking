@@ -14,8 +14,8 @@ NextAttackSimulation(SimOrder, folder)
 \description{
 When multiple attack simulations are being performed the operation can be interrupted.
   This function searches the folder where the simulations are being stored and returns
-  the next attack simulation.
+  the next attack simulation. This function is mostly only used as part of the MultiAttack function
 }
 \seealso{
-MultiAttackOrder
+\code{\link{MultiAttackOrder}}, \code{\link{MultiAttack}}
 }

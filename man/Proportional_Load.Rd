@@ -10,7 +10,7 @@ Proportional_Load(g, alpha, PowerFlow = "PowerFlow",
 \arguments{
 \item{g}{An igraph object representing a power grid. must have a power flow attribute.}
 
-\item{alpha}{The system tolerance.}
+\item{alpha}{The system tolerance. A number larger than 1.}
 
 \item{PowerFlow}{The name of the graph attribute which contains the power flow over each line.}
 

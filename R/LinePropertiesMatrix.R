@@ -10,6 +10,7 @@
 #' @param g Igraph object which contains an attribute naming the edges and another that provides the edge weight
 #' @param Edgename A character string of the edge attribute that holds edge names. Default is "Link"
 #' @param Weight A character string of the edge.attribute for edge weights. Default is "Y
+#' @export
 
 LinePropertiesMatrix <- function(g, Edgename = "Link", Weight = "Y"){
   Link <- get.edge.attribute(g, Edgename)

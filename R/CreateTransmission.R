@@ -7,11 +7,11 @@
 #'    The function is typically used in conjunction with the LinePropertiesMatrix function. The function
 #'    is a key part of calculating ImpPTDF.
 #'
-#'  @param g an igraph object with attribute of named edges. This is an igraph object
-#'  @param Edgename The attribute name of the edges. This is a string
-#'  @export
-#'  @seealso \code{\link{LinePropertiesMatrix}} \code{\link{ImpPTDF}}
-#'  @example
+#' @param g an igraph object with attribute of named edges. This is an igraph object
+#' @param Edgename The attribute name of the edges. This is a string
+#' @export
+#' @seealso \code{\link{LinePropertiesMatrix}} \code{\link{ImpPTDF}}
+#' @example
 #'  CreateTransmission(g, "Edgename")
 
 CreateTransmission <- function(g, Edgename){
