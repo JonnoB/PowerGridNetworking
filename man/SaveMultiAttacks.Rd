@@ -8,7 +8,7 @@ SaveMultiAttacks(g, AttackVectors, folder, MinMaxComp = 0,
   TotalAttackRounds = 10, CascadeMode = FALSE)
 }
 \arguments{
-\item{g}{An igraph object representing a powet grid.}
+\item{g}{An igraph object representing a power grid.}
 
 \item{AttackVectors}{A dataframe. This is the output of the MultiAttackOrder function. If you expect.
 to interrupt the function this dataframe should be saved or the random seed used to generate the dataset

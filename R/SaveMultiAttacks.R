@@ -5,7 +5,7 @@
 #'    results of AttackTheGrid, and also allows the process to be interrupted.
 #'    When the process is started again after and interuption the function finds the last
 #'    save attack and starts the simulation process from there.
-#' @param g An igraph object representing a powet grid.
+#' @param g An igraph object representing a power grid.
 #' @param AttackVectors A dataframe. This is the output of the MultiAttackOrder function. If you expect.
 #'    to interrupt the function this dataframe should be saved or the random seed used to generate the dataset
 #'    recorded.
@@ -22,7 +22,7 @@
 SaveMultiAttacks <- function(g, AttackVectors, folder, MinMaxComp = 0, TotalAttackRounds = 10, CascadeMode = FALSE){
 
   #set working directory
-
+  gc()
   1:nrow(AttackVectors) %>% walk(~{
 
     NextSim <- NextAttackSimulation(AttackVectors, folder)

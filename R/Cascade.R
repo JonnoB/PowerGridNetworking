@@ -53,12 +53,13 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL){
 
   #Delete Edges that are over the Limit
 
+
   DeleteEdges <- as_data_frame(g) %>%
     mutate(index = 1:n(),
            Over.Limit = abs(PowerFlow) > Link.Limit) %>%
     filter(Over.Limit)
 
-  #g us structurally changed here and becomes g2
+  #g is structurally changed here and becomes g2
   g2 <- delete.edges(g, DeleteEdges$index)
 
   #Balence grid after over powered lines and edges are removed
@@ -68,8 +69,10 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL){
   #If all the edges are the same returns TRUE
   edgesequal <- all(!Components_differ(g2,g))
 
+  #Terminates the cascade if there are no edges left preventing errors.
+  GridCollapsed<- ecount(g2)==0
   #Checking there are edges left prevents trying to find a component in the Slackref and throwing an error.
-  CascadeContinues <- !isTRUE(edgesequal)
+  CascadeContinues <- !isTRUE(edgesequal) & !GridCollapsed
 
   if(CascadeContinues & Iteration != StopCascade){
     #add the new network into the list

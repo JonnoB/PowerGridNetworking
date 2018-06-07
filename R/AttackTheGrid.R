@@ -32,6 +32,7 @@ AttackTheGrid <- function(NetworkList,
                           CumulativeAttacks = NULL){
 
   #gets the last network in the list
+  gc()
   g <- NetworkList[[length(NetworkList)]]
 
   g <- g[[length(g)]]
@@ -52,6 +53,12 @@ AttackTheGrid <- function(NetworkList,
 
   gCasc <- list(gCasc)
 
+  if(is.null(CumulativeAttacks)){
+    CumulativeAttacks2 <- 1
+  } else {
+    CumulativeAttacks2 <- CumulativeAttacks + 1
+  }
+
   #This If statement prevents Cascading if theire are no cascadable components
   if(!GridCollapsed){
 
@@ -60,7 +67,7 @@ AttackTheGrid <- function(NetworkList,
       gCasc <- Cascade(gCasc, g0 = g)
     }
 
-    message(paste("Attack ",CumulativeAttacks, " Nodes Remaining", vcount(gCasc[[length(gCasc)]])))
+    message(paste("Attack ",CumulativeAttacks2, " Nodes Remaining", vcount(gCasc[[length(gCasc)]])))
 
   } else{
 
@@ -68,11 +75,6 @@ AttackTheGrid <- function(NetworkList,
 
   }
 
-  if(is.null(CumulativeAttacks)){
-    CumulativeAttacks2 <- 1
-  } else {
-    CumulativeAttacks2 <- CumulativeAttacks + 1
-  }
 
   #concatanate the new list with the list of lists
   NetworkList2 <- NetworkList
@@ -99,7 +101,7 @@ AttackTheGrid <- function(NetworkList,
                                   CumulativeAttacks = CumulativeAttacks2
     )
   }
-
+  gc()
   return(NetworkList2)
 
 }
