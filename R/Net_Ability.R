@@ -10,7 +10,7 @@
 #'  calculated from the original graph
 #'
 #' @param g The graph for which net-ability will be calculated
-#' @param gOrig The original graph structure. The defualt is the \{g}
+#' @param gOrig The original graph structure. The defualt is the g
 #' @export
 #' @examples
 #' NetAbScore <-Net_Ability(g)

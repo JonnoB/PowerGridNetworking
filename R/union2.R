@@ -12,7 +12,7 @@
 #' @param g2 Igraph object
 #' @seealso \code{\link[igraph]{union.igraph}}
 #' @export
-#' @example
+#' @examples
 #' union2(g1,g2)
 #' Reduce(union2, list(g1,g2,g3))
 #'

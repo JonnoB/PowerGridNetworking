@@ -23,18 +23,45 @@ SaveMultiAttacks <- function(g, AttackVectors, folder, MinMaxComp = 0, TotalAtta
 
   #set working directory
   gc()
-  1:nrow(AttackVectors) %>% walk(~{
+  print("Calculating first simulation")
+  TimeAtFirstSimulation <- Sys.time()
+  for (i in 1:nrow(AttackVectors)) {
+    #walk was used previously but it created a crash.
+    #The crash would happen approx every 30 simulations
+    #I can't replicate the crash using dummy data so am leaving it.
 
     NextSim <- NextAttackSimulation(AttackVectors, folder)
     DeletionOrder <- GenerateAttackOrder(AttackVectors, folder)
 
     FixedNodes <- quo(FixedStrategyAttack(g, DeletionOrder))
-
-    AttackSeries <- AttackTheGrid(list(list(g)), FixedNodes, referenceGrid = NULL, MinMaxComp, TotalAttackRounds, CascadeMode)
+    T1 <- Sys.time()
+    #suppres attack the grid messages
+    AttackSeries <- suppressMessages(AttackTheGrid(list(list(g)),
+                                                   FixedNodes,
+                                                   referenceGrid = NULL,
+                                                   MinMaxComp,
+                                                   TotalAttackRounds,
+                                                   CascadeMode))
 
     saveRDS(AttackSeries, file = file.path(folder, paste0(NextSim, ".rds")))
     rm(AttackSeries)
     gc()
+    T2<- Sys.time()
+    SimulationRoundTime <- round(difftime(T2, T1, units = "mins" ))
+    TimeToCompletion <- (difftime(T2, TimeAtFirstSimulation)/i)*(nrow(AttackVectors)-i)
+    ExpectedCompletionTime<- T2 + TimeToCompletion
+    TimeUnit<- ifelse(as.numeric(TimeToCompletion, units= "hours")<1, "mintues", "hours")
+
+    print(paste("Time taken for simulation", i, "is",
+                SimulationRoundTime ,
+                "minutes. Est time to completion",
+                round(as.numeric(TimeToCompletion, units = TimeUnit)),
+                TimeUnit,
+                "Est completion time is",
+                ExpectedCompletionTime))
   }
-  )
+  TimeAtLastSimulation <- Sys.time()
+
+  print(paste("Time taken for all simulations is", round(difftime(TimeAtLastSimulation, TimeAtFirstSimulation , units = "hours" ),2), TimeUnit))
+
 }

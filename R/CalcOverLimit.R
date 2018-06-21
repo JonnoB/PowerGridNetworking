@@ -21,7 +21,7 @@ CalcOverLimit <- function(g){
     summarise(name = first(name),
               Nodes = n())
 
-  print(paste("Total network components ", nrow(SlackRefCasc)))
+  #message(paste("Total network components ", nrow(SlackRefCasc))) #Not sure how useful this is anymore
 
 
   #Sometimes the Slackref df has 0 rows throwing an errors. so this code prevents that

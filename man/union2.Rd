@@ -23,6 +23,11 @@ This function is an upgrade to the \pkg{igraph} function "union".
    In the original union the graph attributes were lost.
    In the case where there are overlapping nodes the attributes of g1 take precedence
 }
+\examples{
+union2(g1,g2)
+Reduce(union2, list(g1,g2,g3))
+
+}
 \seealso{
 \code{\link[igraph]{union.igraph}}
 }

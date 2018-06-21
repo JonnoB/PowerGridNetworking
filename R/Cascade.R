@@ -26,7 +26,7 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL){
   g <- NetworkList[[length(NetworkList)]]
 
   Iteration <- Iteration + 1
-  print(paste("Using previous graph", !is.null(g0)))
+  #message(paste("Using previous graph", !is.null(g0)))
 
   #if graph comparison is being used then the process starts here.
   #This stops needless subgraphs being recalculated then joined.
@@ -38,7 +38,7 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL){
     gNochange <- delete.vertices(g, (1:vcount(g))[components(g)$membership %in% RecalcFlow])
     #create a subgraph of parts that do need to be recalculated
     g <- delete.vertices(g,( 1:vcount(g))[!(components(g)$membership %in% RecalcFlow)])
-    print(paste("components changed since previous", paste(RecalcFlow, collapse = ",")))
+  #  message(paste("components changed since previous", paste(RecalcFlow, collapse = ",")))
   }
 
 
@@ -46,9 +46,9 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL){
 
 
   if(!is.null(g0)){
-    print("Joining pre and post")
+    #print("Joining pre and post") #These joins are fast now and don't need to be mentioned
     g <- union2(gNochange, g)
-    print("Join complete")
+    #print("Join complete")
   }
 
   #Delete Edges that are over the Limit
@@ -81,7 +81,7 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL){
     NetworkList <- Cascade(NetworkList, Iteration, StopCascade, g0 = g)
   }
 
-  print(paste("Cascade has completed with", Iteration, "iterations"))
+  message(paste("Cascade has completed with", Iteration, "iterations"))
 
   return(NetworkList)
 

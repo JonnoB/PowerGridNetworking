@@ -8,6 +8,8 @@ Net_Ability(g, gOrig = NULL)
 }
 \arguments{
 \item{g}{The graph for which net-ability will be calculated}
+
+\item{gOrig}{The original graph structure. The defualt is the g}
 }
 \description{
 This function calculates the net-ability of a graph.
