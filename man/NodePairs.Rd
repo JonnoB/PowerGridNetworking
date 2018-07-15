@@ -21,8 +21,8 @@ NodePairs(g, Node_name = "name", Generation = "Generation",
 \item{Bus_order}{Only used if no PDF is supplied. The vertex attribute that contains the rank order for slack reference.}
 }
 \description{
-This function function finds every pair of nodes in the network. It takes in a igraph power network and outputs a dataframe. 
-The dataframe contains the node pair names, their node ID number type of node Generation/Demand/Transmission, the Net generation of 
+This function finds every pair of nodes in the network. It takes in a igraph power network and outputs a dataframe.
+The dataframe contains the node pair names, their node ID number type of node Generation/Demand/Transmission, the Net generation of
 the node, and wether the node pair is generation and demand
 }
 \seealso{

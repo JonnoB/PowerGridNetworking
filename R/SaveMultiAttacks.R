@@ -31,6 +31,9 @@ SaveMultiAttacks <- function(g, AttackVectors, folder, MinMaxComp = 0, TotalAtta
     #I can't replicate the crash using dummy data so am leaving it.
 
     NextSim <- NextAttackSimulation(AttackVectors, folder)
+
+    if (NextSim=="Simulation_ID_Inf") break #Stops function making error on last iteration
+
     DeletionOrder <- GenerateAttackOrder(AttackVectors, folder)
 
     FixedNodes <- quo(FixedStrategyAttack(g, DeletionOrder))
@@ -46,22 +49,23 @@ SaveMultiAttacks <- function(g, AttackVectors, folder, MinMaxComp = 0, TotalAtta
     saveRDS(AttackSeries, file = file.path(folder, paste0(NextSim, ".rds")))
     rm(AttackSeries)
     gc()
+    #Sort out time stuff
     T2<- Sys.time()
     SimulationRoundTime <- round(difftime(T2, T1, units = "mins" ))
     TimeToCompletion <- (difftime(T2, TimeAtFirstSimulation)/i)*(nrow(AttackVectors)-i)
     ExpectedCompletionTime<- T2 + TimeToCompletion
-    TimeUnit<- ifelse(as.numeric(TimeToCompletion, units= "hours")<1, "mintues", "hours")
+    TimeUnit<- ifelse(as.numeric(TimeToCompletion, units= "hours")<1, "mins", "hours")
 
     print(paste("Time taken for simulation", i, "is",
                 SimulationRoundTime ,
                 "minutes. Est time to completion",
-                round(as.numeric(TimeToCompletion, units = TimeUnit)),
+                round(as.numeric(TimeToCompletion, units = TimeUnit)), #
                 TimeUnit,
                 "Est completion time is",
                 ExpectedCompletionTime))
   }
   TimeAtLastSimulation <- Sys.time()
 
-  print(paste("Time taken for all simulations is", round(difftime(TimeAtLastSimulation, TimeAtFirstSimulation , units = "hours" ),2), TimeUnit))
+  print(paste("Time taken for all simulations is", round(difftime(TimeAtLastSimulation, TimeAtFirstSimulation , units = "hours" ),2), "hours"))
 
 }

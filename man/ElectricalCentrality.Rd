@@ -21,3 +21,9 @@ ElectricalCentrality(g, Node_name = "name", Generation = "Generation",
 \description{
 Calculates the electrical edge centrality of the graph
 }
+\details{
+This is an implementation of Wang et al 2011 Physica A, "An electrical betweeness approach for
+vulnerability assesment of power grids considering the capacity generators and load
+Can only be used on a single component graph, if the graph has multiple components calculate for each component
+   individually and add the results together.
+}
