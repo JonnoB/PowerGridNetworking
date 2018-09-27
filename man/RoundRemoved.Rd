@@ -2,18 +2,20 @@
 % Please edit documentation in R/RoundRemoved.R
 \name{RoundRemoved}
 \alias{RoundRemoved}
-\title{Find Edge Deletion order}
+\title{Find Deletion order}
 \usage{
-RoundRemoved(ListofLists)
+RoundRemoved(ListofLists, type = "Edge")
 }
 \arguments{
 \item{ListofLists}{The output of AttackTheGrid, a list of lists containing igraphs.}
+
+\item{type}{Whether Edge or node order will be found. The default is Edge, any other value will mean nodes are used.}
 }
 \description{
-Attack round that each edge was deleted is  extracted from the network List of lists produced by AttackTheGrid
+Attack round that each edge/node was deleted is  extracted from the network List of lists produced by AttackTheGrid
 }
 \details{
-If not all edges were deleted during AttackTheGrid, these edges will be filled with NA
+If not all edges/nodes were deleted during AttackTheGrid, these edges will be filled with NA
 }
 \seealso{
 \code{\link[PowerGridNetworking]{AttackTheGrid}}
