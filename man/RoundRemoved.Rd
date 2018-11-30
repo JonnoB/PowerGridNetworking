@@ -12,7 +12,8 @@ RoundRemoved(ListofLists, type = "Edge")
 \item{type}{Whether Edge or node order will be found. The default is Edge, any other value will mean nodes are used.}
 }
 \description{
-Attack round that each edge/node was deleted is  extracted from the network List of lists produced by AttackTheGrid
+Attack round that each edge/node was deleted is  extracted from the network List of lists produced by AttackTheGrid.
+Whether the node/edge was the targeted node/edge is also marked. This currently only works for Nodes not Edges
 }
 \details{
 If not all edges/nodes were deleted during AttackTheGrid, these edges will be filled with NA

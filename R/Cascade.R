@@ -11,13 +11,6 @@
 #' @export
 #' @seealso \code{\link{AttackTheGrid}}
 
-############
-
-#Remove the cascade2 from the recurseive process at the bottom!
-
-
-##########
-
 Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL){
   #This Function iterates through the network removing edges until there are no further overpower edges to remove
   #This function uses the Bus order to choose the slack reference should this be changed?
@@ -38,7 +31,7 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL){
     gNochange <- delete.vertices(g, (1:vcount(g))[components(g)$membership %in% RecalcFlow])
     #create a subgraph of parts that do need to be recalculated
     g <- delete.vertices(g,( 1:vcount(g))[!(components(g)$membership %in% RecalcFlow)])
-  #  message(paste("components changed since previous", paste(RecalcFlow, collapse = ",")))
+    #  message(paste("components changed since previous", paste(RecalcFlow, collapse = ",")))
   }
 
 
@@ -58,6 +51,21 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL){
     mutate(index = 1:n(),
            Over.Limit = abs(PowerFlow) > Link.Limit) %>%
     filter(Over.Limit)
+
+  #print("OVERERLOADSSS")
+  #If the cascade has been going for more than 1 round then the overloaded edges need to be added together
+  if(Iteration==1){
+    Overloads <- DeleteEdges$name
+
+  } else {
+
+    Overloads <- c(graph_attr(g, "EdgesOverloaded" ), DeleteEdges$name)
+    print("Overloads")
+    print(Overloads)
+  }
+
+  #write vector of overloaded edges
+  g <- set_graph_attr(g, "EdgesOverloaded", Overloads)
 
   #g is structurally changed here and becomes g2
   g2 <- delete.edges(g, DeleteEdges$index)
