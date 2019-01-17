@@ -22,7 +22,8 @@ DeleteCarefully <- function(g, Target, DeleteVect, Number){
     }
 
     #remove selected node from network
-    g2 <- delete.vertices(g, deletetarget)
+    g2 <- delete.vertices(g, deletetarget) #causing the crash... why?
+
 
   } else { #if nodes aren't being deleted, then logically edges are being deleted
 

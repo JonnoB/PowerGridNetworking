@@ -42,14 +42,15 @@ AttackTheGrid <- function(NetworkList,
   }
 
   #Remove the desired part of the network.
-  gCasc<- AttackStrategy %>%
+  gCasc <- AttackStrategy %>% #this is crashing... wy?
     eval_tidy(., data = list(g = g)) #The capture environment contains delete nodes, however the current g is fed in here
+
 
   #Rebalence network
   #This means that the Cascade calc takes a balanced network which is good.
   gCasc <- BalencedGenDem(gCasc, "Demand", "Generation")
 
-  GridCollapsed<- ecount(gCasc)==0
+  GridCollapsed <- ecount(gCasc)==0
 
   gCasc <- list(gCasc)
 
@@ -89,9 +90,14 @@ AttackTheGrid <- function(NetworkList,
   #when the grid has collapsed problems arise this helps deal with that
   MaxComp <- suppressWarnings(max(components(gCascLast)$csize))
 
+  #Checks to see if the topology of the network is unchanged.
+  #If this is TRUE then nothing is being removed and the process can stop
+  TopoStability <- (vcount(gCascLast) == vcount(g) &   ecount(gCascLast) == ecount(g))
+
   FractGC <-ifelse(is.finite(MaxComp),MaxComp/vcount(referenceGrid), 0)
 
-  if( !(FractGC < MinMaxComp | length(NetworkList2)-1==TotalAttackRounds| GridCollapsed) ){
+  #These conditions can probably be simplified a bit
+  if( !(FractGC < MinMaxComp | length(NetworkList2)-1==TotalAttackRounds| GridCollapsed| TopoStability) ){
     NetworkList2 <- AttackTheGrid(NetworkList = NetworkList2,
                                   AttackStrategy,
                                   referenceGrid = referenceGrid,

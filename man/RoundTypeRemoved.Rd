@@ -13,6 +13,6 @@ RoundTypeRemoved(AttackSeries)
 This function finds the round removed of all Nodes and Edges in a network as well as whether the removal type was Targeted/Overloaded/Islanded
 }
 \details{
-The function accepts the list of lists produced by the function attack the grid and outputs a 
+The function accepts the list of lists produced by the function attack the grid and outputs a
     list containing two dataframes for Nodes and Edges respectively.
 }

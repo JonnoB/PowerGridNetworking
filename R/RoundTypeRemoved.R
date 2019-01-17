@@ -1,24 +1,24 @@
 #' Round Removed and Type of Removal
-#' 
+#'
 #' This function finds the round removed of all Nodes and Edges in a network as well as whether the removal type was Targeted/Overloaded/Islanded
-#' 
-#' The function accepts the list of lists produced by the function attack the grid and outputs a 
+#'
+#' The function accepts the list of lists produced by the function attack the grid and outputs a
 #'     list containing two dataframes for Nodes and Edges respectively.
-#' 
+#'
 #' @param AttackSeries The list of lists produced by attack the grid
 #' @export
 
 RoundTypeRemoved <- function(AttackSeries){
-  
+
   #finds the round removed for each type
   TempNodes <- AttackSeries %>% RoundRemoved(type = "Node")
   TempEdges <- AttackSeries %>% RoundRemoved(type = "Edge")
-  
+
   #gets the original graph
   baseg <- AttackSeries[[1]][[1]]
-  
+
   #Join edges to nodes and vice a versa
-  
+
   #Edge Removal type and first iteration of Node removal type
   EdgeRemovalType <- as_data_frame(baseg) %>%
     select(from, to, Link) %>%
@@ -45,36 +45,36 @@ RoundTypeRemoved <- function(AttackSeries){
         RemovalType.y == "Unknown" ~ "Islanded",
         TRUE ~ RemovalType.y
       ))
-  
+
   #Seperate Nodes and perform second iteration of Node removal type
   #This has to be done as due to the network structure nodes will appear multiple times in the previous dataframe and may have differe
   #Removal conditions each time
-  NodeRemovalType <- bind_rows(select(EdgeRemovalType, Node = from, RoundRemoved = RoundRemoved.x, RemovalType = RemovalType.x),
-                               select(EdgeRemovalType, Node =to, RoundRemoved = RoundRemoved.y, RemovalType = RemovalType.y))
-  
+  NodeRemovalType <- bind_rows(select(EdgeRemovalType, Name = from, RoundRemoved = RoundRemoved.x, RemovalType = RemovalType.x),
+                               select(EdgeRemovalType, Name =to, RoundRemoved = RoundRemoved.y, RemovalType = RemovalType.y))
+
   #Filter the node removal type
   Targeted<- NodeRemovalType %>%
     filter(RemovalType =="Targeted")
-  
+
   Overloaded <-NodeRemovalType %>%
-    filter(RemovalType != "Overloaded", !(Node %in% Targeted$Node))
-  
+    filter(RemovalType != "Overloaded", !(Name %in% Targeted$Name))
+
   Islanded <-NodeRemovalType %>%
-    filter(RemovalType != "Islanded", !(Node %in% Targeted$Node), !(Node %in% Overloaded$Node))
-  
+    filter(RemovalType != "Islanded", !(Name %in% Targeted$Name), !(Name %in% Overloaded$Name))
+
   #re-combine nodes
   #There can be multiple instances of each node if there are multiple edges on a node that match the same condition
   #e.g. two edges attach to a node that was targeted, that node will appear twice in the targeted df but nowhere else.
   #The distinct function prevents doubles
   NodeRemovalType <- bind_rows(Targeted, Overloaded, Islanded) %>%
-    arrange(Node) %>%
-    distinct(Node, .keep_all = TRUE)
-  
-  Out <- list(Node = NodeRemovalType, 
-              Edge = EdgeRemovalType %>% 
-                select(Link, RoundRemoved = RoundRemovedEdge, RemovalType= RemovalTypeEdge))
-  
+    arrange(Name) %>%
+    distinct(Name, .keep_all = TRUE)
+
+  Out <- bind_rows(NodeRemovalType %>% mutate(type = "Node"),
+              Edge = EdgeRemovalType %>%
+                select(Name = Link, RoundRemoved = RoundRemovedEdge, RemovalType= RemovalTypeEdge) %>% mutate(type = "Edge"))
+
   return(Out)
-  
-  
+
+
 }

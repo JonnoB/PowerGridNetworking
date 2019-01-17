@@ -60,8 +60,9 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL){
   } else {
 
     Overloads <- c(graph_attr(g, "EdgesOverloaded" ), DeleteEdges$name)
-    print("Overloads")
-    print(Overloads)
+    #Prints names of overloaded edges
+    #print("Overloads")
+    #print(Overloads)
   }
 
   #write vector of overloaded edges

@@ -23,12 +23,23 @@ FixedStrategyAttack <- function(g, DeletionOrder, Target = "Nodes", Number = 1){
     Remaining <- get.edge.attribute(g, "name")
   }
 
+
   DeleteVect <- data_frame(OriginalTarget = DeletionOrder) %>%
     filter( OriginalTarget %in% Remaining) %>%
     .$OriginalTarget
 
 
-  g2 <- DeleteCarefully(g, Target, DeleteVect, Number)
+  if(length(DeleteVect)==0){
+
+    g2 <- g
+
+  } else {
+
+    g2 <- DeleteCarefully(g, Target, DeleteVect, Number)
+
+  }
+
+
 
   return(g2)
 

@@ -34,12 +34,16 @@ SaveMultiAttacks <- function(g, AttackVectors, folder, MinMaxComp = 0, TotalAtta
 
     if (NextSim=="Simulation_ID_Inf") break #Stops function making error on last iteration
 
+    #Does not appear to actually print the next node
+    #print(paste("Next target is", NextSim))
+
     DeletionOrder <- GenerateAttackOrder(AttackVectors, folder)
+
 
     FixedNodes <- quo(FixedStrategyAttack(g, DeletionOrder))
     T1 <- Sys.time()
     #suppres attack the grid messages
-    AttackSeries <- suppressMessages(AttackTheGrid(list(list(g)),
+    AttackSeries <-suppressMessages(AttackTheGrid(list(list(g)),
                                                    FixedNodes,
                                                    referenceGrid = NULL,
                                                    MinMaxComp,
@@ -50,7 +54,7 @@ SaveMultiAttacks <- function(g, AttackVectors, folder, MinMaxComp = 0, TotalAtta
     rm(AttackSeries)
     gc()
     #Sort out time stuff
-    T2<- Sys.time()
+    T2 <- Sys.time()
     SimulationRoundTime <- round(difftime(T2, T1, units = "mins" ))
     TimeToCompletion <- (difftime(T2, TimeAtFirstSimulation)/i)*(nrow(AttackVectors)-i)
     ExpectedCompletionTime<- T2 + TimeToCompletion
