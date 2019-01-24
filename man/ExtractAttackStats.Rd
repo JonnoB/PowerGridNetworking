@@ -12,5 +12,6 @@ ExtractAttackStats(RootFolder, NewfolderPath)
 \item{NewFolderPath}{: The folder where the summary files will be saved to}
 }
 \description{
-Extracts the attack statistics for each network in a folder and combines it into a single file that is also saved
+Extracts the attack statistics for each network in a folder and combines it into a single file that is also saved.
+This function only works on a folder of folders...It needs to be changed
 }

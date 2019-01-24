@@ -2,7 +2,7 @@
 % Please edit documentation in R/Components_differ.R
 \name{Components_differ}
 \alias{Components_differ}
-\title{Find components of a graph that have
+\title{Find components of a graph that have changed
 Find components of a graph that have changed}
 \usage{
 Components_differ(g, g0)
@@ -14,4 +14,8 @@ Components_differ(g, g0)
 }
 \description{
 Using this should be able to cut down on the amount of calculation done on the power flow equations
+This function checks to see which subcomponents have changed in the graph and which are the same.
+It does this by comparing edges. This is because a component may have had an edge removed but still be intact.
+However, the powerflow will still need to be re-calculated.
+The function outputs a logical value
 }
