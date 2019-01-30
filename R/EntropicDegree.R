@@ -14,7 +14,7 @@
 
 EntropicDegree <- function(g, value = "Link.Limit", Scale = FALSE){
 
-  E(g)$weight <- get.edge.attribute(g, name = value)
+  E(g)$weight <- get.edge.attribute(g, name = value) %>% abs(.) #Otherwise negative values like power flow cause problems when logged
 
   ED <- (1-diversity(g))*strength(g)
 
