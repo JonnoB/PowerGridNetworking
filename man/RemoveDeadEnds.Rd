@@ -9,7 +9,7 @@ RemoveDeadEnds(g, iteration = 1)
 \arguments{
 \item{g}{An igraph object representing a power network}
 
-\item{iteration}{}
+\item{iteration}{the number of times the function has recursively removed nodes. Default start is 1}
 }
 \description{
 Removes Transfernodes of Degree 1 from the network. This prevents the network being padded with nodes that don't do anything

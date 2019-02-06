@@ -3,7 +3,7 @@
 #'Removes Transfernodes of Degree 1 from the network. This prevents the network being padded with nodes that don't do anything
 #'
 #' @param g An igraph object representing a power network
-#' @param  iteration
+#' @param  iteration the number of times the function has recursively removed nodes. Default start is 1
 
 
 RemoveDeadEnds <- function(g, iteration = 1){
