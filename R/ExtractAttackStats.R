@@ -34,7 +34,8 @@ ExtractAttackStats<- function(RootFolder, NewfolderPath ){
               mutate( simulationID = gsub("\\.rds", "", .x ) %>% gsub("Simulation_ID_", "", .) %>% as.integer)
           }
           ) %>%
-          mutate(alpha = targetfolder)
+          mutate(alpha = targetfolder,
+                 GridLoading = ifelse(Blackout==1, 0, GridLoading))
 
 
         saveRDS(summarydata, savename)

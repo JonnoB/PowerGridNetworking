@@ -64,7 +64,8 @@ ElectricalCentrality <- function(g, Node_name = "name", Generation = "Generation
   print("Calculating node Electrical centrality scores")
   #Simplify the graph. This prevents lines being removed reducing the score of a node.
   EdgeEC2 <- EdgeEC %>%
-    mutate(Edgename = sub("-[^-]+$", "", Edgename)) %>%
+   # mutate(Edgename = sub("-[^-]+$", "", Edgename)) %>% #This was useful when there were parallel lines connecting node pairs.
+    #These lines have now been added together, so this line has to be removed to prevent errors
     separate(., Edgename, into = c("Bus.1", "Bus.2"), sep= "(-)") %>%
     group_by(Bus.1, Bus.2) %>%
     summarise(ElectricalCentrality = sum(ElectricalCentrality)) %>% #sum the scores for multple edges connecting two nodes
