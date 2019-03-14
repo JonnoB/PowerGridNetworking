@@ -8,6 +8,16 @@
 #' @export
 #' @example
 #' ImpPTDF(g, SlackRef)
+#This is a reference for the book I used to get good info on the admittance matrix.. Add into package when possible
+# @chapter{matlab-program-building,
+#   title = "6.4.3 MATLAB Program for Building Ybus Matrix",
+#  booktitle = "Power System Analysis (2nd Edition)",
+# author = "Nagsarkar, T. K., Sukhija, M. S.",
+#   year = "2014",
+# isbn = "978-0-19-809633-7",
+#   publisher = "Oxford University Press",
+#   pages = "232-240"
+# }
 ImpPTDF <- function(g, SlackRef){
   #This is a wrapper for the more interesting parts of the electrical building blocks
 
