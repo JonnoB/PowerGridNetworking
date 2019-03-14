@@ -7,7 +7,7 @@
 #' @export
 
 
-RemoveDeadEnds <- function(g, iteration = 1){
+RemoveDeadEnds <- function(g, iteration = 1, Type = "Transfer"){
   #This is a recursive function that removes transfer nodes of degree 1 iteratviely until there are non left.
   #This is becuase there shouldn't be any nodes like that.
 

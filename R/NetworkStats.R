@@ -5,6 +5,7 @@
 #' These statistics are, number of node, number of edges, number of components, Betweeness, Mean Degree, Assortivity, Clustering, and Mean Distance.
 #' @param g An igraph object
 #' @param colname A character string. The desired name of the output statistic column. the default is "value"
+#' @export
 
 NetworkStats <- function(g, colname = "value"){
   data_frame(Metric = c("Nodes", "Edges", "Components" ,"Betweenness", "Degree", "Assortativity", "Clustering", "Distance"),
