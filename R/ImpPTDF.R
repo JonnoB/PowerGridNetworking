@@ -7,6 +7,7 @@
 #' @param SlackRef The slack node for the power-grid, A character vector
 #' @export
 #' @example
+#' g2 <-make_ego_graph(g, 2, "AXMI")[[1]]
 #' ImpPTDF(g, SlackRef)
 #This is a reference for the book I used to get good info on the admittance matrix.. Add into package when possible
 # @chapter{matlab-program-building,
