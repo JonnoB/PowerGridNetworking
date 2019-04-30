@@ -4,16 +4,16 @@
 \alias{SlackRefFunc}
 \title{SlackRef}
 \usage{
-SlackRefFunc(g, name = "name", Bus.Order = "Bus.Order")
+SlackRefFunc(g, name = "name", Generation = "Generation")
 }
 \arguments{
 \item{g}{The igraph object representing the power grid}
 
 \item{name}{The vertex attribute containing node names}
 
-\item{Bus.Order}{The vertex attribute that contains the rank order for slack reference}
+\item{Generation}{The vertex attribute that contains the generation data.}
 }
 \description{
-Finds the Slack node in each component of the power grid. A graph is put in and a data frame giving 
-the slack reference for each component is returned
+Finds the Slack node in each component of the power grid. A graph is put in and a data frame giving
+the slack reference for each component is returned. The Slack bus is the largest generator in that component
 }

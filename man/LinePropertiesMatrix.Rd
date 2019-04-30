@@ -17,7 +17,7 @@ LinePropertiesMatrix(g, Edgename = "Link", Weight = "Y")
 A matrix, with names rows and columns
 }
 \description{
-Creates the line properties matrix representing
+Creates the line properties matrix
 }
 \details{
 This function creates a line properties matrix that can be used with the output of the Transmission matrix function.

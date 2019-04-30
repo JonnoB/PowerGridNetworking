@@ -5,6 +5,8 @@
 #'   together is more efficient than producing each one on its own.
 #' @param g An igraph object representing a power-grid
 #' @param SlackRef The slack node for the power-grid, A character vector
+#' @param EdgeName the variable that holds the edge names, a character string.
+#' @param VertexName the variable that holds the names of the nodes, to identify the slack ref. a character string
 #' @export
 #' @example
 #' g2 <-make_ego_graph(g, 2, "AXMI")[[1]]
@@ -19,18 +21,18 @@
 #   publisher = "Oxford University Press",
 #   pages = "232-240"
 # }
-ImpPTDF <- function(g, SlackRef){
+ImpPTDF <- function(g, SlackRef, EdgeName = "Link", VertexName = "name"){
   #This is a wrapper for the more interesting parts of the electrical building blocks
 
   message("Creating Power matrices")
 
-  AZero <- CreateTransmission(g, "Link")
+  AZero <- CreateTransmission(g, EdgeName, VertexName)
 
   # #remove Slack bus, usually the largest generator
   #drop = FALSE stops the matrix being converted to a vector when there are only two nodes in the sub-graph
   A <- AZero[,colnames(AZero)!=SlackRef, drop = FALSE]
 
-  #Create the diagonal matrix of edge to itself impedance
+  #Create the diagonal matrix of edge impedance
   C <- LinePropertiesMatrix(g)
 
   B <- t(A) %*% C %*% A

@@ -4,12 +4,19 @@
 \alias{PowerFlow}
 \title{Calculate DC power flow}
 \usage{
-PowerFlow(g, SlackRef)
+PowerFlow(g, SlackRef, EdgeName = "Link", VertexName = "name",
+  Net_generation = "BalencedPower")
 }
 \arguments{
 \item{g}{an igraph object}
 
 \item{SlackRef}{the node to remove from the calculations to prevent the matrix being singular}
+
+\item{EdgeName}{the variable that holds the edge names, a character string.}
+
+\item{VertexName}{the variable that holds the names of the nodes, to identify the slack ref. a character string}
+
+\item{Net_generation}{the name that the net generation data for each node is held in}
 }
 \description{
 TCalculates the PowerFlow from a graph that contains the following attributes,

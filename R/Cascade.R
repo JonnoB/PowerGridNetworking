@@ -8,10 +8,23 @@
 #' @param NetworkList A list of power-grid networks.
 #' @param Iteration The current iteration number
 #' @param StopCascade The number of iterations when cascade will be forced to terminate. An integer, default is set to infinity.
+#' @Demand the name of the node Load variable. A character string.
+#' @Generation the name of the node generation variable. A character string.
+#' @param EdgeName the variable that holds the edge names, a character string.
+#' @param VertexName the variable that holds the names of the nodes, to identify the slack ref. a character string
+#' @param Net_generation the name that the net generation data for each node is held in
 #' @export
 #' @seealso \code{\link{AttackTheGrid}}
 
-Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL){
+Cascade <- function(NetworkList,
+                    Iteration = 0,
+                    StopCascade = Inf,
+                    g0 = NULL,
+                    Generation = "Generation",
+                    Demand = "Demand",
+                    EdgeName = "Link",
+                    VertexName = "name",
+                    Net_generation = "BalencedPower"){
   #This Function iterates through the network removing edges until there are no further overpower edges to remove
   #This function uses the Bus order to choose the slack reference should this be changed?
   #Iteration: the number of iteration number of the cascade, used to keep track of what is going on
@@ -26,7 +39,7 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL){
   #The rejoining process is slow so this speeds it up
   if(!is.null(g0)){
     #find components that need to be recalculuated
-    RecalcFlow <- (1:components(g)$no)[Components_differ(g, g0)]
+    RecalcFlow <- (1:components(g)$no)[Components_differ(g, g0, EdgeName = EdgeName)]
     #create a subgraph of elements that do not need to be recalculated
     gNochange <- delete.vertices(g, (1:vcount(g))[components(g)$membership %in% RecalcFlow])
     #create a subgraph of parts that do need to be recalculated
@@ -35,7 +48,7 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL){
   }
 
 
-  g <- CalcOverLimit(g)
+  g <- CalcOverLimit(g,  EdgeName, VertexName, Net_generation)
 
 
   if(!is.null(g0)){
@@ -55,11 +68,11 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL){
   #print("OVERERLOADSSS")
   #If the cascade has been going for more than 1 round then the overloaded edges need to be added together
   if(Iteration==1){
-    Overloads <- DeleteEdges$name
+    Overloads <- DeleteEdges %>% pull(EdgeName)
 
   } else {
 
-    Overloads <- c(graph_attr(g, "EdgesOverloaded" ), DeleteEdges$name)
+    Overloads <- c(graph_attr(g, "EdgesOverloaded" ), DeleteEdges %>% pull(EdgeName))
     #Prints names of overloaded edges
     #print("Overloads")
     #print(Overloads)
@@ -70,24 +83,32 @@ Cascade <- function(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL){
 
   #g is structurally changed here and becomes g2
   g2 <- delete.edges(g, DeleteEdges$index)
-
+  
   #Balence grid after over powered lines and edges are removed
-  g2 <- BalencedGenDem(g2, "Demand", "Generation")
+  g2 <- BalencedGenDem(g2, Demand, Generation, OutputVar = Net_generation)
 
   #Checks to see if there are any changes in the edges of the network by component.
   #If all the edges are the same returns TRUE
-  edgesequal <- all(!Components_differ(g2,g))
+  edgesequal <- all(!Components_differ(g2, g, EdgeName = EdgeName))
 
   #Terminates the cascade if there are no edges left preventing errors.
   GridCollapsed<- ecount(g2)==0
   #Checking there are edges left prevents trying to find a component in the Slackref and throwing an error.
   CascadeContinues <- !isTRUE(edgesequal) & !GridCollapsed
-
+  
   if(CascadeContinues & Iteration != StopCascade){
     #add the new network into the list
     NetworkList <- c(NetworkList, list(g2))
     #update the list with the new lists created in the cascade
-    NetworkList <- Cascade(NetworkList, Iteration, StopCascade, g0 = g)
+    NetworkList <- Cascade(NetworkList,
+                           Iteration = Iteration,
+                           StopCascade = StopCascade,
+                           g0 = g,
+                           Generation = Generation,
+                           Demand = Demand,
+                           EdgeName = EdgeName,
+                           VertexName = VertexName ,
+                           Net_generation = Net_generation)
   }
 
   message(paste("Cascade has completed with", Iteration, "iterations"))

@@ -5,9 +5,18 @@
 #'
 #' @param RootFolder :The folder where the attack files are saved
 #' @param NewFolderPath : The folder where the summary files will be saved to
+#' @param Generation The name of the variable that stores the net generation data. character string
+#' @param Edgename A character string. The default is "name".
+#' @param PowerFlow A character String. The default is "PowerFlow".
+#' @param Link.Limit A character string. The default is "Link.Limit".
 #' @export
 
-ExtractAttackStats<- function(RootFolder, NewfolderPath ){
+ExtractAttackStats<- function(RootFolder, 
+                              NewfolderPath, 
+                              Generation = "BalencedPower", 
+                              EdgeName = "name", 
+                              PowerFlow = "PowerFlow", 
+                              Link.Limit = "Link.Limit" ){
 
   list.files(RootFolder , full.names = TRUE) %>%
     walk(~{
@@ -30,7 +39,7 @@ ExtractAttackStats<- function(RootFolder, NewfolderPath ){
           map_df(~{
             print(.x)
             read_rds(file.path(rootfolder, .x)) %>%
-              ExtractNetworkStats()%>%
+              ExtractNetworkStats(Generation = Generation, EdgeName = EdgeName, PowerFlow = PowerFlow, Link.Limit = Link.Limit)%>%
               mutate( simulationID = gsub("\\.rds", "", .x ) %>% gsub("Simulation_ID_", "", .) %>% as.integer)
           }
           ) %>%

@@ -4,10 +4,17 @@
 \alias{CalcOverLimit}
 \title{Find which edges are over the limit}
 \usage{
-CalcOverLimit(g)
+CalcOverLimit(g, EdgeName = "Link", VertexName = "name",
+  Net_generation = "BalencedPower")
 }
 \arguments{
 \item{g}{An igraph object that represents a power-grid}
+
+\item{EdgeName}{the variable that holds the edge names, a character string.}
+
+\item{VertexName}{the variable that holds the names of the nodes, to identify the slack ref. a character string}
+
+\item{Net_generation}{the name that the net generation data for each node is held in}
 }
 \description{
 This function checks to see which lines are over limit and removes them and re-calculates power flow in the network

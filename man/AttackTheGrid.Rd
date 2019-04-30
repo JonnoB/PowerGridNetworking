@@ -5,8 +5,10 @@
 \title{Initiate power-grid attack simulation}
 \usage{
 AttackTheGrid(NetworkList, AttackStrategy, referenceGrid = NULL,
-  MinMaxComp = 0.8, TotalAttackRounds = 100, CascadeMode = TRUE,
-  CumulativeAttacks = NULL)
+  MinMaxComp = 0.8, TotalAttackRounds = 1000, CascadeMode = TRUE,
+  CumulativeAttacks = NULL, Demand = "Demand",
+  Generation = "Generation", EdgeName = "Link", VertexName = "name",
+  Net_generation = "BalencedPower")
 }
 \arguments{
 \item{NetworkList}{A list of lists where each element of the sub list is an igraph object, the first time it is used the
@@ -25,6 +27,16 @@ to 0.8.}
 \item{CascadeMode}{Whether the power flow equations will be used to check line-overloading or not.}
 
 \item{CumulativeAttacks}{The total number of attacks that have taken place so far.}
+
+\item{Demand}{the name of the node Load variable. A character string.}
+
+\item{Generation}{the name of the node generation variable. A character string.}
+
+\item{EdgeName}{the variable that holds the edge names, a character string.}
+
+\item{VertexName}{the variable that holds the names of the nodes, to identify the slack ref. a character string}
+
+\item{Net_generation}{the name that the net generation data for each node is held in}
 }
 \description{
 This function simulates an attack on the power grid using the parameter settings you choose

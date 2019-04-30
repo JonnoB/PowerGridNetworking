@@ -5,13 +5,13 @@
 \title{Get load level of power-grid
 Calculates the fraction of maximum flow in each edge across a power-grid}
 \usage{
-LoadLevel(g, EdgeName = "name", Power = "PowerFlow",
+LoadLevel(g, EdgeName = "name", PowerFlow = "PowerFlow",
   Link.Limit = "Link.Limit")
 }
 \arguments{
 \item{g}{An igraph object representing a powergrid.}
 
-\item{Power}{A character String. The default is "PowerFlow".}
+\item{PowerFlow}{A character String. The default is "PowerFlow".}
 
 \item{Link.Limit}{A character string. The default is "Link.Limit".}
 

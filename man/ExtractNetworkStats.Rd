@@ -4,10 +4,20 @@
 \alias{ExtractNetworkStats}
 \title{Summarise attack Statistics}
 \usage{
-ExtractNetworkStats(NetworkList)
+ExtractNetworkStats(NetworkList, Generation = "BalencedPower",
+  EdgeName = "name", PowerFlow = "PowerFlow",
+  Link.Limit = "Link.Limit")
 }
 \arguments{
 \item{NetworkList}{The output of the AttackTheGridFunction}
+
+\item{Generation}{The name of the variable that stores the net generation data. character string}
+
+\item{PowerFlow}{A character String. The default is "PowerFlow".}
+
+\item{Link.Limit}{A character string. The default is "Link.Limit".}
+
+\item{Edgename}{A character string. The default is "name".}
 }
 \value{
 A dataframe

@@ -12,6 +12,11 @@
 #' @param TotalAttackRounds The maximum number of nodes to be removed before the process stops.
 #' @param CascadeMode Whether the power flow equations will be used to check line-overloading or not.
 #' @param CumulativeAttacks  The total number of attacks that have taken place so far.
+#' @param Demand the name of the node Load variable. A character string.
+#' @param Generation the name of the node generation variable. A character string.
+#' @param EdgeName the variable that holds the edge names, a character string.
+#' @param VertexName the variable that holds the names of the nodes, to identify the slack ref. a character string
+#' @param Net_generation the name that the net generation data for each node is held in
 #' @export
 #' @examples
 #' AttackTheGrid(NetworkList, AttackStrategy, SubstationData, EdgeData, referenceGrid = NULL, MinMaxComp = 0.8)
@@ -27,9 +32,14 @@ AttackTheGrid <- function(NetworkList,
                           AttackStrategy,
                           referenceGrid = NULL,
                           MinMaxComp = 0.8,
-                          TotalAttackRounds=100,
+                          TotalAttackRounds=1000,
                           CascadeMode = TRUE,
-                          CumulativeAttacks = NULL){
+                          CumulativeAttacks = NULL,
+                          Demand = "Demand",
+                          Generation = "Generation",
+                          EdgeName = "Link",
+                          VertexName = "name",
+                          Net_generation = "BalencedPower"){
 
   #gets the last network in the list
   gc()
@@ -48,7 +58,7 @@ AttackTheGrid <- function(NetworkList,
 
   #Rebalence network
   #This means that the Cascade calc takes a balanced network which is good.
-  gCasc <- BalencedGenDem(gCasc, "Demand", "Generation")
+  gCasc <- BalencedGenDem(gCasc, Demand, Generation, OutputVar = Net_generation)
 
   GridCollapsed <- ecount(gCasc)==0
 
@@ -65,7 +75,16 @@ AttackTheGrid <- function(NetworkList,
 
     if(CascadeMode){
       #this returns a list of networks each of the cascade
-      gCasc <- Cascade(gCasc, g0 = g)
+      gCasc <- Cascade(NetworkList  = gCasc,
+                       Iteration = 0,
+                       StopCascade = Inf,
+                       g0 = g,
+                       Demand = Demand,
+                       Generation = Generation,
+                       EdgeName = EdgeName,
+                       VertexName = VertexName,
+                       Net_generation = Net_generation)
+
     }
 
     message(paste("Attack ",CumulativeAttacks2, " Nodes Remaining", vcount(gCasc[[length(gCasc)]])))
@@ -104,7 +123,12 @@ AttackTheGrid <- function(NetworkList,
                                   MinMaxComp = MinMaxComp,
                                   TotalAttackRounds = TotalAttackRounds,
                                   CascadeMode = CascadeMode,
-                                  CumulativeAttacks = CumulativeAttacks2
+                                  CumulativeAttacks = CumulativeAttacks2,
+                                  Demand = Demand,
+                                  Generation = Generation,
+                                  EdgeName = EdgeName,
+                                  VertexName = VertexName,
+                                  Net_generation = Net_generation
     )
   }
   gc()

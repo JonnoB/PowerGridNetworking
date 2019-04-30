@@ -4,11 +4,12 @@
 #'
 #' @param g An igraph object representing a power-grid
 #' @param DeltionOrder The order in which nodes will be targeted for deltion. This is a string vector
+#' @param Name the variable which holds the edge/node names.
 #' @param Target The element that will be attacked. A string, the default is Nodes. Can also be Edge.
 #' @param Number The total number of targets to calulcate the order for
 #' @export
 
-FixedStrategyAttack <- function(g, DeletionOrder, Target = "Nodes", Number = 1){
+FixedStrategyAttack <- function(g, DeletionOrder, Target = "Nodes", Name = "name" ,Number = 1){
   #This function is used for fixed strategy attacks. It takes as an argument a graph g
   #and deletes the next available target on the DeletionOrder vector, it outputs a graph g2
   #g: network, an Igraph object
@@ -17,10 +18,10 @@ FixedStrategyAttack <- function(g, DeletionOrder, Target = "Nodes", Number = 1){
   #Number: The number of the Target to remove
 
   if(Target == "Nodes"){
-    Remaining <- get.vertex.attribute(g, "name")
+    Remaining <- get.vertex.attribute(g, Name)
   } else {
 
-    Remaining <- get.edge.attribute(g, "name")
+    Remaining <- get.edge.attribute(g, Name)
   }
 
 

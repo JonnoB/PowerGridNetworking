@@ -4,12 +4,14 @@
 \alias{CreateTransmission}
 \title{Create Transmission Network}
 \usage{
-CreateTransmission(g, Edgename)
+CreateTransmission(g, EdgeName = "Link", VertexName = "name")
 }
 \arguments{
 \item{g}{an igraph object with attribute of named edges. This is an igraph object}
 
-\item{Edgename}{The attribute name of the edges. This is a string}
+\item{EdgeName}{The attribute name of the edges. This is a string}
+
+\item{VertexName}{the variable that holds the names of the nodes. a character string.}
 }
 \description{
 This function creates the transmission matrix between the edges and the In and Out Nodes

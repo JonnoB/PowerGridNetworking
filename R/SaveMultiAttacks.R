@@ -13,13 +13,27 @@
 #' @param MinMaxComp See AttackTheGrid. Default is 0
 #' @param TotalAttackRounds See AttackTheGrid. Default is 10
 #' @param CascadeMode See AttackTheGrid. Default is set to FALSE
+#' @param Demand the name of the node Load variable. A character string.
+#' @param Generation the name of the node generation variable. A character string.
+#' @param EdgeName the variable that holds the edge names, a character string.
+#' @param VertexName the variable that holds the names of the nodes, to identify the slack ref. a character string
+#' @param Net_generation the name that the net generation data for each node is held in
 #' @keywords multi-attack,
 #' @export
 #' @seealso \code{\link{AttackTheGrid}}, \code{\link{MultiAttackOrder}}
 #' @example
 #' SaveMultiAttacks(g, AttackVectors, folder, CascadeMode = F)
 
-SaveMultiAttacks <- function(g, AttackVectors, folder, MinMaxComp = 0, TotalAttackRounds = 10, CascadeMode = FALSE){
+SaveMultiAttacks <- function(g, AttackVectors,
+                             folder,
+                             MinMaxComp = 0,
+                             TotalAttackRounds = 10,
+                             CascadeMode = FALSE,
+                             Demand = "Demand",
+                             Generation = "Generation",
+                             EdgeName = "Link",
+                             VertexName = "name",
+                             Net_generation = "BalencedPower"){
 
   #set working directory
   gc()
@@ -44,11 +58,16 @@ SaveMultiAttacks <- function(g, AttackVectors, folder, MinMaxComp = 0, TotalAtta
     T1 <- Sys.time()
     #suppres attack the grid messages
     AttackSeries <-suppressMessages(AttackTheGrid(list(list(g)),
-                                                   FixedNodes,
-                                                   referenceGrid = NULL,
-                                                   MinMaxComp,
-                                                   TotalAttackRounds,
-                                                   CascadeMode))
+                                                  FixedNodes,
+                                                  referenceGrid = NULL,
+                                                  MinMaxComp,
+                                                  TotalAttackRounds,
+                                                  CascadeMode,
+                                                  Demand = Demand,
+                                                  Generation = Generation,
+                                                  EdgeName = EdgeName,
+                                                  VertexName = VertexName,
+                                                  Net_generation = Net_generation))
 
     saveRDS(AttackSeries, file = file.path(folder, paste0(NextSim, ".rds")))
     rm(AttackSeries)

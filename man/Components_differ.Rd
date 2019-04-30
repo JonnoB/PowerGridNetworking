@@ -5,7 +5,7 @@
 \title{Find components of a graph that have changed
 Find components of a graph that have changed}
 \usage{
-Components_differ(g, g0)
+Components_differ(g, g0, EdgeName = "name")
 }
 \arguments{
 \item{g}{the current graph}

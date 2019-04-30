@@ -4,12 +4,15 @@
 \alias{FixedStrategyAttack}
 \title{Flexible Removal method}
 \usage{
-FixedStrategyAttack(g, DeletionOrder, Target = "Nodes", Number = 1)
+FixedStrategyAttack(g, DeletionOrder, Target = "Nodes", Name = "name",
+  Number = 1)
 }
 \arguments{
 \item{g}{An igraph object representing a power-grid}
 
 \item{Target}{The element that will be attacked. A string, the default is Nodes. Can also be Edge.}
+
+\item{Name}{the variable which holds the edge/node names.}
 
 \item{Number}{The total number of targets to calulcate the order for}
 

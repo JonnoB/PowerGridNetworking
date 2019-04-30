@@ -5,21 +5,18 @@
 #'The function uses a node attribute "Bus.Order" to identify the slack bus. This may be changed in later versions
 #'
 #' @param g An igraph object that represents a power-grid
+#' @param EdgeName the variable that holds the edge names, a character string.
+#' @param VertexName the variable that holds the names of the nodes, to identify the slack ref. a character string
+#' @param Net_generation the name that the net generation data for each node is held in
 #' @export
 
-CalcOverLimit <- function(g){
+CalcOverLimit <- function(g, EdgeName = "Link", VertexName = "name", Net_generation = "BalencedPower"){
   #This function calculates which edges are over the limit for the current network configuration and demand
   #production profile.
   #g: a graph with multiple edge and vertex attributes. The graph is assumed to be balenced in demand and production.
 
   #finds the slack reference in each component
-  SlackRefCasc <-  tibble(name = get.vertex.attribute(g, "name"),
-                          Bus.Order = get.vertex.attribute(g, "Bus.Order"),
-                          component = components(g)$membership) %>%
-    group_by(component) %>%
-    arrange(Bus.Order) %>%
-    summarise(name = first(name),
-              Nodes = n())
+  SlackRefCasc <-  SlackRefFunc(g, VertexName, Generation = Net_generation)
 
   #message(paste("Total network components ", nrow(SlackRefCasc))) #Not sure how useful this is anymore
 
@@ -38,7 +35,7 @@ CalcOverLimit <- function(g){
 
       if(SlackRef$Nodes > 1){
 
-        gsubset <- PowerFlow(gsubset, SlackRef$name)
+        gsubset <- PowerFlow(gsubset, SlackRef$name,  EdgeName, VertexName, Net_generation)
       }
 
       gsubset

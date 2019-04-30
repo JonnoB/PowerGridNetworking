@@ -5,7 +5,9 @@
 \title{Save attack simulations to folder}
 \usage{
 SaveMultiAttacks(g, AttackVectors, folder, MinMaxComp = 0,
-  TotalAttackRounds = 10, CascadeMode = FALSE)
+  TotalAttackRounds = 10, CascadeMode = FALSE, Demand = "Demand",
+  Generation = "Generation", EdgeName = "Link", VertexName = "name",
+  Net_generation = "BalencedPower")
 }
 \arguments{
 \item{g}{An igraph object representing a power grid.}
@@ -21,6 +23,16 @@ recorded.}
 \item{TotalAttackRounds}{See AttackTheGrid. Default is 10}
 
 \item{CascadeMode}{See AttackTheGrid. Default is set to FALSE}
+
+\item{Demand}{the name of the node Load variable. A character string.}
+
+\item{Generation}{the name of the node generation variable. A character string.}
+
+\item{EdgeName}{the variable that holds the edge names, a character string.}
+
+\item{VertexName}{the variable that holds the names of the nodes, to identify the slack ref. a character string}
+
+\item{Net_generation}{the name that the net generation data for each node is held in}
 }
 \description{
 When creating many attack simulations it can be conveniant to save the resulting graphs to a folder

@@ -4,7 +4,9 @@
 \alias{Cascade}
 \title{Calculate the effects of a cascade}
 \usage{
-Cascade(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL)
+Cascade(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL,
+  Generation = "Generation", Demand = "Demand", EdgeName = "Link",
+  VertexName = "name", Net_generation = "BalencedPower")
 }
 \arguments{
 \item{NetworkList}{A list of power-grid networks.}
@@ -12,6 +14,12 @@ Cascade(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL)
 \item{Iteration}{The current iteration number}
 
 \item{StopCascade}{The number of iterations when cascade will be forced to terminate. An integer, default is set to infinity.}
+
+\item{EdgeName}{the variable that holds the edge names, a character string.}
+
+\item{VertexName}{the variable that holds the names of the nodes, to identify the slack ref. a character string}
+
+\item{Net_generation}{the name that the net generation data for each node is held in}
 }
 \description{
 Iterates through the network removing edges until no edges are over the line limit and the network has stabilised.

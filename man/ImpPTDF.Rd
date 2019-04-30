@@ -4,12 +4,16 @@
 \alias{ImpPTDF}
 \title{Create Impedance matrix and PTDF}
 \usage{
-ImpPTDF(g, SlackRef)
+ImpPTDF(g, SlackRef, EdgeName = "Link", VertexName = "name")
 }
 \arguments{
 \item{g}{An igraph object representing a power-grid}
 
 \item{SlackRef}{The slack node for the power-grid, A character vector}
+
+\item{EdgeName}{the variable that holds the edge names, a character string.}
+
+\item{VertexName}{the variable that holds the names of the nodes, to identify the slack ref. a character string}
 }
 \description{
 This is a wrapper for the more interesting parts of the electrical building blocks

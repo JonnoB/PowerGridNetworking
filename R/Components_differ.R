@@ -10,7 +10,7 @@
 #' @param g0 the previous graph
 #' @export
 #'
-Components_differ<-function(g, g0){
+Components_differ<-function(g, g0, EdgeName = "name"){
   #This function checks to see which subcomponents have changed in the graph and which are the same.
   # It does this by comparing edges. This is because a component may have had an edge removed but still be intact.
   # However, the powerflow will still need to be re-calculated.
@@ -34,14 +34,14 @@ if(gcomps==0){
     gcompsList <- 1:gcomps %>%
       map(~ {
         newgraph <- delete.vertices(g, components(g)$membership != .x)
-        get.edge.attribute(newgraph)$name}
+        get.edge.attribute(newgraph, EdgeName)}
       )
 
     #Create a list of the nodes names in each component, for the previous
     g0compsList <- 1:g0comps %>%
       map(~ {
         newgraph <- delete.vertices(g0, components(g0)$membership != .x)
-        get.edge.attribute(newgraph)$name}
+        get.edge.attribute(newgraph, EdgeName)}
       )
 
     #Make a matrix that allows each list to be checked against the other

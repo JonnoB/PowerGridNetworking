@@ -8,10 +8,14 @@
 #' Blackout size.
 #'
 #' @param NetworkList The output of the AttackTheGridFunction
+#' @param Generation The name of the variable that stores the net generation data. character string
+#' @param Edgename A character string. The default is "name".
+#' @param PowerFlow A character String. The default is "PowerFlow".
+#' @param Link.Limit A character string. The default is "Link.Limit".
 #' @return A dataframe
 #' @export
 
-ExtractNetworkStats <- function( NetworkList){
+ExtractNetworkStats <- function(NetworkList,  Generation = "BalencedPower", EdgeName = "name", PowerFlow = "PowerFlow", Link.Limit = "Link.Limit"){
   # Takes a list of lists of igraph objects where each list is an attack run
   # and the overall list shows the break down of the grid over a series of attacks
   #NetworkList: the out put of the AttackTheGrid function
@@ -24,8 +28,8 @@ ExtractNetworkStats <- function( NetworkList){
     data.frame(MaxComp = components(g)$csize %>% max,
                TotalNodes = vcount(g),
                TotalEdges = ecount(g),
-               PowerGen = sum(abs(get.vertex.attribute(g, "BalencedPower"))/2),
-               GridLoading = mean(LoadLevel(g)$LineLoading))
+               PowerGen = sum(abs(get.vertex.attribute(g, Generation))/2),
+               GridLoading = mean(LoadLevel(g, EdgeName = EdgeName, PowerFlow = PowerFlow, Link.Limit = Link.Limit)$LineLoading))
   }
    ) %>%
     mutate(NodesAttacked = 0:(n()-1),
