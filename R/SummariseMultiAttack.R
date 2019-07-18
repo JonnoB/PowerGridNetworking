@@ -2,7 +2,7 @@
 #'
 #' This function provides a consice way to summarise the output of the ExtractAttackStats function, especially when said function
 #' has been used over a lot of attacks. This is most common when using "SaveMultiAttacks".
-#' @param df A dataframe that is produced by the ExtractStats function.
+#' @param df A dataframe that is produced by the ExtractNetworkStats function.
 #' @param groupingvar The bare unquoted name of the grouping variable, the default is alpha
 #' @export
 #' @example
@@ -29,7 +29,8 @@ SummariseMultiAttack <- function(df, groupingvar = alpha){
               PGmin = min(PGfract),
               mLoad = mean(GridLoading),
               GL95 = quantile(GridLoading, .95),
-              GL05 = quantile(GridLoading, .05)) %>%
+              GL05 = quantile(GridLoading, .05),
+              GC_intact = mean(mean_degree_sqrd>2*mean_degree)) %>%
     ungroup %>%
     group_by(!!groupingvar) %>%
      mutate(ID =n():1) %>%

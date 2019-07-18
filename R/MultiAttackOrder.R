@@ -5,16 +5,21 @@
 #'    Currently the function only generates random attacks.
 #' @param g an igraph object.
 #' @param Sims the number of attack simulations to be performed
+#' @param Target whether Edges or Nodes will be attacked 
+#' @param Name The attribute name of the target
 #' @keywords
 #' @export
 #' @examples
 #' ExampleTargets <- MultiAttackOrder(g, 100)
 
 
-MultiAttackOrder <- function(g, Sims){
+MultiAttackOrder <- function(g, Target = "Nodes", Sims, Name = "name"){
+  
+  Number_attacks <- ifelse(Target == "Nodes", length(V(g)), length(E(g)))
+  
   Out <- 1:Sims %>%
     map(~{
-      AttackOrder <- RandomAttack(g, Number = length(V(g)))
+      AttackOrder <- RandomAttack(g, Target, Number = Number_attacks, Name)
       df <- AttackOrder%>%
         as.matrix() %>%
         t %>%

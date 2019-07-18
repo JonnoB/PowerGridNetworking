@@ -29,7 +29,9 @@ ExtractNetworkStats <- function(NetworkList,  Generation = "BalencedPower", Edge
                TotalNodes = vcount(g),
                TotalEdges = ecount(g),
                PowerGen = sum(abs(get.vertex.attribute(g, Generation))/2),
-               GridLoading = mean(LoadLevel(g, EdgeName = EdgeName, PowerFlow = PowerFlow, Link.Limit = Link.Limit)$LineLoading))
+               GridLoading = mean(LoadLevel(g, EdgeName = EdgeName, PowerFlow = PowerFlow, Link.Limit = Link.Limit)$LineLoading),
+               mean_degree  = mean(degree(g)), #allows the calculation of the molloy-reed criterion
+               mean_degree_sqrd = mean(degree(g)^2)) #allows the calculation of the molloy-reed criterion
   }
    ) %>%
     mutate(NodesAttacked = 0:(n()-1),

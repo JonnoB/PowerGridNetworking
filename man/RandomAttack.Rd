@@ -4,7 +4,7 @@
 \alias{RandomAttack}
 \title{Generate a random attack order}
 \usage{
-RandomAttack(g, Target = "Nodes", Number = 1)
+RandomAttack(g, Target = "Nodes", Number = 1, Name = "name")
 }
 \arguments{
 \item{g}{An igraph object representing a power-grid.}
@@ -12,6 +12,8 @@ RandomAttack(g, Target = "Nodes", Number = 1)
 \item{Target}{The target of the attack. A string either "Nodes" or "Edges".}
 
 \item{Number}{The number of targets to generate. An integer the default is set to 1.}
+
+\item{Name}{The attribute name of the target}
 }
 \description{
 The most simple attack strategy. Targets either nodes or edges.

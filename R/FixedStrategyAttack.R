@@ -20,12 +20,11 @@ FixedStrategyAttack <- function(g, DeletionOrder, Target = "Nodes", Name = "name
   if(Target == "Nodes"){
     Remaining <- get.vertex.attribute(g, Name)
   } else {
-
     Remaining <- get.edge.attribute(g, Name)
   }
 
 
-  DeleteVect <- data_frame(OriginalTarget = DeletionOrder) %>%
+  DeleteVect <- tibble(OriginalTarget = DeletionOrder) %>%
     filter( OriginalTarget %in% Remaining) %>%
     .$OriginalTarget
 
@@ -36,7 +35,7 @@ FixedStrategyAttack <- function(g, DeletionOrder, Target = "Nodes", Name = "name
 
   } else {
 
-    g2 <- DeleteCarefully(g, Target, DeleteVect, Number)
+    g2 <- DeleteCarefully(g, Target, DeleteVect, Number, Name)
 
   }
 

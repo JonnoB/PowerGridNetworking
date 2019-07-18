@@ -7,7 +7,7 @@
 SaveMultiAttacks(g, AttackVectors, folder, MinMaxComp = 0,
   TotalAttackRounds = 10, CascadeMode = FALSE, Demand = "Demand",
   Generation = "Generation", EdgeName = "Link", VertexName = "name",
-  Net_generation = "BalencedPower")
+  Net_generation = "BalencedPower", Target = "Nodes")
 }
 \arguments{
 \item{g}{An igraph object representing a power grid.}
@@ -33,6 +33,8 @@ recorded.}
 \item{VertexName}{the variable that holds the names of the nodes, to identify the slack ref. a character string}
 
 \item{Net_generation}{the name that the net generation data for each node is held in}
+
+\item{Target}{whether nodes or edges are being attacked}
 }
 \description{
 When creating many attack simulations it can be conveniant to save the resulting graphs to a folder

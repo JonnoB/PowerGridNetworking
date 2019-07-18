@@ -4,12 +4,16 @@
 \alias{MultiAttackOrder}
 \title{Generate a dataframe of deletion orders}
 \usage{
-MultiAttackOrder(g, Sims)
+MultiAttackOrder(g, Target = "Nodes", Sims, Name = "name")
 }
 \arguments{
 \item{g}{an igraph object.}
 
+\item{Target}{whether Edges or Nodes will be attacked}
+
 \item{Sims}{the number of attack simulations to be performed}
+
+\item{Name}{The attribute name of the target}
 }
 \description{
 This function takes an igrap object and returns a dataframe where each row represents a node/edge

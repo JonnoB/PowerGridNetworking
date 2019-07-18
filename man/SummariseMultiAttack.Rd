@@ -7,7 +7,7 @@
 SummariseMultiAttack(df, groupingvar = alpha)
 }
 \arguments{
-\item{df}{A dataframe that is produced by the ExtractStats function.}
+\item{df}{A dataframe that is produced by the ExtractNetworkStats function.}
 
 \item{groupingvar}{The bare unquoted name of the grouping variable, the default is alpha}
 }

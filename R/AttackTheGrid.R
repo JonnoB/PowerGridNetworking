@@ -52,7 +52,7 @@ AttackTheGrid <- function(NetworkList,
   }
 
   #Remove the desired part of the network.
-  gCasc <- AttackStrategy %>% #this is crashing... wy?
+  gCasc <- AttackStrategy %>% 
     eval_tidy(., data = list(g = g)) #The capture environment contains delete nodes, however the current g is fed in here
 
 
