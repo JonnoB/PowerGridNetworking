@@ -23,7 +23,7 @@ DeleteCarefully <- function(g, Target, DeleteVect, Number, Name){
       deletetarget <- DeleteVect[1:(vcount(g)-1)]
     }
     #See the edges version below for and explanation of why this code is here
-    delete_seq <- which(get.edge.attribute(g, Name) %in% deletetarget)
+    delete_seq <- which(get.vertex.attribute(g, Name) %in% deletetarget)
     #remove selected node from network
     g2 <- delete.vertices(g, delete_seq)
 

@@ -62,8 +62,8 @@ SaveMultiAttacks <-  function(g, AttackVectors,
     FixedNodes <- quo(FixedStrategyAttack(g, DeletionOrder, Target, Name))
     T1 <- Sys.time()
     #suppres attack the grid messages
-    AttackSeries <-suppressMessages(AttackTheGrid(list(list(g)),
-                                                  FixedNodes,
+    AttackSeries <-suppressMessages(AttackTheGrid(NetworkList = list(list(g)),
+                                                  AttackStrategy = FixedNodes,
                                                   referenceGrid = NULL,
                                                   MinMaxComp,
                                                   TotalAttackRounds,
