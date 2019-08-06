@@ -1,6 +1,8 @@
 # Power Grid Networking
 ## An R package for complex network analysis of cascading failures on power grids.
 
+The R package is a general set of functions that can be used for DC simulation of cascading failures on the power grid. It also includes functions for simulating targeted and random attacks on a given power network. The package provides support for networks with Line limits as well as functions for generating line limits using either proportional loading or a linear models derived from real line limit data.
+
 # Instructions
 1. Open [R](https://cran.r-project.org/)/[Rstudio](https://www.rstudio.com/) and ensure that `devtools` has been installed
 1. Run the following code `library(devtools); install_github("JonnoB/PowerGridNetworking")`
