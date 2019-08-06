@@ -6,7 +6,7 @@ The R package is a general set of functions that can be used for DC simulation o
 # Instructions
 1. Open [R](https://cran.r-project.org/)/[Rstudio](https://www.rstudio.com/) and ensure that `devtools` has been installed
 1. Run the following code `library(devtools); install_github("JonnoB/PowerGridNetworking")`
-1. Load the Power Grid Networking package normally using `library(PowerGridNetworking")`
+1. Load the Power Grid Networking package normally using `library(PowerGridNetworking)`
 1. All functions have help files e.g `?PowerFlow`
 
 The package can also be downloaded or cloned then installed locally using the `install` function from `devtools`.
