@@ -2,11 +2,12 @@
 ## An R package for complex network analysis of cascading failures on power grids.
 
 # Instructions
-1. Download or clone the repo
-1. Open [R](https://cran.r-project.org/)/[Rstudio](https://www.rstudio.com/) and ensure that devtools has been installed
+1. Open [R](https://cran.r-project.org/)/[Rstudio](https://www.rstudio.com/) and ensure that `devtools` has been installed
 1. Run the following code `library(devtools); install_github("JonnoB/PowerGridNetworking")`
 1. Load the Power Grid Networking package normally using `library(PowerGridNetworking")`
 1. All functions have help files e.g `?PowerFlow`
+
+The package can also be downloaded or cloned then installed locally using the `install` function from `devtools`.
 
 # Comments
 The package is designed to run on power networks represented by `igraph` object so ensure that this package is installed.
