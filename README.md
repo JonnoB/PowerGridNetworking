@@ -1,7 +1,7 @@
 # Power Grid Networking
 ## An R package for complex network analysis of cascading failures on power grids.
 
-The R package is a general set of functions that can be used for DC simulation of cascading failures on the power grid. It provides the tools necessary to run reproducible simulations in accordance with the PEARL framework discussed in [Bourne et al 2019](https://arxiv.org/abs/1907.12848). 
+The R package is a general set of functions that can be used for DC simulation of cascading failures on the power grid. It provides the tools necessary to run reproducible simulations in accordance with the PEARL framework discussed in [Bourne et al. 2019](https://arxiv.org/abs/1907.12848). 
 It also includes functions for simulating targeted and random attacks on a given power network. The package provides support for networks with Line limits as well as functions for generating line limits using either proportional loading or a linear models derived from real line limit data.
 
 # Instructions
