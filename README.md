@@ -15,5 +15,5 @@ The package can also be downloaded or cloned then installed locally using the `i
 # Comments
 The package is designed to run on power networks represented by `igraph` object so ensure that this package is installed.
 
-The package is currently light on examples these will be added as development continues. Good example datasets to explore can be found at [Electricity Ten Year Statement (ETYS)](https://www.nationalgrideso.com/insights/electricity-ten-year-statement-etys) or [IEEE](https://icseg.iti.illinois.edu/power-cases/). A use case of this package can be found at [this repo](https://github.com/JonnoB/ProportionalLoading).
+The package is currently light on examples these will be added as development continues. Good example datasets to explore can be found at [Electricity Ten Year Statement (ETYS)](https://www.nationalgrideso.com/insights/electricity-ten-year-statement-etys) or [IEEE](https://icseg.iti.illinois.edu/power-cases/). A use case of this package can be found at [this repo](https://github.com/JonnoB/ProportionalLoading), which was used for the analysis in the article [Bourne et al. 2019](https://arxiv.org/abs/1907.12848).
 
