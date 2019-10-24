@@ -1,8 +1,7 @@
 #' Generate a dataframe of deletion orders
 #'
-#' This function takes an igrap object and returns a dataframe where each row represents a node/edge
-#'    deletion order. It is used for simulating a large amount of attacks in a reproducible way.
-#'    Currently the function only generates random attacks.
+#' This function takes an igraph object and returns a dataframe where each row represents a node/edge
+#'    deletion order. It is used for simulating a large amount of random attacks in a reproducible way.
 #' @param g an igraph object.
 #' @param Sims the number of attack simulations to be performed
 #' @param Target whether Edges or Nodes will be attacked 

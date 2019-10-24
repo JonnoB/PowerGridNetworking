@@ -1,12 +1,14 @@
 #' Calculate DC power flow
 #'
-#' TCalculates the PowerFlow from a graph that contains the following attributes,
-#' named edges, edgeweights, a balanced power generation and demand column, Powerflow (will be overwritten)
-#' @param g an igraph object
-#' @param SlackRef the node to remove from the calculations to prevent the matrix being singular
-#' @param EdgeName the variable that holds the edge names, a character string.
-#' @param VertexName the variable that holds the names of the nodes, to identify the slack ref. a character string
-#' @param Net_generation the name that the net generation data for each node is held in
+#' Calculates the PowerFlow from a graph that contains the following attributes,
+#' named edges, edgeweights, a balanced power generation and demand column. Writes an attribute called Powerflow 
+#' (existing attributeof the same name will be overwritten). 
+#' The function outputs a a graph with the correct power flow values
+#' @param g An igraph object representing the power grid
+#' @param SlackRef A character strong. The node to remove from the calculations to prevent the matrix being singular
+#' @param EdgeName The variable that holds the edge names, a character string.
+#' @param VertexName The variable that holds the names of the nodes, to identify the slack ref. a character string
+#' @param Net_generation The name that the net generation data for each node is held in
 #' @keywords power flow
 #' @export
 #' @examples

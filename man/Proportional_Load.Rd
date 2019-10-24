@@ -16,6 +16,16 @@ Proportional_Load(g, alpha, PowerFlow = "PowerFlow",
 
 \item{Link.Limit}{The attribute name that will be used when setting the line limits.}
 }
+\value{
+The original network with an additional edge attribute that is a numeric line limit created by; Line Limit =  \eqn{\alpha*PowerFlow}
+}
 \description{
 This function sets the line limits to the tolerance value \eqn{\alpha} chosen by the user.
+}
+\details{
+Proportional loading should only be used when there are no other options available as it can
+   be challenging to set the value of \eqn{\alpha} close to the system mean.
+   \href{https://arxiv.org/abs/1907.12848}{Bourne et al. 2019} find that values of \eqn{\alpha} that
+   deviate substantially from the actual value of \eqn{\alpha} given that load profile will not represent
+   the behaviour of the power grid under attack or collapse.
 }

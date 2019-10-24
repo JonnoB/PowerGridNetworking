@@ -8,7 +8,7 @@
 #' attack type.
 #' @param referenceGrid The grid that will be used to test the largest component against if NULL it uses the given network.
 #' @param MinMaxComp The minimum size of the maximum component, as a fraction, for the process to continue, the default is set
-#' to 0.8.
+#' to 0.0 complete collapse.
 #' @param TotalAttackRounds The maximum number of nodes to be removed before the process stops.
 #' @param CascadeMode Whether the power flow equations will be used to check line-overloading or not.
 #' @param CumulativeAttacks  The total number of attacks that have taken place so far.
@@ -31,7 +31,7 @@
 AttackTheGrid <- function(NetworkList,
                           AttackStrategy,
                           referenceGrid = NULL,
-                          MinMaxComp = 0.8,
+                          MinMaxComp = 0.0,
                           TotalAttackRounds=1000,
                           CascadeMode = TRUE,
                           CumulativeAttacks = NULL,

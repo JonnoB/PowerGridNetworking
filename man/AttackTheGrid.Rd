@@ -5,7 +5,7 @@
 \title{Initiate power-grid attack simulation}
 \usage{
 AttackTheGrid(NetworkList, AttackStrategy, referenceGrid = NULL,
-  MinMaxComp = 0.8, TotalAttackRounds = 1000, CascadeMode = TRUE,
+  MinMaxComp = 0, TotalAttackRounds = 1000, CascadeMode = TRUE,
   CumulativeAttacks = NULL, Demand = "Demand",
   Generation = "Generation", EdgeName = "Link", VertexName = "name",
   Net_generation = "BalencedPower")
@@ -20,7 +20,7 @@ attack type.}
 \item{referenceGrid}{The grid that will be used to test the largest component against if NULL it uses the given network.}
 
 \item{MinMaxComp}{The minimum size of the maximum component, as a fraction, for the process to continue, the default is set
-to 0.8.}
+to 0.0 complete collapse.}
 
 \item{TotalAttackRounds}{The maximum number of nodes to be removed before the process stops.}
 
