@@ -18,3 +18,6 @@ RandomAttack(g, Target = "Nodes", Number = 1, Name = "name")
 \description{
 The most simple attack strategy. Targets either nodes or edges.
 }
+\examples{
+RandomAttack(g, Number = V(g))
+}

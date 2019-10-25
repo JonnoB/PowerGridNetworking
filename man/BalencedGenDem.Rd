@@ -20,3 +20,6 @@ A character vector the default is set to "BalencedPower".}
 Ensures that the demand and generation of the power network are balanced. This is used before power
   flow is calculated.
 }
+\examples{
+BalencedGenDem(g, DemandVar, GenerationVar, OutputVar = "BalencedPower")
+}

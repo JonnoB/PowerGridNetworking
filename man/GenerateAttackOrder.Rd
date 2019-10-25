@@ -20,5 +20,5 @@ Takes the output from the 'MultiAttackOrder' function and produces an attack vec
 GenerateAttackOrder(SimOrder, folder)
 }
 \seealso{
-\code{\link{MultiAttackOrder}}
+\code{\link{MultiAttackOrder}}, \code{\link{SaveMultiAttacks}}
 }

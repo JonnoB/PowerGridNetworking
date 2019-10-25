@@ -11,7 +11,7 @@
 #' @param Edgename A character string of the edge attribute that holds edge names. Default is "Link"
 #' @param Weight A character string of the edge.attribute for edge weights. Default is "Y
 #' @export
-#' @example
+#' @examples
 #' This example doesn't show in the documentatio, I don't know why
 #' g2 <-make_ego_graph(g, 2, "AXMI")[[1]]
 #' plot(g2)

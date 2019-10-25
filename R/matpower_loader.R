@@ -7,7 +7,7 @@
 #' @param output_graph A logical value. This determines whether the function ouputs an igraph network of the matpower file or a 
 #' two element list where the first element is the bus/node data and the second element is the branch data
 #' @export
-#' @example
+#' @examples
 #' # This example requires the loading of a matpower file. I don't know how to add raw datasets to the package yet so this will have to wait.
 
 matpower_loader <- function(file_path, output_graph = TRUE){

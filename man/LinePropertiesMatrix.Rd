@@ -24,3 +24,9 @@ This function creates a line properties matrix that can be used with the output 
  The function takes an igraph object of a power-grid and returns diagonal matrix. Where the diagonal is the edgeweight of
  each edge.
 }
+\examples{
+This example doesn't show in the documentatio, I don't know why
+g2 <-make_ego_graph(g, 2, "AXMI")[[1]]
+plot(g2)
+LinePropertiesMatrix(g2)
+}

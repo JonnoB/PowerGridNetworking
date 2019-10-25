@@ -6,7 +6,6 @@
 #' @param Sims the number of attack simulations to be performed
 #' @param Target whether Edges or Nodes will be attacked 
 #' @param Name The attribute name of the target
-#' @keywords
 #' @export
 #' @examples
 #' ExampleTargets <- MultiAttackOrder(g, 100)

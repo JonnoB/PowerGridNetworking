@@ -29,3 +29,6 @@ Proportional loading should only be used when there are no other options availab
    deviate substantially from the actual value of \eqn{\alpha} given that load profile will not represent
    the behaviour of the power grid under attack or collapse.
 }
+\examples{
+Proportional_Load(g, alpha = 1.05)
+}

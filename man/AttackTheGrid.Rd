@@ -8,7 +8,7 @@ AttackTheGrid(NetworkList, AttackStrategy, referenceGrid = NULL,
   MinMaxComp = 0, TotalAttackRounds = 1000, CascadeMode = TRUE,
   CumulativeAttacks = NULL, Demand = "Demand",
   Generation = "Generation", EdgeName = "Link", VertexName = "name",
-  Net_generation = "BalencedPower")
+  Net_generation = "BalencedPower", edge_limit = "Link.Limit")
 }
 \arguments{
 \item{NetworkList}{A list of lists where each element of the sub list is an igraph object, the first time it is used the

@@ -43,6 +43,9 @@ When creating many attack simulations it can be conveniant to save the resulting
    When the process is started again after and interuption the function finds the last
    save attack and starts the simulation process from there.
 }
+\examples{
+SaveMultiAttacks(g, AttackVectors, folder, CascadeMode = F)
+}
 \seealso{
 \code{\link{AttackTheGrid}}, \code{\link{MultiAttackOrder}}
 }

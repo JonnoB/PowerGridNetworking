@@ -20,3 +20,7 @@ This is a wrapper for the more interesting parts of the electrical building bloc
   It creates both matrices as they almost always both need to be created and they take time so producing
   together is more efficient than producing each one on its own.
 }
+\examples{
+g2 <-make_ego_graph(g, 2, "AXMI")[[1]]
+ImpPTDF(g, SlackRef)
+}

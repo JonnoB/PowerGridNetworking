@@ -22,6 +22,9 @@ The function follows the method described in Pepyne 2007.
    The function is typically used in conjunction with the LinePropertiesMatrix function. The function
    is a key part of calculating ImpPTDF.
 }
+\examples{
+ CreateTransmission(g,  EdgeName = "Link", VertexName = "name")
+}
 \seealso{
 \code{\link{LinePropertiesMatrix}} \code{\link{ImpPTDF}}
 }

@@ -39,7 +39,9 @@ AttackTheGrid <- function(NetworkList,
                           Generation = "Generation",
                           EdgeName = "Link",
                           VertexName = "name",
-                          Net_generation = "BalencedPower"){
+                          Net_generation = "BalencedPower",
+                          edge_limit = "Link.Limit"
+                          ){
 
   #gets the last network in the list
   gc()
@@ -83,7 +85,9 @@ AttackTheGrid <- function(NetworkList,
                        Generation = Generation,
                        EdgeName = EdgeName,
                        VertexName = VertexName,
-                       Net_generation = Net_generation)
+                       Net_generation = Net_generation,
+                       edge_limit = edge_limit
+                       )
 
     }
 
@@ -128,7 +132,8 @@ AttackTheGrid <- function(NetworkList,
                                   Generation = Generation,
                                   EdgeName = EdgeName,
                                   VertexName = VertexName,
-                                  Net_generation = Net_generation
+                                  Net_generation = Net_generation,
+                                  edge_limit = edge_limit
     )
   }
   gc()

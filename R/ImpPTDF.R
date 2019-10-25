@@ -8,7 +8,7 @@
 #' @param EdgeName the variable that holds the edge names, a character string.
 #' @param VertexName the variable that holds the names of the nodes, to identify the slack ref. a character string
 #' @export
-#' @example
+#' @examples
 #' g2 <-make_ego_graph(g, 2, "AXMI")[[1]]
 #' ImpPTDF(g, SlackRef)
 #This is a reference for the book I used to get good info on the admittance matrix.. Add into package when possible
@@ -33,7 +33,7 @@ ImpPTDF <- function(g, SlackRef, EdgeName = "Link", VertexName = "name"){
   A <- AZero[,colnames(AZero)!=SlackRef, drop = FALSE]
 
   #Create the diagonal matrix of edge impedance
-  C <- LinePropertiesMatrix(g)
+  C <- LinePropertiesMatrix(g, EdgeName, Weight = "Y")
 
   B <- t(A) %*% C %*% A
 

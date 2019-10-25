@@ -24,3 +24,6 @@ A dataframe
 Load level is used as a way of describing how close a power-grid or power line is to tripping.
 Load level is the inverse of tolerance (\eqn{\alpha}).
 }
+\examples{
+LoadLevel(g)
+}

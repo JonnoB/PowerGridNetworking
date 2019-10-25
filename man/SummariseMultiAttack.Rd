@@ -15,3 +15,6 @@ SummariseMultiAttack(df, groupingvar = alpha)
 This function provides a consice way to summarise the output of the ExtractAttackStats function, especially when said function
 has been used over a lot of attacks. This is most common when using "SaveMultiAttacks".
 }
+\examples{
+SummariseMultiAttack(df)
+}

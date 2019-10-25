@@ -12,7 +12,7 @@
 #' @param VertexName the variable that holds the names of the nodes. a character string.
 #' @export
 #' @seealso \code{\link{LinePropertiesMatrix}} \code{\link{ImpPTDF}}
-#' @example
+#' @examples
 #'  CreateTransmission(g,  EdgeName = "Link", VertexName = "name")
 
 CreateTransmission <- function(g, EdgeName = "Link", VertexName = "name"){

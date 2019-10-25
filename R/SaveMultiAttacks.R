@@ -22,7 +22,7 @@
 #' @keywords multi-attack,
 #' @export
 #' @seealso \code{\link{AttackTheGrid}}, \code{\link{MultiAttackOrder}}
-#' @example
+#' @examples
 #' SaveMultiAttacks(g, AttackVectors, folder, CascadeMode = F)
 
 SaveMultiAttacks <-  function(g, AttackVectors,

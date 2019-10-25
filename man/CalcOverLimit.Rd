@@ -2,23 +2,32 @@
 % Please edit documentation in R/CalcOverLimit.R
 \name{CalcOverLimit}
 \alias{CalcOverLimit}
-\title{Find which edges are over the limit}
+\title{Calculate power flow across all components in the network}
 \usage{
 CalcOverLimit(g, EdgeName = "Link", VertexName = "name",
-  Net_generation = "BalencedPower")
+  Net_generation = "BalencedPower", power_flow = "PowerFlow")
 }
 \arguments{
 \item{g}{An igraph object that represents a power-grid}
 
-\item{EdgeName}{the variable that holds the edge names, a character string.}
+\item{EdgeName}{The variable that holds the edge names, a character string.}
 
-\item{VertexName}{the variable that holds the names of the nodes, to identify the slack ref. a character string}
+\item{VertexName}{The variable that holds the names of the nodes, to identify the slack ref. a character string}
 
-\item{Net_generation}{the name that the net generation data for each node is held in}
+\item{Net_generation}{The name that the net generation data for each node is held in}
+
+\item{power_flow}{A character string. This value indicates the name of the edge attribute that holds power flow, the default is "PowerFlow"}
 }
 \description{
-This function checks to see which lines are over limit and removes them and re-calculates power flow in the network
+This function calculates the power flow across all components of the network, then re combines them back into a single network using union2
+This function has a legacy name. It does not calculate which edges are over the limit. This will be changed at some point
 }
 \details{
-The function uses a node attribute "Bus.Order" to identify the slack bus. This may be changed in later versions
+The function uses SlackRefFunc and the largest generator to find the slack bus
+}
+\examples{
+CalcOverLimit(g, EdgeName = "Link", VertexName = "name", Net_generation = "BalencedPower")
+}
+\seealso{
+\code{\link{SlackRefFunc}},\code{\link{union2}}
 }

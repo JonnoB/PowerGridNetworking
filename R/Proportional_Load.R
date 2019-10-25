@@ -17,7 +17,7 @@
 #'    deviate substantially from the actual value of \eqn{\alpha} given that load profile will not represent
 #'    the behaviour of the power grid under attack or collapse.
 #' @export
-#' @example
+#' @examples
 #' Proportional_Load(g, alpha = 1.05)
 Proportional_Load <-function(g, alpha, PowerFlow = "PowerFlow", Link.Limit = "Link.Limit"){
 

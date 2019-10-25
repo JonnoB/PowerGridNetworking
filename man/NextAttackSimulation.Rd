@@ -16,6 +16,10 @@ When multiple attack simulations are being performed the operation can be interr
   This function searches the folder where the simulations are being stored and returns
   the next attack simulation. This function is mostly only used as part of the MultiAttack function
 }
+\examples{
+  NextAttackSimulation(SimOrder, folder)
+
+}
 \seealso{
 \code{\link{MultiAttackOrder}}, \code{\link{MultiAttack}}
 }

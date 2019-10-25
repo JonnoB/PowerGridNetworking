@@ -5,7 +5,7 @@
 #' @param df A dataframe that is produced by the ExtractNetworkStats function.
 #' @param groupingvar The bare unquoted name of the grouping variable, the default is alpha
 #' @export
-#' @example
+#' @examples
 #' SummariseMultiAttack(df)
 
 SummariseMultiAttack <- function(df, groupingvar = alpha){

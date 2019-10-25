@@ -6,7 +6,7 @@
 #' @param Number The number of targets to generate. An integer the default is set to 1.
 #' @param Name The attribute name of the target
 #' @export
-#' @example
+#' @examples
 #' RandomAttack(g, Number = V(g))
 
 RandomAttack <-function(g, Target = "Nodes", Number = 1, Name = "name"){

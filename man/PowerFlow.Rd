@@ -5,22 +5,26 @@
 \title{Calculate DC power flow}
 \usage{
 PowerFlow(g, SlackRef, EdgeName = "Link", VertexName = "name",
-  Net_generation = "BalencedPower")
+  Net_generation = "BalencedPower", power_flow = "PowerFlow")
 }
 \arguments{
-\item{g}{an igraph object}
+\item{g}{An igraph object representing the power grid}
 
-\item{SlackRef}{the node to remove from the calculations to prevent the matrix being singular}
+\item{SlackRef}{A character strong. The node to remove from the calculations to prevent the matrix being singular}
 
-\item{EdgeName}{the variable that holds the edge names, a character string.}
+\item{EdgeName}{The variable that holds the edge names, a character string.}
 
-\item{VertexName}{the variable that holds the names of the nodes, to identify the slack ref. a character string}
+\item{VertexName}{The variable that holds the names of the nodes, to identify the slack ref. a character string}
 
-\item{Net_generation}{the name that the net generation data for each node is held in}
+\item{Net_generation}{The name that the net generation data for each node is held in}
+
+\item{power_flow}{A character string. The name of the edge attribute that will hold the power flow information}
 }
 \description{
-TCalculates the PowerFlow from a graph that contains the following attributes,
-named edges, edgeweights, a balanced power generation and demand column, Powerflow (will be overwritten)
+Calculates the PowerFlow from a graph that contains the following attributes,
+named edges, edgeweights, a balanced power generation and demand column. Writes a new edge attribute of power flow
+(existing attribute of the same name will be overwritten). 
+The function outputs a a graph with the correct power flow values
 }
 \examples{
 PowerFlow(g Slackref)

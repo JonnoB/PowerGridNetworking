@@ -7,7 +7,7 @@
 #' @param folder The folder where the attack simulations are saved
 #' @export
 #' @seealso \code{\link{MultiAttackOrder}}, \code{\link{MultiAttack}}
-#' @example
+#' @examples
 #'   NextAttackSimulation(SimOrder, folder)
 #'
 

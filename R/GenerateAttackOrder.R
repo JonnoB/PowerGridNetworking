@@ -6,9 +6,8 @@
 #'
 #' @param SimOrder The dataframe produced by the MultiAttackOrder
 #' @param folder the folder that the attack simuations are being saved to
-#' @keywords
 #' @export
-#' @seealso \code{\link{MultiAttackOrder}}
+#' @seealso \code{\link{MultiAttackOrder}}, \code{\link{SaveMultiAttacks}}
 #' @examples
 #' GenerateAttackOrder(SimOrder, folder)
 

@@ -8,13 +8,27 @@
 #' @param NetworkList A list of power-grid networks.
 #' @param Iteration The current iteration number
 #' @param StopCascade The number of iterations when cascade will be forced to terminate. An integer, default is set to infinity.
-#' @Demand the name of the node Load variable. A character string.
-#' @Generation the name of the node generation variable. A character string.
-#' @param EdgeName the variable that holds the edge names, a character string.
-#' @param VertexName the variable that holds the names of the nodes, to identify the slack ref. a character string
-#' @param Net_generation the name that the net generation data for each node is held in
+#' @param Demand the name of the node Load variable. A character string.
+#' @param Generation The name of the node generation variable. A character string.
+#' @param EdgeName The variable that holds the edge names, a character string.
+#' @param VertexName The variable that holds the names of the nodes, to identify the slack ref. a character string
+#' @param Net_generation The name that the net generation data for each node is held in
+#' @param power_flow A character string. This value indicates the name of the edge attribute that holds power flow, the default is "PowerFlow"
+#' @param edge_limit A character string. This value indicates the name of the edge attribute that holds the edge limit, the default is "Link.Limit"
 #' @export
 #' @seealso \code{\link{AttackTheGrid}}
+#' Cascade(NetworkList,
+#' Iteration = 0,
+#' StopCascade = Inf,
+#' g0 = NULL,
+#' Generation = "Generation",
+#' Demand = "Demand",
+#' EdgeName = "Link",
+#' VertexName = "name",
+#' Net_generation = "BalencedPower",
+#' power_flow = "PowerFlow",
+#' edge_limit = "Link.Limit"
+#' )
 
 Cascade <- function(NetworkList,
                     Iteration = 0,
@@ -24,7 +38,10 @@ Cascade <- function(NetworkList,
                     Demand = "Demand",
                     EdgeName = "Link",
                     VertexName = "name",
-                    Net_generation = "BalencedPower"){
+                    Net_generation = "BalencedPower",
+                    power_flow = "PowerFlow",
+                    edge_limit = "Link.Limit"
+                    ){
   #This Function iterates through the network removing edges until there are no further overpower edges to remove
   #This function uses the Bus order to choose the slack reference should this be changed?
   #Iteration: the number of iteration number of the cascade, used to keep track of what is going on
@@ -62,10 +79,9 @@ Cascade <- function(NetworkList,
 
   DeleteEdges <- as_data_frame(g) %>%
     mutate(index = 1:n(),
-           Over.Limit = abs(PowerFlow) > Link.Limit) %>%
+           Over.Limit = abs(.data[[power_flow]]) > .data[[edge_limit]]) %>%
     filter(Over.Limit)
 
-  #print("OVERERLOADSSS")
   #If the cascade has been going for more than 1 round then the overloaded edges need to be added together
   if(Iteration==1){
     Overloads <- DeleteEdges %>% pull(EdgeName)
@@ -108,7 +124,10 @@ Cascade <- function(NetworkList,
                            Demand = Demand,
                            EdgeName = EdgeName,
                            VertexName = VertexName ,
-                           Net_generation = Net_generation)
+                           Net_generation = Net_generation,
+                           power_flow = power_flow,
+                           edge_limit = edge_limit
+                           )
   }
 
   message(paste("Cascade has completed with", Iteration, "iterations"))

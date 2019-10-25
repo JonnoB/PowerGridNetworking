@@ -6,7 +6,8 @@
 \usage{
 Cascade(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL,
   Generation = "Generation", Demand = "Demand", EdgeName = "Link",
-  VertexName = "name", Net_generation = "BalencedPower")
+  VertexName = "name", Net_generation = "BalencedPower",
+  power_flow = "PowerFlow", edge_limit = "Link.Limit")
 }
 \arguments{
 \item{NetworkList}{A list of power-grid networks.}
@@ -15,11 +16,19 @@ Cascade(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL,
 
 \item{StopCascade}{The number of iterations when cascade will be forced to terminate. An integer, default is set to infinity.}
 
-\item{EdgeName}{the variable that holds the edge names, a character string.}
+\item{Generation}{The name of the node generation variable. A character string.}
 
-\item{VertexName}{the variable that holds the names of the nodes, to identify the slack ref. a character string}
+\item{Demand}{the name of the node Load variable. A character string.}
 
-\item{Net_generation}{the name that the net generation data for each node is held in}
+\item{EdgeName}{The variable that holds the edge names, a character string.}
+
+\item{VertexName}{The variable that holds the names of the nodes, to identify the slack ref. a character string}
+
+\item{Net_generation}{The name that the net generation data for each node is held in}
+
+\item{power_flow}{A character string. This value indicates the name of the edge attribute that holds power flow, the default is "PowerFlow"}
+
+\item{edge_limit}{A character string. This value indicates the name of the edge attribute that holds the edge limit, the default is "Link.Limit"}
 }
 \description{
 Iterates through the network removing edges until no edges are over the line limit and the network has stabilised.
@@ -31,4 +40,16 @@ This is a recursive function that calls itself repeatedly until the cascade has 
 }
 \seealso{
 \code{\link{AttackTheGrid}}
+Cascade(NetworkList,
+Iteration = 0,
+StopCascade = Inf,
+g0 = NULL,
+Generation = "Generation",
+Demand = "Demand",
+EdgeName = "Link",
+VertexName = "name",
+Net_generation = "BalencedPower",
+power_flow = "PowerFlow",
+edge_limit = "Link.Limit"
+)
 }

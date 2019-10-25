@@ -9,7 +9,7 @@
 #' @param PowerFlow A character String. The default is "PowerFlow".
 #' @param Link.Limit A character string. The default is "Link.Limit".
 #' @export
-#' @example
+#' @examples
 #' LoadLevel(g)
 
 LoadLevel <- function(g, EdgeName = "name", PowerFlow = "PowerFlow", Link.Limit = "Link.Limit"){

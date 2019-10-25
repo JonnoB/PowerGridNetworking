@@ -9,7 +9,7 @@
 #' @param OutputVar The desired output variable for the balanced net power demand of each node.
 #'    A character vector the default is set to "BalencedPower".
 #' @export
-#' @example
+#' @examples
 #' BalencedGenDem(g, DemandVar, GenerationVar, OutputVar = "BalencedPower")
 BalencedGenDem <- function(g, DemandVar, GenerationVar, OutputVar = "BalencedPower"){
   #Balences the generation and demand across multiple isolated componants and removes all dead islands

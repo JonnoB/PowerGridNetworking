@@ -1,13 +1,28 @@
+#' Delete Carefully
+#'  This is a helper fucntion for the Fixed and Adaptive strategies. It is called by the functions FixedStrategyAttack and AdaptiveStrategyAttack..
+#' It deletes nodes/edges without trying to delete more nodes/edges
+#' than there are in the graph. It is a bit long and fiddly so is broken out for ease of maintenance.
+#' It takes in a graph and outputs a smaller graph
+#' @param g the graph that is going to be modified
+#' @param Target whether Nodes or Edges are being targeted.
+#' @param DeleteVect The vector of names to be deleted
+#' @param Number The number of Nodes/Edges to be deleted
+#' @param Name the name of the target e.g "Link", or "name"
+#' @export
+#' @seealso @seealso \code{\link{FixedStrategyAttack}}, \code{\link{AdaptiveStrategyAttack}}
+#' @examples
+#'DeleteCarefully(g, Target, DeleteVect, Number, Name)
+#'
 DeleteCarefully <- function(g, Target, DeleteVect, Number, Name){
-  #This is a helper fucntion for the Fixed and Adaptive strategies. It is called by the functions FixedStrategyAttack and AdaptiveStrategyAttack.. 
-  #It deletes nodes/edges without trying to delete more nodes/edges
-  #than there are in the graph. It is a bit long and fiddly so is broken out for ease of maintenance.
-  #It takes in a graph and outputs a smaller graph
-  #g: the graph that is going to be modified
-  #Target: whether Nodes or Edges are being targeted.
-  #DeleteVect: The vector of names to be deleted
-  #Number: The number of Nodes/Edges to be deleted
-  #Name: the name of the target e.g "Link", or "name"
+  # This is a helper fucntion for the Fixed and Adaptive strategies. It is called by the functions FixedStrategyAttack and AdaptiveStrategyAttack..
+  # It deletes nodes/edges without trying to delete more nodes/edges
+  # than there are in the graph. It is a bit long and fiddly so is broken out for ease of maintenance.
+  # It takes in a graph and outputs a smaller graph
+  # g: the graph that is going to be modified
+  # Target: whether Nodes or Edges are being targeted.
+  # DeleteVect: The vector of names to be deleted
+  # Number: The number of Nodes/Edges to be deleted
+  # Name: the name of the target e.g "Link", or "name"
 
   if(Target == "Nodes"){
 
