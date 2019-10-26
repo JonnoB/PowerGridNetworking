@@ -8,7 +8,8 @@ AttackTheGrid(NetworkList, AttackStrategy, referenceGrid = NULL,
   MinMaxComp = 0, TotalAttackRounds = 1000, CascadeMode = TRUE,
   CumulativeAttacks = NULL, Demand = "Demand",
   Generation = "Generation", EdgeName = "Link", VertexName = "name",
-  Net_generation = "BalencedPower", edge_limit = "Link.Limit")
+  Net_generation = "BalencedPower", power_flow = "PowerFlow",
+  edge_limit = "Link.Limit")
 }
 \arguments{
 \item{NetworkList}{A list of lists where each element of the sub list is an igraph object, the first time it is used the
@@ -37,6 +38,10 @@ to 0.0 complete collapse.}
 \item{VertexName}{the variable that holds the names of the nodes, to identify the slack ref. a character string}
 
 \item{Net_generation}{the name that the net generation data for each node is held in}
+
+\item{power_flow}{A character string. This value indicates the name of the edge attribute that holds power flow, the default is "PowerFlow"}
+
+\item{edge_limit}{A character string. This value indicates the name of the edge attribute that holds the edge limit, the default is "Link.Limit"}
 }
 \description{
 This function simulates an attack on the power grid using the parameter settings you choose

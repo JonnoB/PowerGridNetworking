@@ -17,6 +17,8 @@
 #' @param EdgeName the variable that holds the edge names, a character string.
 #' @param VertexName the variable that holds the names of the nodes, to identify the slack ref. a character string
 #' @param Net_generation the name that the net generation data for each node is held in
+#' @param power_flow A character string. This value indicates the name of the edge attribute that holds power flow, the default is "PowerFlow"
+#' @param edge_limit A character string. This value indicates the name of the edge attribute that holds the edge limit, the default is "Link.Limit"
 #' @export
 #' @examples
 #' AttackTheGrid(NetworkList, AttackStrategy, SubstationData, EdgeData, referenceGrid = NULL, MinMaxComp = 0.8)
@@ -40,6 +42,7 @@ AttackTheGrid <- function(NetworkList,
                           EdgeName = "Link",
                           VertexName = "name",
                           Net_generation = "BalencedPower",
+                          power_flow = "PowerFlow",
                           edge_limit = "Link.Limit"
                           ){
 
@@ -86,6 +89,7 @@ AttackTheGrid <- function(NetworkList,
                        EdgeName = EdgeName,
                        VertexName = VertexName,
                        Net_generation = Net_generation,
+                       power_flow = power_flow,
                        edge_limit = edge_limit
                        )
 
@@ -133,6 +137,7 @@ AttackTheGrid <- function(NetworkList,
                                   EdgeName = EdgeName,
                                   VertexName = VertexName,
                                   Net_generation = Net_generation,
+                                  power_flow = power_flow,
                                   edge_limit = edge_limit
     )
   }
