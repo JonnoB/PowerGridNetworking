@@ -53,7 +53,6 @@ Cascade <- function(NetworkList,
 
   #if graph comparison is being used then the process starts here.
   #This stops needless subgraphs being recalculated then joined.
-  #The rejoining process is slow so this speeds it up
   if(!is.null(g0)){
     #find components that need to be recalculuated
     RecalcFlow <- (1:components(g)$no)[Components_differ(g, g0, EdgeName = EdgeName)]
@@ -65,13 +64,14 @@ Cascade <- function(NetworkList,
   }
 
 
-  g <- CalcOverLimit(g,  EdgeName, VertexName, Net_generation)
+  #Calculate new power flow over all edges after target has been removed
+  #... This function does not calculate whether the lines are over the limit 
+  g <- CalcOverLimit(g,  EdgeName, VertexName, Net_generation, power_flow = power_flow)
 
-
+#If there is a reference graph that has subcomponents the subcomponents that have been changed by targeting are re-combined into the
+  #rest of the network here
   if(!is.null(g0)){
-    #print("Joining pre and post") #These joins are fast now and don't need to be mentioned
     g <- union2(gNochange, g)
-    #print("Join complete")
   }
 
   #Delete Edges that are over the Limit
@@ -89,9 +89,7 @@ Cascade <- function(NetworkList,
   } else {
 
     Overloads <- c(graph_attr(g, "EdgesOverloaded" ), DeleteEdges %>% pull(EdgeName))
-    #Prints names of overloaded edges
-    #print("Overloads")
-    #print(Overloads)
+
   }
 
   #write vector of overloaded edges
