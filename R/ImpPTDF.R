@@ -24,7 +24,7 @@
 ImpPTDF <- function(g, SlackRef, EdgeName = "Link", VertexName = "name"){
   #This is a wrapper for the more interesting parts of the electrical building blocks
 
-  message("Creating Power matrices")
+  #message("Creating Power matrices")
 
   AZero <- CreateTransmission(g, EdgeName, VertexName)
 
@@ -37,12 +37,12 @@ ImpPTDF <- function(g, SlackRef, EdgeName = "Link", VertexName = "name"){
 
   B <- t(A) %*% C %*% A
 
-  message("Inverting the Susceptance matrix") #As this is DC it is the same as the admittance matrix. It is sparse
+  #message("Inverting the Susceptance matrix") #As this is DC it is the same as the admittance matrix. It is sparse
 
   Imp <- solve(B) #If the Impedance matrix is inverted again it does not return the original Addmitance matrix due to rounding errors
   #The 0 values of the sparse addmittance matrix are lost and a dense matrix is returned with many very small numbers
 
-  message("Creating the PTDF")
+  #message("Creating the PTDF")
 
   PTDF <- C %*% A %*% Imp
 

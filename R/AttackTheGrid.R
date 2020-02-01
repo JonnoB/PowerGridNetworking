@@ -47,7 +47,7 @@ AttackTheGrid <- function(NetworkList,
                           ){
 
   #gets the last network in the list
-  gc()
+  #gc()
   g <- NetworkList[[length(NetworkList)]]
 
   g <- g[[length(g)]]
@@ -141,7 +141,7 @@ AttackTheGrid <- function(NetworkList,
                                   edge_limit = edge_limit
     )
   }
-  gc()
+ # gc()
   return(NetworkList2)
 
 }

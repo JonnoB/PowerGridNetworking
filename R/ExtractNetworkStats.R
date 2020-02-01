@@ -34,7 +34,7 @@ ExtractNetworkStats <- function(NetworkList,  Generation = "BalencedPower", Edge
                mean_loading = mean(LoadLevel(g, EdgeName = EdgeName, PowerFlow = PowerFlow, Link.Limit = Link.Limit)$LineLoading),
                median_loading = median(LoadLevel(g, EdgeName = EdgeName, PowerFlow = PowerFlow, Link.Limit = Link.Limit)$LineLoading),
                mean_alpha = mean(1/LoadLevel(g, EdgeName = EdgeName, PowerFlow = PowerFlow, Link.Limit = Link.Limit)$LineLoading),
-               median_alpha = mean(1/LoadLevel(g, EdgeName = EdgeName, PowerFlow = PowerFlow, Link.Limit = Link.Limit)$LineLoading),
+               median_alpha = median(1/LoadLevel(g, EdgeName = EdgeName, PowerFlow = PowerFlow, Link.Limit = Link.Limit)$LineLoading),
                #Mean degree is usefull to know, however, it is essential if you want to calculate the point/time of giant component
                #collapse. That is why I have also included the mean of the degree squared
                mean_degree  = mean(degree(g)), #allows the calculation of the molloy-reed criterion
