@@ -5,7 +5,7 @@
 \title{Electrical Edge Centrality}
 \usage{
 ElectricalCentrality(g, Node_name = "name", Generation = "Generation",
-  Demand = "Demand", Bus_order = "Bus.Order")
+  Demand = "Demand", EdgeName = "Link")
 }
 \arguments{
 \item{g}{An igraph object of a power network.}
@@ -14,9 +14,9 @@ ElectricalCentrality(g, Node_name = "name", Generation = "Generation",
 
 \item{Generation}{The vertex attribute containing the node generation data.}
 
-\item{Demand}{The vertec attribute containing the node generation data.}
+\item{Demand}{The vertex attribute containing the node generation data.}
 
-\item{Bus_order}{Only used if no PDF is supplied. The vertex attribute that contains the rank order for slack reference.}
+\item{EdgeName}{A character string. The edge attribute that contains the edge names}
 }
 \description{
 Calculates the electrical edge centrality of the graph

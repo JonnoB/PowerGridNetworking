@@ -65,9 +65,10 @@ DeleteCarefully <- function(g, Target, DeleteVect, Number, Name){
     g2 <- delete.edges(g, delete_seq)
   }
 
-  message(paste("Delete", Target, deletetarget))
+  #message(paste("Delete", Target, deletetarget))
 
   #add a graph attribute that names the deleted node.this makes it possible to track what was deleted and what overloaded
+  #This will be changed in the matrix version
   g2 <- set.graph.attribute(g2, "Removed", deletetarget)
 
   return(g2)

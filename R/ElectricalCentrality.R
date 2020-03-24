@@ -10,29 +10,40 @@
 #' @param g An igraph object of a power network.
 #' @param Node_name Is the vertex attribute that contains the node names.
 #' @param Generation The vertex attribute containing the node generation data.
-#' @param  Demand The vertec attribute containing the node generation data.
-#' @param Bus_order Only used if no PDF is supplied. The vertex attribute that contains the rank order for slack reference.
+#' @param Demand The vertex attribute containing the node generation data.
+#' @param EdgeName A character string. The edge attribute that contains the edge names
+# @param Bus_order Only used if no PDF is supplied. The vertex attribute that contains the rank order for slack reference.
 #' @export
 #'
 
-ElectricalCentrality <- function(g, Node_name = "name", Generation = "Generation", Demand = "Demand",  Bus_order = "Bus.Order"){
+ElectricalCentrality <- function(g, Node_name = "name",
+                                 Generation = "Generation", 
+                                 Demand = "Demand", 
+                                 EdgeName = "Link"
+                                # Bus_order = "Bus.Order"
+                                 ){
 
   #Slack ref needs to be a node that neither produces nore consumes, aka it is a transfer node.
   #Filter to keep only transfernodes, produces many candidates due to components that were created when all non-transfer nodes were removed
-  SlackRef<- delete_vertices(g,
+  SlackRef <- delete_vertices(g,
                              get.vertex.attribute(g, Node_name)[get.vertex.attribute(g, Generation)!=0 |
                                                                get.vertex.attribute(g, Demand)!=0]) %>%
-    SlackRefFunc(., Node_name, Bus_order)
+    SlackRefFunc(., Node_name, Generation = Generation)
 
-  #Take the transfer node with the lowest Bus.Order
-  SlackRef <-data_frame(name = get.vertex.attribute(g, Node_name), Bus.order = get.vertex.attribute(g, Bus_order)) %>%
-       filter( name %in% SlackRef$name ) %>%
-      top_n(1, -Bus.order)
+  AZero <- CreateTransmission(g, EdgeName = EdgeName, VertexName = Node_name)
+  LineProperties <- LinePropertiesMatrix(g, Edgename = EdgeName, Weight = "Y")
+  
+#This is removed as bus order is not really important, especially for nodes without generation or demand
+    # #Take the transfer node with the lowest Bus.Order
+  # SlackRef <-data_frame(name = get.vertex.attribute(g, Node_name), Bus.order = get.vertex.attribute(g, Bus_order)) %>%
+  #      filter( name %in% SlackRef$name ) %>%
+  #     top_n(1, -Bus.order)
+  SlackRef <- SlackRef %>% slice(1)
 
-  PTDF <- ImpPTDF(g,  SlackRef$name)$PTDF
+  PTDF <- ImpPTDF(g,  SlackRef$name, AZero, LineProperties, EdgeName = EdgeName, VertexName = Node_name)$PTDF
 
   print("Creating Node Pair injection matrix")
-  Combos <-NodePairs(g, Node_name = "name", Generation = "Generation", Demand = "Demand", PTDF = PTDF) %>%
+  Combos <-NodePairs(g, Node_name = "name", Generation = Generation, Demand = Demand, PTDF = PTDF) %>%
     filter(GenPair == TRUE) %>%
     group_by(V1, V2) %>%
     mutate(MinGen = min(abs(NetGen1), abs(NetGen2))) %>%
@@ -59,7 +70,7 @@ ElectricalCentrality <- function(g, Node_name = "name", Generation = "Generation
   EdgeEC <- abs(PTDF %*% InjectionMat) %>% rowSums %>%
     tibble(ElectricalCentrality = .) %>%
     set_names("ElectricalCentrality") %>%
-    mutate(Edgename = get.edge.attribute(g, "name"))
+    mutate(Edgename = get.edge.attribute(g, EdgeName))
 
   print("Calculating node Electrical centrality scores")
   #Simplify the graph. This prevents lines being removed reducing the score of a node.

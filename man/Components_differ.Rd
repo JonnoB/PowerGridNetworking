@@ -11,11 +11,13 @@ Components_differ(g, g0, EdgeName = "name")
 \item{g}{the current graph}
 
 \item{g0}{the previous graph}
+
+\item{EdgeName}{A character string. The name of the edge attribute}
 }
 \description{
 Using this should be able to cut down on the amount of calculation done on the power flow equations
 This function checks to see which subcomponents have changed in the graph and which are the same.
 It does this by comparing edges. This is because a component may have had an edge removed but still be intact.
 However, the powerflow will still need to be re-calculated.
-The function outputs a logical value
+The function a scaler vector representing each of the changed components
 }

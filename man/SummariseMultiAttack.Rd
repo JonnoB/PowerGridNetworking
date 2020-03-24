@@ -12,7 +12,7 @@ SummariseMultiAttack(df, groupingvar = alpha)
 \item{groupingvar}{The bare unquoted name of the grouping variable, the default is alpha}
 }
 \description{
-This function provides a consice way to summarise the output of the ExtractAttackStats function, especially when said function
+This function provides a concise way to summarise the output of the ExtractAttackStats function, especially when said function
 has been used over a lot of attacks. This is most common when using "SaveMultiAttacks".
 }
 \examples{

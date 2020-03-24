@@ -4,7 +4,8 @@
 \alias{ImpPTDF}
 \title{Create Impedance matrix and PTDF}
 \usage{
-ImpPTDF(g, SlackRef, EdgeName = "Link", VertexName = "name")
+ImpPTDF(g, SlackRef, AZero, LineProperties, EdgeName = "Link",
+  VertexName = "name", PTDF_only = FALSE)
 }
 \arguments{
 \item{g}{An igraph object representing a power-grid}

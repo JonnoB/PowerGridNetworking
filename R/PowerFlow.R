@@ -5,7 +5,8 @@
 #' (existing attribute of the same name will be overwritten). 
 #' The function outputs a a graph with the correct power flow values
 #' @param g An igraph object representing the power grid
-#' @param SlackRef A character strong. The node to remove from the calculations to prevent the matrix being singular
+#' @param AZero A numeric matrix The transmission matrix of the original network
+#' @param LineProperties A numeric matrix. a diagonal matrix of the Y characteristic of the network
 #' @param EdgeName The variable that holds the edge names, a character string.
 #' @param VertexName The variable that holds the names of the nodes, to identify the slack ref. a character string
 #' @param Net_generation The name that the net generation data for each node is held in
@@ -15,17 +16,53 @@
 #' @examples
 #' PowerFlow(g Slackref)
 
-PowerFlow <- function(g, SlackRef, EdgeName = "Link", VertexName = "name", Net_generation = "BalencedPower", power_flow = "PowerFlow"){
-  #Calculates the PowerFlow from a graph that contains the following attributes
-  #named edges, edgeweights, a balanced power generation and demand column, Powerflow (will be overwritten)
-  #g: an igraph object
-  #SlackRef: the node to remove from the calculations to prevent the matrix being singular
+#Azero is calculated externally
+PowerFlow <- function(g, AZero, LineProperties, 
+                       EdgeName = "Link", 
+                       VertexName = "name", 
+                       Net_generation = "BalencedPower", 
+                       power_flow = "PowerFlow"){
 
-  InjectionVector <- get.vertex.attribute(g, name = Net_generation)[get.vertex.attribute(g, name = VertexName)!=SlackRef]
-
-  Power <- ImpPTDF(g,  SlackRef, EdgeName, VertexName)$PTDF %*% InjectionVector
-
-  g <- set_edge_attr(g, name = power_flow, value = Power)
+  #generate the slack reference bus for each component of the network
+  #This creates much smaller matrices which are quicker to invert and operate on.
+  slack_ref_df <-  SlackRefFunc(g, VertexName, Generation = Net_generation)
+  
+  if(nrow(slack_ref_df)!=0){
+    #Calculate power flow for each component of the network as seperate networks
+    gList <- 1:nrow(slack_ref_df) %>%
+      map(~{
+        
+        #print(paste("PowerFlow for componant", .x))
+        
+        SlackRef <- slack_ref_df %>% slice(.x)
+        
+        gsubset <- delete.vertices(g, components(g)$membership != .x)
+        
+        if(SlackRef$Nodes > 1){
+          
+          #gsubset <- PowerFlow2(gsubset, SlackRef$name, AZero = AZero, LineProperties = LineProperties, EdgeName, VertexName, Net_generation, power_flow)
+          
+          InjectionVector <- get.vertex.attribute(gsubset, name = Net_generation)[get.vertex.attribute(gsubset, name = VertexName)!=SlackRef$name]
+          
+          Power <- ImpPTDF(gsubset,  
+                            SlackRef$name, 
+                            AZero = AZero, 
+                            LineProperties = LineProperties, 
+                            EdgeName, 
+                            VertexName, 
+                            PTDF_only = TRUE)$PTDF %*% InjectionVector
+          
+          gsubset <- set_edge_attr(gsubset, name = power_flow, value = Power)
+        }
+        
+        gsubset
+        
+      })
+    #This function could be replaced with the method that just matches edges but it is so fast I don't care enough
+    #It would mean that union could be completley removed which woul be more secure and simpler
+    g <- gList %>%
+      Reduce(union2, .)
+  }
 
   return(g)
 }

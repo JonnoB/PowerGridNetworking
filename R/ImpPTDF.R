@@ -21,33 +21,39 @@
 #   publisher = "Oxford University Press",
 #   pages = "232-240"
 # }
-ImpPTDF <- function(g, SlackRef, EdgeName = "Link", VertexName = "name"){
+
+#This version calculates Azero externally saving quite a lot of time
+ImpPTDF <- function(g, SlackRef, AZero, LineProperties, EdgeName = "Link", VertexName = "name", PTDF_only = FALSE){
   #This is a wrapper for the more interesting parts of the electrical building blocks
 
   #message("Creating Power matrices")
-
-  AZero <- CreateTransmission(g, EdgeName, VertexName)
-
+  #edge index is used quite a lot so is assigned here
+  edge_index <- get.edge.attribute(g, EdgeName)
+  #subset the original edge transmission matrix to only contain current nodes
+  AZero <-  AZero[rownames(AZero) %in% edge_index, colnames(AZero) %in% get.vertex.attribute(g, name = VertexName), drop = FALSE]
+  #AZero <- CreateTransmission(g, EdgeName, VertexName)
+  
   # #remove Slack bus, usually the largest generator
   #drop = FALSE stops the matrix being converted to a vector when there are only two nodes in the sub-graph
   A <- AZero[,colnames(AZero)!=SlackRef, drop = FALSE]
 
   #Create the diagonal matrix of edge impedance
-  C <- LinePropertiesMatrix(g, EdgeName, Weight = "Y")
-
-  B <- t(A) %*% C %*% A
+  C <- LineProperties[edge_index, edge_index] #LinePropertiesMatrix(g, EdgeName, Weight = "Y")
 
   #message("Inverting the Susceptance matrix") #As this is DC it is the same as the admittance matrix. It is sparse
 
-  Imp <- solve(B) #If the Impedance matrix is inverted again it does not return the original Addmitance matrix due to rounding errors
+  B <- t(A) %*% C %*% A
+  
+  Imp <- base::solve(B) #If the Impedance matrix is inverted again it does not return the original Addmitance matrix due to rounding errors
   #The 0 values of the sparse addmittance matrix are lost and a dense matrix is returned with many very small numbers
-
+  
   #message("Creating the PTDF")
-
+  
   PTDF <- C %*% A %*% Imp
 
-  Out <-list(Imp, PTDF)
 
+  Out <-list(Imp, PTDF)
+  
   names(Out)<- c("Imp", "PTDF")
 
   return(Out)

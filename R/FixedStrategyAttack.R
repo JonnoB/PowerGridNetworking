@@ -20,15 +20,13 @@ FixedStrategyAttack <- function(g, DeletionOrder, Target = "Nodes", Name = "name
   #create a vector of either nodes or edge names for deletion
   if(Target == "Nodes"){
     Remaining <- get.vertex.attribute(g, Name)
+
   } else {
     Remaining <- get.edge.attribute(g, Name)
   }
 
   #Finds which of the targets are still in the network
-  DeleteVect <- tibble(OriginalTarget = DeletionOrder) %>%
-    filter( OriginalTarget %in% Remaining) %>%
-    .$OriginalTarget
-
+  DeleteVect <- DeletionOrder[DeletionOrder %in% Remaining]
 
   if(length(DeleteVect)==0){
 

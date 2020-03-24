@@ -5,9 +5,10 @@
 \title{Calculate the effects of a cascade}
 \usage{
 Cascade(NetworkList, Iteration = 0, StopCascade = Inf, g0 = NULL,
-  Generation = "Generation", Demand = "Demand", EdgeName = "Link",
-  VertexName = "name", Net_generation = "BalencedPower",
-  power_flow = "PowerFlow", edge_limit = "Link.Limit")
+  AZero, LineProperties, Generation = "Generation", Demand = "Demand",
+  EdgeName = "Link", VertexName = "name",
+  Net_generation = "BalencedPower", power_flow = "PowerFlow",
+  edge_limit = "Link.Limit")
 }
 \arguments{
 \item{NetworkList}{A list of power-grid networks.}

@@ -4,13 +4,16 @@
 \alias{PowerFlow}
 \title{Calculate DC power flow}
 \usage{
-PowerFlow(g, SlackRef, EdgeName = "Link", VertexName = "name",
-  Net_generation = "BalencedPower", power_flow = "PowerFlow")
+PowerFlow(g, AZero, LineProperties, EdgeName = "Link",
+  VertexName = "name", Net_generation = "BalencedPower",
+  power_flow = "PowerFlow")
 }
 \arguments{
 \item{g}{An igraph object representing the power grid}
 
-\item{SlackRef}{A character strong. The node to remove from the calculations to prevent the matrix being singular}
+\item{AZero}{A numeric matrix The transmission matrix of the original network}
+
+\item{LineProperties}{A numeric matrix. a diagonal matrix of the Y characteristic of the network}
 
 \item{EdgeName}{The variable that holds the edge names, a character string.}
 

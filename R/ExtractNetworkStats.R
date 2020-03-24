@@ -20,6 +20,9 @@ ExtractNetworkStats <- function(NetworkList,  Generation = "BalencedPower", Edge
   # and the overall list shows the break down of the grid over a series of attacks
   #NetworkList: the out put of the AttackTheGrid function
 
+  #removes any trailing NULLs
+  NetworkList<-NetworkList[1:(length(NetworkList)-sum(NetworkList %>% map_lgl(~is.null(.x[[1]]))))]
+  
   NetworkList %>% map_df(~{
     #find the last element of the list which is the final network for that Cascade
     g <- .x[[length(.x)]]

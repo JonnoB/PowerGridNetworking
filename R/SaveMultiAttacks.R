@@ -62,17 +62,16 @@ SaveMultiAttacks <-  function(g, AttackVectors,
     FixedNodes <- quo(FixedStrategyAttack(g, DeletionOrder, Target, Name))
     T1 <- Sys.time()
     #suppres attack the grid messages
-    AttackSeries <-suppressMessages(AttackTheGrid(NetworkList = list(list(g)),
+    AttackSeries <-AttackTheGrid_List(g = g,
                                                   AttackStrategy = FixedNodes,
                                                   referenceGrid = NULL,
-                                                  MinMaxComp,
                                                   TotalAttackRounds,
                                                   CascadeMode,
                                                   Demand = Demand,
                                                   Generation = Generation,
                                                   EdgeName = EdgeName,
                                                   VertexName = VertexName,
-                                                  Net_generation = Net_generation))
+                                                  Net_generation = Net_generation)
     
     saveRDS(AttackSeries, file = file.path(folder, paste0(NextSim, ".rds")))
     rm(AttackSeries)
