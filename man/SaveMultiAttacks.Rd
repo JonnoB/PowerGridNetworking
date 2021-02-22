@@ -4,10 +4,20 @@
 \alias{SaveMultiAttacks}
 \title{Save attack simulations to folder}
 \usage{
-SaveMultiAttacks(g, AttackVectors, folder, MinMaxComp = 0,
-  TotalAttackRounds = 10, CascadeMode = FALSE, Demand = "Demand",
-  Generation = "Generation", EdgeName = "Link", VertexName = "name",
-  Net_generation = "BalencedPower", Target = "Nodes")
+SaveMultiAttacks(
+  g,
+  AttackVectors,
+  folder,
+  MinMaxComp = 0,
+  TotalAttackRounds = 10,
+  CascadeMode = FALSE,
+  Demand = "Demand",
+  Generation = "Generation",
+  EdgeName = "Link",
+  VertexName = "name",
+  Net_generation = "BalencedPower",
+  Target = "Nodes"
+)
 }
 \arguments{
 \item{g}{An igraph object representing a power grid.}

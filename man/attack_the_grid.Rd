@@ -4,11 +4,21 @@
 \alias{attack_the_grid}
 \title{Initiate power-grid attack simulation}
 \usage{
-attack_the_grid(g, AttackStrategy, g0 = NULL, TotalAttackRounds = 1000,
-  CascadeMode = TRUE, Demand = "demand", Generation = "generation",
-  EdgeName = "edge_name", VertexName = "name",
-  Net_generation = "net_generation", power_flow = "power_flow",
-  edge_capacity = "edge_capacity", target = "nodes")
+attack_the_grid(
+  g,
+  AttackStrategy,
+  g0 = NULL,
+  TotalAttackRounds = 1000,
+  CascadeMode = TRUE,
+  Demand = "demand",
+  Generation = "generation",
+  EdgeName = "edge_name",
+  VertexName = "name",
+  Net_generation = "net_generation",
+  power_flow = "power_flow",
+  edge_capacity = "edge_capacity",
+  target = "nodes"
+)
 }
 \arguments{
 \item{AttackStrategy}{A function that calculates which node to delete the function is is in "quo" form and embedded in an

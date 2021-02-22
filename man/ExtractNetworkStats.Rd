@@ -4,9 +4,13 @@
 \alias{ExtractNetworkStats}
 \title{Summarise attack Statistics}
 \usage{
-ExtractNetworkStats(NetworkList, Generation = "BalencedPower",
-  EdgeName = "name", PowerFlow = "PowerFlow",
-  Link.Limit = "Link.Limit")
+ExtractNetworkStats(
+  NetworkList,
+  Generation = "BalencedPower",
+  EdgeName = "name",
+  PowerFlow = "PowerFlow",
+  Link.Limit = "Link.Limit"
+)
 }
 \arguments{
 \item{NetworkList}{The output of the AttackTheGridFunction}

@@ -4,8 +4,12 @@
 \alias{ExtendAttack}
 \title{Extend Attack}
 \usage{
-ExtendAttack(NetworkList, AttackOrder, MinMaxComp = 0,
-  TotalAttackRounds = 1000)
+ExtendAttack(
+  NetworkList,
+  AttackOrder,
+  MinMaxComp = 0,
+  TotalAttackRounds = 1000
+)
 }
 \arguments{
 \item{NetworkList}{The output of AttackTheGrid, which is to be extended}

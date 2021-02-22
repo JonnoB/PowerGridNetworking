@@ -4,11 +4,21 @@
 \alias{Cascade2}
 \title{Calculate the effects of a cascade}
 \usage{
-Cascade2(g, g0 = NULL, node_power = node_power,
-  edge_status = edge_status, AZero, LineProperties,
-  Generation = "Generation", Demand = "Demand", EdgeName = "Link",
-  VertexName = "name", Net_generation = "BalencedPower",
-  power_flow = "PowerFlow", edge_limit = "Link.Limit")
+Cascade2(
+  g,
+  g0 = NULL,
+  node_power = node_power,
+  edge_status = edge_status,
+  AZero,
+  LineProperties,
+  Generation = "Generation",
+  Demand = "Demand",
+  EdgeName = "Link",
+  VertexName = "name",
+  Net_generation = "BalencedPower",
+  power_flow = "PowerFlow",
+  edge_limit = "Link.Limit"
+)
 }
 \arguments{
 \item{g0}{An igraph object. An optional value that defines the reference network}

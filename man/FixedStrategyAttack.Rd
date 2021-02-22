@@ -4,8 +4,13 @@
 \alias{FixedStrategyAttack}
 \title{Flexible Removal method}
 \usage{
-FixedStrategyAttack(g, DeletionOrder, Target = "Nodes", Name = "name",
-  Number = 1)
+FixedStrategyAttack(
+  g,
+  DeletionOrder,
+  Target = "Nodes",
+  Name = "name",
+  Number = 1
+)
 }
 \arguments{
 \item{g}{An igraph object representing a power-grid}

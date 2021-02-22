@@ -4,9 +4,15 @@
 \alias{PowerFlow}
 \title{Calculate DC power flow}
 \usage{
-PowerFlow(g, AZero, LineProperties, EdgeName = "Link",
-  VertexName = "name", Net_generation = "BalencedPower",
-  power_flow = "PowerFlow")
+PowerFlow(
+  g,
+  AZero,
+  LineProperties,
+  EdgeName = "Link",
+  VertexName = "name",
+  Net_generation = "BalencedPower",
+  power_flow = "PowerFlow"
+)
 }
 \arguments{
 \item{g}{An igraph object representing the power grid}

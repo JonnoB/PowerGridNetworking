@@ -4,8 +4,7 @@
 \alias{Proportional_Load}
 \title{Create proportional loading line limits}
 \usage{
-Proportional_Load(g, alpha, PowerFlow = "PowerFlow",
-  Link.Limit = "Link.Limit")
+Proportional_Load(g, alpha, PowerFlow = "PowerFlow", Link.Limit = "Link.Limit")
 }
 \arguments{
 \item{g}{An igraph object representing a power grid. must have a power flow attribute.}

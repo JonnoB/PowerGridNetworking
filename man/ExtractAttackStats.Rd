@@ -4,9 +4,14 @@
 \alias{ExtractAttackStats}
 \title{Extracts Attack stats from saved}
 \usage{
-ExtractAttackStats(RootFolder, NewfolderPath,
-  Generation = "BalencedPower", EdgeName = "name",
-  PowerFlow = "PowerFlow", Link.Limit = "Link.Limit")
+ExtractAttackStats(
+  RootFolder,
+  NewfolderPath,
+  Generation = "BalencedPower",
+  EdgeName = "name",
+  PowerFlow = "PowerFlow",
+  Link.Limit = "Link.Limit"
+)
 }
 \arguments{
 \item{RootFolder}{:The folder where the attack files are saved}

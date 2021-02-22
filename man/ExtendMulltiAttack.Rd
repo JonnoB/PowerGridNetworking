@@ -4,8 +4,12 @@
 \alias{ExtendMulltiAttack}
 \title{Extend Multi-Attack}
 \usage{
-ExtendMulltiAttack(files, DeleteOrders, MinMaxComp = 0,
-  TotalAttackRounds = 1000)
+ExtendMulltiAttack(
+  files,
+  DeleteOrders,
+  MinMaxComp = 0,
+  TotalAttackRounds = 1000
+)
 }
 \arguments{
 \item{files}{the files in the current working directory to be extended. These files should all have the extension'.rds'}

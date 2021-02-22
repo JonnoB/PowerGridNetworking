@@ -4,11 +4,20 @@
 \alias{AttackTheGrid_List}
 \title{Initiate power-grid attack simulation}
 \usage{
-AttackTheGrid_List(g, AttackStrategy, referenceGrid = NULL,
-  TotalAttackRounds = 1000, CascadeMode = TRUE, Demand = "Demand",
-  Generation = "Generation", EdgeName = "Link", VertexName = "name",
-  Net_generation = "BalencedPower", power_flow = "PowerFlow",
-  edge_limit = "Link.Limit")
+AttackTheGrid_List(
+  g,
+  AttackStrategy,
+  referenceGrid = NULL,
+  TotalAttackRounds = 1000,
+  CascadeMode = TRUE,
+  Demand = "Demand",
+  Generation = "Generation",
+  EdgeName = "Link",
+  VertexName = "name",
+  Net_generation = "BalencedPower",
+  power_flow = "PowerFlow",
+  edge_limit = "Link.Limit"
+)
 }
 \arguments{
 \item{g}{An igraph object. the graph that is going to be attacked

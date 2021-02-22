@@ -4,8 +4,13 @@
 \alias{ElectricalCentrality}
 \title{Electrical Edge Centrality}
 \usage{
-ElectricalCentrality(g, Node_name = "name", Generation = "Generation",
-  Demand = "Demand", EdgeName = "Link")
+ElectricalCentrality(
+  g,
+  Node_name = "name",
+  Generation = "Generation",
+  Demand = "Demand",
+  EdgeName = "Link"
+)
 }
 \arguments{
 \item{g}{An igraph object of a power network.}

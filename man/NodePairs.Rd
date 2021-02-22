@@ -4,8 +4,14 @@
 \alias{NodePairs}
 \title{Node pairs}
 \usage{
-NodePairs(g, Node_name = "name", Generation = "Generation",
-  Demand = "Demand", PTDF = NULL, Bus_order = "Bus.Order")
+NodePairs(
+  g,
+  Node_name = "name",
+  Generation = "Generation",
+  Demand = "Demand",
+  PTDF = NULL,
+  Bus_order = "Bus.Order"
+)
 }
 \arguments{
 \item{g}{An igraph object of a power network.}
