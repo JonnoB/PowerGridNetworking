@@ -21,5 +21,5 @@ When multiple attack simulations are being performed the operation can be interr
 
 }
 \seealso{
-\code{\link{MultiAttackOrder}}, \code{\link{MultiAttack}}
+\code{\link{MultiAttackOrder}}
 }

@@ -12,16 +12,16 @@
 #' @param Weight A character string of the edge.attribute for edge weights. Default is "Y
 #' @export
 #' @examples
-#' This example doesn't show in the documentatio, I don't know why
+#' #This example doesn't show in the documentation I don't know why
 #' g2 <-make_ego_graph(g, 2, "AXMI")[[1]]
 #' plot(g2)
 #' LinePropertiesMatrix(g2)
 
 
 LinePropertiesMatrix <- function(g, Edgename = "Link", Weight = "Y"){
-  Link <- get.edge.attribute(g, Edgename)
+  Link <- igraph::get.edge.attribute(g, Edgename)
   C <- matrix(data = 0, nrow = length(Link), ncol = length(Link))
-  diag(C) <- get.edge.attribute(g, Weight)
+  diag(C) <- igraph::get.edge.attribute(g, Weight)
   colnames(C)<- Link
   rownames(C)<- Link
 

@@ -23,14 +23,14 @@ NodePairs <- function(g, Node_name = "name", Generation = "Generation", Demand =
   }
 
   #Describe the node type
-  GenAndDem <-data_frame(
-    name = get.vertex.attribute(g, Node_name),
-    type = case_when(
-      get.vertex.attribute(g, Demand) > get.vertex.attribute(g, Generation) ~ "Demand",
-      get.vertex.attribute(g, Demand) < get.vertex.attribute(g, Generation) ~ "Generation",
+  GenAndDem <-dplyr::data_frame(
+    name = igraph::get.vertex.attribute(g, Node_name),
+    type = dplyr::case_when(
+      igraph::get.vertex.attribute(g, Demand) > igraph::get.vertex.attribute(g, Generation) ~ "Demand",
+      igraph::get.vertex.attribute(g, Demand) < igraph::get.vertex.attribute(g, Generation) ~ "Generation",
       TRUE ~"Transmission"
     ),
-    NetGen = get.vertex.attribute(g, Generation)-get.vertex.attribute(g, Demand))
+    NetGen = igraph::get.vertex.attribute(g, Generation)-igraph::get.vertex.attribute(g, Demand))
 
 
   #Find every combination of Demand and Generation pair there should be sum(GenAndDem$type=="Generation") * sum(GenAndDem$type=="Demand") of them
@@ -38,7 +38,7 @@ NodePairs <- function(g, Node_name = "name", Generation = "Generation", Demand =
   Combos <- combn(1:ncol(PTDF), 2) %>%
     t %>%
     as.data.frame() %>%
-    mutate(name1 = colnames(PTDF)[V1],
+    dplyr::mutate(name1 = colnames(PTDF)[V1],
            name2 = colnames(PTDF)[V2],
            type1 = GenAndDem$type[match(name1,GenAndDem$name)],
            type2 = GenAndDem$type[match(name2,GenAndDem$name)],

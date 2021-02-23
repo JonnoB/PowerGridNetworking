@@ -20,27 +20,27 @@ RoundTypeRemoved <- function(AttackSeries){
   #Join edges to nodes and vice a versa
 
   #Edge Removal type and first iteration of Node removal type
-  EdgeRemovalType <- as_data_frame(baseg) %>%
-    select(from, to, Link) %>%
-    left_join(TempEdges, by = c("Link" = "Names")) %>%
-    rename(RemovalTypeEdge = RemovalType,
+  EdgeRemovalType <- igraph::as_data_frame(baseg) %>%
+    dplyr::select(from, to, Link) %>%
+    dplyr::left_join(TempEdges, by = c("Link" = "Names")) %>%
+    dplyr::rename(RemovalTypeEdge = RemovalType,
            RoundRemovedEdge = RoundRemoved) %>%
-    left_join(TempNodes, by = c("from" = "Names")) %>%
-    left_join(TempNodes, by = c("to" = "Names")) %>%
-    mutate(
+    dplyr::left_join(TempNodes, by = c("from" = "Names")) %>%
+    dplyr::left_join(TempNodes, by = c("to" = "Names")) %>%
+    dplyr::mutate(
       #Conditioanlly class the edge removal type
-      RemovalTypeEdge = case_when(
+      RemovalTypeEdge = dplyr::case_when(
         RemovalTypeEdge == "Unknown" & (RemovalType.x == "Targeted"| RemovalType.y == "Targeted") ~ "Targeted",
         RemovalTypeEdge == "Unknown" ~ "Islanded",
         TRUE ~ RemovalTypeEdge
       ),
       #Conditionally class the node removaltype
-      RemovalType.x = case_when(
+      RemovalType.x = dplyr::case_when(
         RemovalType.x =="Unknown" & RoundRemovedEdge == RoundRemoved.x & RemovalTypeEdge =="Overloaded" ~ "Overloaded",
         RemovalType.x == "Unknown" ~ "Islanded",
         TRUE ~ RemovalType.x
       ),
-      RemovalType.y = case_when(
+      RemovalType.y = dplyr::case_when(
         RemovalType.y =="Unknown" & RoundRemovedEdge == RoundRemoved.y & RemovalTypeEdge =="Overloaded" ~ "Overloaded",
         RemovalType.y == "Unknown" ~ "Islanded",
         TRUE ~ RemovalType.y
@@ -49,30 +49,30 @@ RoundTypeRemoved <- function(AttackSeries){
   #Seperate Nodes and perform second iteration of Node removal type
   #This has to be done as due to the network structure nodes will appear multiple times in the previous dataframe and may have differe
   #Removal conditions each time
-  NodeRemovalType <- bind_rows(select(EdgeRemovalType, Name = from, RoundRemoved = RoundRemoved.x, RemovalType = RemovalType.x),
-                               select(EdgeRemovalType, Name =to, RoundRemoved = RoundRemoved.y, RemovalType = RemovalType.y))
+  NodeRemovalType <- dplyr::bind_rows(dplyr::select(EdgeRemovalType, Name = from, RoundRemoved = RoundRemoved.x, RemovalType = RemovalType.x),
+                               dplyr::select(EdgeRemovalType, Name =to, RoundRemoved = RoundRemoved.y, RemovalType = RemovalType.y))
 
   #Filter the node removal type
   Targeted<- NodeRemovalType %>%
-    filter(RemovalType =="Targeted")
+    dplyr::filter(RemovalType =="Targeted")
 
   Overloaded <-NodeRemovalType %>%
-    filter(RemovalType != "Overloaded", !(Name %in% Targeted$Name))
+    dplyr::filter(RemovalType != "Overloaded", !(Name %in% Targeted$Name))
 
   Islanded <-NodeRemovalType %>%
-    filter(RemovalType != "Islanded", !(Name %in% Targeted$Name), !(Name %in% Overloaded$Name))
+    dplyr::filter(RemovalType != "Islanded", !(Name %in% Targeted$Name), !(Name %in% Overloaded$Name))
 
   #re-combine nodes
   #There can be multiple instances of each node if there are multiple edges on a node that match the same condition
   #e.g. two edges attach to a node that was targeted, that node will appear twice in the targeted df but nowhere else.
   #The distinct function prevents doubles
-  NodeRemovalType <- bind_rows(Targeted, Overloaded, Islanded) %>%
-    arrange(Name) %>%
-    distinct(Name, .keep_all = TRUE)
+  NodeRemovalType <- dplyr::bind_rows(Targeted, Overloaded, Islanded) %>%
+    dplyr::arrange(Name) %>%
+    dplyr::distinct(Name, .keep_all = TRUE)
 
-  Out <- bind_rows(NodeRemovalType %>% mutate(type = "Node"),
+  Out <- dplyr::bind_rows(NodeRemovalType %>% dplyr::mutate(type = "Node"),
               Edge = EdgeRemovalType %>%
-                select(Name = Link, RoundRemoved = RoundRemovedEdge, RemovalType= RemovalTypeEdge) %>% mutate(type = "Edge"))
+                dplyr::select(Name = Link, RoundRemoved = RoundRemovedEdge, RemovalType= RemovalTypeEdge) %>% dplyr::mutate(type = "Edge"))
 
   return(Out)
 

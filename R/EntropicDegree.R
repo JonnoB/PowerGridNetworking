@@ -14,12 +14,12 @@
 
 EntropicDegree <- function(g, value = "Link.Limit", Scale = FALSE){
 
-  E(g)$weight <- get.edge.attribute(g, name = value) %>% abs(.) #Otherwise negative values like power flow cause problems when logged
+  igraph::E(g)$weight <- igraph::get.edge.attribute(g, name = value) %>% abs(.) #Otherwise negative values like power flow cause problems when logged
 
-  ED <- (1-diversity(g))*strength(g)
+  ED <- (1-igraph::diversity(g))*igraph::strength(g)
 
   if(!Scale){
-    ED <- ED * log(degree(g))
+    ED <- ED * log(igraph::degree(g))
   }
 
   return(ED)

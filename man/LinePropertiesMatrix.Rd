@@ -25,7 +25,7 @@ This function creates a line properties matrix that can be used with the output 
  each edge.
 }
 \examples{
-This example doesn't show in the documentatio, I don't know why
+#This example doesn't show in the documentation I don't know why
 g2 <-make_ego_graph(g, 2, "AXMI")[[1]]
 plot(g2)
 LinePropertiesMatrix(g2)

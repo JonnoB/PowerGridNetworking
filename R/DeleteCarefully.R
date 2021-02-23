@@ -26,50 +26,50 @@ DeleteCarefully <- function(g, Target, DeleteVect, Number, Name){
 
   if(Target == "Nodes"){
 
-    if(vcount(g) > Number ){
+    if(igraph::vcount(g) > Number ){
 
       deletetarget <- DeleteVect[1:Number]
 
-    }  else if(vcount(g) == 0){
+    }  else if(igraph::vcount(g) == 0){
       deletetarget <- NULL
 
     }else {
 
-      deletetarget <- DeleteVect[1:(vcount(g)-1)]
+      deletetarget <- DeleteVect[1:(igraph::vcount(g)-1)]
     }
     #See the edges version below for and explanation of why this code is here
-    delete_seq <- which(get.vertex.attribute(g, Name) %in% deletetarget)
+    delete_seq <- which(igraph::get.vertex.attribute(g, Name) %in% deletetarget)
     #remove selected node from network
-    g2 <- delete.vertices(g, delete_seq)
+    g2 <- igraph::delete.vertices(g, delete_seq)
 
 
   } else { #if nodes aren't being deleted, then logically edges are being deleted
 
-    if(ecount(g) > Number ){
+    if(igraph::ecount(g) > Number ){
       deletetarget <- DeleteVect[1:Number]
-    } else if(ecount(g) == 0){
+    } else if(igraph::ecount(g) == 0){
 
       deletetarget <- NULL
 
     }else {
 
-      deletetarget <- DeleteVect[1:(ecount(g)-1)]
+      deletetarget <- DeleteVect[1:(igraph::ecount(g)-1)]
     }
     
    #This converts the edge name to a numeric value that can be easily removed/
     #It was added in to the code as edges were not being deleted due to a mismatch between what human edge name and the machine edge name
     #this addition makes deletion more straight forword.
-   delete_seq <- which(get.edge.attribute(g, Name) %in% deletetarget)
+   delete_seq <- which(igraph::get.edge.attribute(g, Name) %in% deletetarget)
     
     #remove selected node from network
-    g2 <- delete.edges(g, delete_seq)
+    g2 <- igraph::delete.edges(g, delete_seq)
   }
 
   #message(paste("Delete", Target, deletetarget))
 
   #add a graph attribute that names the deleted node.this makes it possible to track what was deleted and what overloaded
   #This will be changed in the matrix version
-  g2 <- set.graph.attribute(g2, "Removed", deletetarget)
+  g2 <- igraph::set.graph.attribute(g2, "Removed", deletetarget)
 
   return(g2)
 

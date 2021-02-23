@@ -11,13 +11,13 @@
 #'
 ExtendMulltiAttack <- function(files, DeleteOrders, MinMaxComp = 0, TotalAttackRounds = 1000){
   
-  files %>% walk(~{
+  files %>% purrr::walk(~{
     
     print(.x)
     #get deletion order for current file
     DeletionOrder <-   DeleteOrders %>%
-      filter(SimulationID == gsub(".rds","",.x)) %>%
-      select(-SimulationID) %>%
+      dplyr::filter(SimulationID == gsub(".rds","",.x)) %>%
+      dplyr::select(-SimulationID) %>%
       t %>%
       as.vector
     

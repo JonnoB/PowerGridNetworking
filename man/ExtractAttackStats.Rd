@@ -6,7 +6,7 @@
 \usage{
 ExtractAttackStats(
   RootFolder,
-  NewfolderPath,
+  NewFolderPath,
   Generation = "BalencedPower",
   EdgeName = "name",
   PowerFlow = "PowerFlow",
@@ -16,15 +16,15 @@ ExtractAttackStats(
 \arguments{
 \item{RootFolder}{:The folder where the attack files are saved}
 
+\item{NewFolderPath}{: The folder where the summary files will be saved to}
+
 \item{Generation}{The name of the variable that stores the net generation data. character string}
+
+\item{EdgeName}{A character string. The default is "name".}
 
 \item{PowerFlow}{A character String. The default is "PowerFlow".}
 
 \item{Link.Limit}{A character string. The default is "Link.Limit".}
-
-\item{NewFolderPath}{: The folder where the summary files will be saved to}
-
-\item{Edgename}{A character string. The default is "name".}
 }
 \description{
 Extracts the attack statistics for each network in a folder and combines it into a single file that is also saved.

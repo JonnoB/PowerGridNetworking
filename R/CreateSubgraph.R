@@ -13,12 +13,12 @@
 CreateSubgraph <- function(g, Nodes, LineLimit = "Link.Limit"){
 
   g %>%
-    set.edge.attribute(., "weight", value = get.edge.attribute(., LineLimit)) %>%
-    set.vertex.attribute(., "OldStrength", value = strength(.)) %>%
-    induced_subgraph(., Nodes) %>%
-    set.vertex.attribute(., "StrengthChange", value = strength(.) - get.vertex.attribute(., "OldStrength")) %>%
-    set.vertex.attribute(., "Generation",
-                         value = get.vertex.attribute(., "Generation") - get.vertex.attribute(., "StrengthChange")) %>%
+    igraph::set.edge.attribute(., "weight", value = igraph::get.edge.attribute(., LineLimit)) %>%
+    igraph::set.vertex.attribute(., "OldStrength", value = igraph::strength(.)) %>%
+    igraph::induced_subgraph(., Nodes) %>%
+    igraph::set.vertex.attribute(., "StrengthChange", value = igraph::strength(.) - igraph::get.vertex.attribute(., "OldStrength")) %>%
+    igraph::set.vertex.attribute(., "Generation",
+                         value = igraph::get.vertex.attribute(., "Generation") - igraph::get.vertex.attribute(., "StrengthChange")) %>%
     BalencedGenDem(., "Demand", "Generation")
 
 

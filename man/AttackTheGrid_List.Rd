@@ -45,16 +45,17 @@ attack type.}
 \item{power_flow}{A character string. This value indicates the name of the edge attribute that holds power flow, the default is "PowerFlow"}
 
 \item{edge_limit}{A character string. This value indicates the name of the edge attribute that holds the edge limit, the default is "Link.Limit"}
-
-\item{MinMaxComp}{The minimum size of the maximum component, as a fraction, for the process to continue, the default is set
-to 0.0 complete collapse.}
 }
 \description{
 This function simulates an attack on the power grid using the parameter settings you choose
    the outut of the function is a nested list of igraph objects.
 }
 \examples{
-AttackTheGrid(NetworkList, AttackStrategy, SubstationData, EdgeData, referenceGrid = NULL, MinMaxComp = 0.8)
+AttackTheGrid(NetworkList,
+AttackStrategy,
+SubstationData, EdgeData,
+referenceGrid = NULL,
+MinMaxComp = 0.8)
 Out <- AttackTheGrid(NetworkList,
 AttackStrategy,
 referenceGrid = NULL,

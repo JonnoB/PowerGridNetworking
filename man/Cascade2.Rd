@@ -21,6 +21,8 @@ Cascade2(
 )
 }
 \arguments{
+\item{g}{An igraph object. The graph at its current state in the attack process}
+
 \item{g0}{An igraph object. An optional value that defines the reference network}
 
 \item{node_power}{A vector of the current node power for this round}
@@ -44,8 +46,6 @@ Cascade2(
 \item{power_flow}{A character string. This value indicates the name of the edge attribute that holds power flow, the default is "PowerFlow"}
 
 \item{edge_limit}{A character string. This value indicates the name of the edge attribute that holds the edge limit, the default is "Link.Limit"}
-
-\item{NetworkList}{A list of power-grid networks.}
 }
 \description{
 Iterates through the network removing edges until no edges are over the line limit and the network has stabilised.

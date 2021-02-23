@@ -14,13 +14,13 @@
 BalancedGenDem <- function(g, DemandVar, GenerationVar, OutputVar = "BalencedPower"){
 
   #get the components and create the vectors that will be filled with the component generation and demand
-  comp_mem <-components(g)$membership
+  comp_mem <-igraph::components(g)$membership
   sum_dem <- rep(NA, length(comp_mem))
   sum_gen <-  rep(NA, length(comp_mem))
 
   #Get the nodeal demand and generation
-  Demand <- get.vertex.attribute(g, DemandVar) 
-  Generation <- get.vertex.attribute(g, GenerationVar)
+  Demand <- igraph::get.vertex.attribute(g, DemandVar) 
+  Generation <- igraph::get.vertex.attribute(g, GenerationVar)
   
   #The loop inserts the sum of gen and dem into the respective vector
   for(n in 1:max(comp_mem)){
@@ -37,9 +37,9 @@ BalancedGenDem <- function(g, DemandVar, GenerationVar, OutputVar = "BalencedPow
   Generation = ifelse(sum_gen>sum_dem, Generation*(sum_dem/sum_gen), Generation)
   #print(all.equal(Demand, df$Demand))
   
-  g <- set.vertex.attribute(g, OutputVar, value =(Generation-Demand)*(!DeadIsland))
+  g <- igraph::set.vertex.attribute(g, OutputVar, value =(Generation-Demand)*(!DeadIsland))
   #The function can take a binary vector, it doesn't have to be an indexed vector I have checked
-  g <- delete.vertices(g, DeadIsland)
+  g <- igraph::delete.vertices(g, DeadIsland)
   return(g)
 
 

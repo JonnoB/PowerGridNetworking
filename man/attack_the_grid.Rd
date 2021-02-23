@@ -21,6 +21,9 @@ attack_the_grid(
 )
 }
 \arguments{
+\item{g}{An igraph object. The graph that will be attacked
+the network list is simply list(list(g)).}
+
 \item{AttackStrategy}{A function that calculates which node to delete the function is is in "quo" form and embedded in an
 attack type.}
 
@@ -47,12 +50,6 @@ attack type.}
 \item{target}{A character string. This value defines the columns of the returned it must match the target element of the attack strategy or an
 error will be thrown if the number of columns of the matrix is exceeded. modularising the function call to attack strategy
 would solve this, but it is a low priority.}
-
-\item{NetworkList}{A list of lists where each element of the sub list is an igraph object, the first time it is used the
-the network list is simply list(list(g)).}
-
-\item{MinMaxComp}{The minimum size of the maximum component, as a fraction, for the process to continue, the default is set
-to 0.0 complete collapse.}
 }
 \description{
 This function simulates an attack on the power grid using the parameter settings you choose

@@ -19,7 +19,7 @@ network_co_failure <- function(collapse_list){
   #The round the node is lost has to be done by row.
   #I don't think a vectorised version is possible
   node_failure_round_vect <- 1:nrow(node_failure_round) %>%
-    map_int(~{
+    purrr::map_int(~{
       
       round_lost <- which(node_failure_round[.x,])
       #nodes which survived until the complete collapse of the grid get an NA score
@@ -43,17 +43,17 @@ network_co_failure <- function(collapse_list){
   
   #The round each edge was lost.
   edge_failure_round_vect <- 1:nrow(edge_failure_round) %>%
-    map_int(~which(edge_failure_round[.x,]))
+    purrr::map_int(~which(edge_failure_round[.x,]))
   
   #Edge failure is easier to find as the status is explicitly coded and all active states are 0 all missing states are NA
   #This means a row sum will find the failure mode of every edge
   edge_failure_mode <-rowSums(collapse_list$edge_status, na.rm = T)
   
-  edge_failure_mode_df <- tibble(name = rownames(edge_failure_round),
+  edge_failure_mode_df <- dplyr::tibble(name = rownames(edge_failure_round),
          mode = factor(edge_failure_mode, levels = c(0:3), labels = c("Survived", "Targeted", "Overloaded", "Islanded")),
          round = edge_failure_round_vect)
   
-  node_failure_mode_df <- tibble(name = rownames(node_failure_round),
+  node_failure_mode_df <- dplyr::tibble(name = rownames(node_failure_round),
                                  mode = factor(node_failure_mode, levels = c(-Inf, 0, Inf), labels = c("Targeted", "Survived" ,"Islanded")),
                                  round = node_failure_round_vect)
   #outputs a six element list

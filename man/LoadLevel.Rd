@@ -15,11 +15,11 @@ LoadLevel(
 \arguments{
 \item{g}{An igraph object representing a powergrid.}
 
+\item{EdgeName}{A character string. The default is "name".}
+
 \item{PowerFlow}{A character String. The default is "PowerFlow".}
 
 \item{Link.Limit}{A character string. The default is "Link.Limit".}
-
-\item{Edgename}{A character string. The default is "name".}
 }
 \value{
 A dataframe

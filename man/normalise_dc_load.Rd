@@ -22,7 +22,7 @@ normalise_dc_load(
 
 \item{demand}{A character string. The node attribute containing the flow demand}
 
-\item{net_generation}{A character string. The node atribute containing the difference between demand and generation for 
+\item{net_generation}{A character string. The node atribute containing the difference between demand and generation for
 the current parametrization}
 
 \item{capacity}{A character string. The edge attribute containing the flow capacity of each edge}
@@ -32,6 +32,9 @@ the current parametrization}
 \item{node_name}{A character string. The node attibute containing the node names}
 
 \item{power_flow}{A character string. The name of the edge atribute that contains the flow data}
+}
+\value{
+an igraph object
 }
 \description{
 This function normalises the load across a DC power network.

@@ -19,9 +19,16 @@ ImpPTDF(
 
 \item{SlackRef}{The slack node for the power-grid, A character vector}
 
+\item{AZero}{a matrix. This is created by the 'CreateTransmission' function}
+
+\item{LineProperties}{a matrix This is created by the LinePropertiesMatrix function}
+
 \item{EdgeName}{the variable that holds the edge names, a character string.}
 
 \item{VertexName}{the variable that holds the names of the nodes, to identify the slack ref. a character string}
+
+\item{PTDF_only}{Logical. This option shows whether the only the PTDF will be generated and is used in certain situations
+to increase speed}
 }
 \description{
 This is a wrapper for the more interesting parts of the electrical building blocks
@@ -31,4 +38,7 @@ This is a wrapper for the more interesting parts of the electrical building bloc
 \examples{
 g2 <-make_ego_graph(g, 2, "AXMI")[[1]]
 ImpPTDF(g, SlackRef)
+}
+\seealso{
+\code{\link{attack_the_grid}},\code{CreateTransmission}, \code{LinePropertiesMatrix}
 }

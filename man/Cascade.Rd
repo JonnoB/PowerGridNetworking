@@ -27,6 +27,12 @@ Cascade(
 
 \item{StopCascade}{The number of iterations when cascade will be forced to terminate. An integer, default is set to infinity.}
 
+\item{g0}{An igraph object. The graph in its initial state}
+
+\item{AZero}{a matrix. This is created by the 'CreateTransmission' function}
+
+\item{LineProperties}{a matrix This is created by the LinePropertiesMatrix function}
+
 \item{Generation}{The name of the node generation variable. A character string.}
 
 \item{Demand}{the name of the node Load variable. A character string.}
@@ -50,7 +56,7 @@ This is a recursive function that calls itself repeatedly until the cascade has 
   AttackTheGrid function.
 }
 \seealso{
-\code{\link{AttackTheGrid}}
+\code{\link{attack_the_grid}},\code{CreateTransmission}, \code{LinePropertiesMatrix}
 Cascade(NetworkList,
 Iteration = 0,
 StopCascade = Inf,

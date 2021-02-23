@@ -6,29 +6,29 @@
 #' @param RootFolder :The folder where the attack files are saved
 #' @param NewFolderPath : The folder where the summary files will be saved to
 #' @param Generation The name of the variable that stores the net generation data. character string
-#' @param Edgename A character string. The default is "name".
+#' @param EdgeName A character string. The default is "name".
 #' @param PowerFlow A character String. The default is "PowerFlow".
 #' @param Link.Limit A character string. The default is "Link.Limit".
 #' @export
 
-ExtractAttackStats<- function(RootFolder, 
-                              NewfolderPath, 
-                              Generation = "BalencedPower", 
-                              EdgeName = "name", 
-                              PowerFlow = "PowerFlow", 
+ExtractAttackStats<- function(RootFolder,
+                              NewFolderPath,
+                              Generation = "BalencedPower",
+                              EdgeName = "name",
+                              PowerFlow = "PowerFlow",
                               Link.Limit = "Link.Limit" ){
 
   list.files(RootFolder , full.names = TRUE) %>%
-    walk(~{
+    purrr::walk(~{
 
       rootfolder <- .x
       targetfolder <- basename(.x)
-      savename <-paste0(targetfolder, ".rds") %>% file.path(NewfolderPath,.)
+      savename <-paste0(targetfolder, ".rds") %>% file.path(NewFolderPath,.)
       print(savename)
 
       #Create directory if needed
-      if(!file.exists(NewfolderPath)){
-        dir.create(NewfolderPath)
+      if(!file.exists(NewFolderPath)){
+        dir.create(NewFolderPath)
       }
 
       if(!file.exists(savename)){
@@ -36,14 +36,14 @@ ExtractAttackStats<- function(RootFolder,
         print(paste("Extracting summary data for", targetfolder))
 
         summarydata <-list.files(rootfolder) %>%
-          map_df(~{
+          purrr::map_df(~{
             print(.x)
             read_rds(file.path(rootfolder, .x)) %>%
               ExtractNetworkStats(Generation = Generation, EdgeName = EdgeName, PowerFlow = PowerFlow, Link.Limit = Link.Limit)%>%
-              mutate( simulationID = gsub("\\.rds", "", .x ) %>% gsub("Simulation_ID_", "", .) %>% as.integer)
+              dplyr::mutate( simulationID = gsub("\\.rds", "", .x ) %>% gsub("Simulation_ID_", "", .) %>% as.integer)
           }
           ) %>%
-          mutate(alpha = targetfolder)
+          dplyr::mutate(alpha = targetfolder)
 
 
         saveRDS(summarydata, savename)

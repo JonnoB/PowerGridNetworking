@@ -57,6 +57,6 @@ When creating many attack simulations it can be conveniant to save the resulting
 SaveMultiAttacks(g, AttackVectors, folder, CascadeMode = F)
 }
 \seealso{
-\code{\link{AttackTheGrid}}, \code{\link{MultiAttackOrder}}
+\code{\link{attack_the_grid}}, \code{\link{MultiAttackOrder}}
 }
 \keyword{multi-attack,}

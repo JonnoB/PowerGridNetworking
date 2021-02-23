@@ -5,9 +5,14 @@
 #'   together is more efficient than producing each one on its own.
 #' @param g An igraph object representing a power-grid
 #' @param SlackRef The slack node for the power-grid, A character vector
+#' @param AZero a matrix. This is created by the 'CreateTransmission' function
+#' @param LineProperties a matrix This is created by the LinePropertiesMatrix function
 #' @param EdgeName the variable that holds the edge names, a character string.
 #' @param VertexName the variable that holds the names of the nodes, to identify the slack ref. a character string
+#' @param PTDF_only Logical. This option shows whether the only the PTDF will be generated and is used in certain situations
+#' to increase speed
 #' @export
+#' @seealso \code{\link{attack_the_grid}},\code{CreateTransmission}, \code{LinePropertiesMatrix}
 #' @examples
 #' g2 <-make_ego_graph(g, 2, "AXMI")[[1]]
 #' ImpPTDF(g, SlackRef)
@@ -28,11 +33,11 @@ ImpPTDF <- function(g, SlackRef, AZero, LineProperties, EdgeName = "Link", Verte
 
   #message("Creating Power matrices")
   #edge index is used quite a lot so is assigned here
-  edge_index <- get.edge.attribute(g, EdgeName)
+  edge_index <- igraph::get.edge.attribute(g, EdgeName)
   #subset the original edge transmission matrix to only contain current nodes
-  AZero <-  AZero[rownames(AZero) %in% edge_index, colnames(AZero) %in% get.vertex.attribute(g, name = VertexName), drop = FALSE]
+  AZero <-  AZero[rownames(AZero) %in% edge_index, colnames(AZero) %in% igraph::get.vertex.attribute(g, name = VertexName), drop = FALSE]
   #AZero <- CreateTransmission(g, EdgeName, VertexName)
-  
+
   # #remove Slack bus, usually the largest generator
   #drop = FALSE stops the matrix being converted to a vector when there are only two nodes in the sub-graph
   A <- AZero[,colnames(AZero)!=SlackRef, drop = FALSE]
@@ -43,17 +48,17 @@ ImpPTDF <- function(g, SlackRef, AZero, LineProperties, EdgeName = "Link", Verte
   #message("Inverting the Susceptance matrix") #As this is DC it is the same as the admittance matrix. It is sparse
 
   B <- t(A) %*% C %*% A
-  
+
   Imp <- base::solve(B) #If the Impedance matrix is inverted again it does not return the original Addmitance matrix due to rounding errors
   #The 0 values of the sparse addmittance matrix are lost and a dense matrix is returned with many very small numbers
-  
+
   #message("Creating the PTDF")
-  
+
   PTDF <- C %*% A %*% Imp
 
 
   Out <-list(Imp, PTDF)
-  
+
   names(Out)<- c("Imp", "PTDF")
 
   return(Out)

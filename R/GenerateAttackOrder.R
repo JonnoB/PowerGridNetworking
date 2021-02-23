@@ -19,8 +19,8 @@ NextSim <- NextAttackSimulation(SimOrder, folder)
 
   #The deletion order of the lowest simulation not yet completed.
   SimOrder %>%
-    filter(SimulationID == NextSim) %>%
-    select(-SimulationID) %>%
+    dplyr::filter(SimulationID == NextSim) %>%
+    dplyr::select(-SimulationID) %>%
     t %>%
   as.vector
 }

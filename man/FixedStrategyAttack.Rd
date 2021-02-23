@@ -15,13 +15,13 @@ FixedStrategyAttack(
 \arguments{
 \item{g}{An igraph object representing a power-grid}
 
+\item{DeletionOrder}{The order in which nodes will be targeted for deltion. This is a string vector}
+
 \item{Target}{The element that will be attacked. A string, the default is Nodes. Can also be Edge.}
 
 \item{Name}{the variable which holds the edge/node names.}
 
 \item{Number}{The total number of targets to calulcate the order for}
-
-\item{DeltionOrder}{The order in which nodes will be targeted for deltion. This is a string vector}
 }
 \description{
 This Removal method pre-calculates the attack order and removes a fixed number of nodes

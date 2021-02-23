@@ -14,10 +14,12 @@ ExtendAttack <-  function(NetworkList, AttackOrder, MinMaxComp = 0, TotalAttackR
   g<- NetworkList[[1]][[1]]
 
   #set strategy
-  FixedNodes <- quo(FixedStrategyAttack(g, AttackOrder))
+  FixedNodes <- dplyr::quo(FixedStrategyAttack(g, AttackOrder))
 
   #continue attack
-  Fullgraph <- NetworkList %>%
-    AttackTheGrid(., FixedNodes, referenceGrid = g, MinMaxComp = MinMaxComp, TotalAttackRounds = TotalAttackRounds)
+  Fullgraph <- attack_the_grid(g = NetworkList,
+                               AttackStrategy = FixedNodes,
+                               g0= g,
+                               TotalAttackRounds = TotalAttackRounds)
 
 }

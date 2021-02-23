@@ -3,7 +3,7 @@ ValidNodesFunc <-function(trans1, Impedance){
   #in the power flow calculations
   
   ValidNodesCasc <- trans1 %>% 
-    filter(Bus.Name %in% c(Impedance$Bus.1, Impedance$Bus.2)) 
+    dplyr::filter(Bus.Name %in% c(Impedance$Bus.1, Impedance$Bus.2)) 
   
   
 }

@@ -3,7 +3,7 @@ NodesTargeted <-function(NetworkList){
   #Networklist: a list of lists of networks. The output of Attack the grid
 
   Out <- NetworkList %>% 
-    map(~ get.graph.attribute(.x[[1]], "Removed")) %>% 
+    purrr::map(~ igraph::get.graph.attribute(.x[[1]], "Removed")) %>% 
     unlist(.) %>% 
     c("None", .) #adds on the first element where there was nothing deleted.
   return(Out)

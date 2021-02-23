@@ -11,11 +11,11 @@
 ##Balance is spelt wrong have to change everywhere
 SlackRefFunc <- function(g, name = "name", Generation = "Generation"){
   #Finds the slack ref in each component
-  tibble(name = get.vertex.attribute(g, name),
-         Generation = get.vertex.attribute(g, Generation),
-         component = components(g)$membership) %>%
-    group_by(component) %>%
-    arrange(desc(Generation)) %>%
-    summarise(name = first(name),
-              Nodes = n())
+  dplyr::tibble(name = igraph::get.vertex.attribute(g, name),
+         Generation = igraph::get.vertex.attribute(g, Generation),
+         component = igraph::components(g)$membership) %>%
+    dplyr::group_by(component) %>%
+    dplyr::arrange(dplyr::desc(Generation)) %>%
+    dplyr::summarise(name = dplyr::first(name),
+              Nodes = dplyr::n())
 }

@@ -9,11 +9,11 @@ AdaptiveStrategyAttack(g, AttackStrategy, Target = "Nodes", Number = 1)
 \arguments{
 \item{g}{The network which is being attacked}
 
+\item{AttackStrategy}{a non-evaluated attack strategy}
+
+\item{Target}{a character string either Nodes or Edges}
+
 \item{Number}{The Number of targets to generate}
-
-\item{Nodes}{The Number of Nodes to Remove}
-
-\item{seed}{The random number generator seed to use. This is optional}
 }
 \description{
 This implements an attack strategy to be adaptive.

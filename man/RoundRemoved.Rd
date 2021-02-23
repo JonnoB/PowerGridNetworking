@@ -19,5 +19,5 @@ Whether the node/edge was the targeted node/edge is also marked. This currently 
 If not all edges/nodes were deleted during AttackTheGrid, these edges will be filled with NA
 }
 \seealso{
-\code{\link[PowerGridNetworking]{AttackTheGrid}}
+\code{\link[PowerGridNetworking]{attack_the_grid}}
 }

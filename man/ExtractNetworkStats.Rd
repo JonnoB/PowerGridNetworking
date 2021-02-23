@@ -17,11 +17,11 @@ ExtractNetworkStats(
 
 \item{Generation}{The name of the variable that stores the net generation data. character string}
 
+\item{EdgeName}{A character string. The default is "name".}
+
 \item{PowerFlow}{A character String. The default is "PowerFlow".}
 
 \item{Link.Limit}{A character string. The default is "Link.Limit".}
-
-\item{Edgename}{A character string. The default is "name".}
 }
 \value{
 A dataframe

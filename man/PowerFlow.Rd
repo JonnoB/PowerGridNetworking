@@ -32,11 +32,11 @@ PowerFlow(
 \description{
 Calculates the PowerFlow from a graph that contains the following attributes,
 named edges, edgeweights, a balanced power generation and demand column. Writes a new edge attribute of power flow
-(existing attribute of the same name will be overwritten). 
+(existing attribute of the same name will be overwritten).
 The function outputs a a graph with the correct power flow values
 }
 \examples{
-PowerFlow(g Slackref)
+PowerFlow(g, Slackref)
 }
 \keyword{flow}
 \keyword{power}

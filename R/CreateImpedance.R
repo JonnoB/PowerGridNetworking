@@ -5,11 +5,11 @@ CreateImpedance <- function(df){
   
   Impmat <- df[,1:2] %>% 
     as.matrix %>% 
-    graph_from_edgelist(., directed = FALSE)
+    igraph::graph_from_edgelist(., directed = FALSE)
   
-  E(Impmat)$weight <- as.numeric(unlist(df[,3]))
+  igraph::E(Impmat)$weight <- as.numeric(unlist(df[,3]))
   
-  Impmat <- as_adjacency_matrix(Impmat, attr = "weight") %>% as.matrix
+  Impmat <- igraph::as_adjacency_matrix(Impmat, attr = "weight") %>% as.matrix
   
   diag(Impmat ) <- -rowSums(Impmat )
   

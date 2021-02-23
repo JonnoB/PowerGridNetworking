@@ -8,11 +8,11 @@
 #' @export
 
 NetworkStats <- function(g, colname = "value"){
-  tibble(Metric = c("Nodes", "Edges", "Components" ,"Betweenness", "Degree", "Assortativity", "Clustering", "Distance"),
-             value = c(vcount(g), ecount(g), components(g)$no, mean(betweenness(g)),mean(degree(g)), assortativity(g, degree(g)),
-                       transitivity(g), mean_distance(g, directed = F))
-  ) %>% setNames(c("Metric", colname))
+  dplyr::tibble(Metric = c("Nodes", "Edges", "Components" ,"Betweenness", "Degree", "Assortativity", "Clustering", "Distance"),
+             value = c(igraph::vcount(g), igraph::ecount(g), igraph::components(g)$no, mean(igraph::betweenness(g)),mean(igraph::degree(g)), igraph::assortativity(g, igraph::degree(g)),
+                       igraph::transitivity(g), igraph::mean_distance(g, directed = F))
+  ) %>% stats::setNames(c("Metric", colname))
 
   #This takes forever maybe should replace with *distances* or something else? and custome electrical distance function
-  #  mean( ifelse(is.finite(shortest.paths(g)),shortest.paths(g), NA), na.rm = T)
+  #  mean( ifelse(is.finite(igraph::shortest.paths(g)),igraph::shortest.paths(g), NA), na.rm = T)
 }

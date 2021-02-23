@@ -21,23 +21,23 @@ Net_Ability <- function(g, gOrig = NULL){
   }
 
   #finds the slack reference in each component
-  SlackRefCasc <-  tibble(name = get.vertex.attribute(g, "name"),
-                          Bus.Order = get.vertex.attribute(g, "Bus.Order"),
-                          component = components(g)$membership) %>%
-    group_by(component) %>%
-    arrange(Bus.Order) %>%
-    summarise(name = first(name),
-              Nodes = n())
+  SlackRefCasc <-  dplyr::tibble(name = igraph::get.vertex.attribute(g, "name"),
+                          Bus.Order = igraph::get.vertex.attribute(g, "Bus.Order"),
+                          component = igraph::components(g)$membership) %>%
+    dplyr::group_by(component) %>%
+    dplyr::arrange(Bus.Order) %>%
+    dplyr::summarise(name = dplyr::first(name),
+              Nodes = dplyr::n())
 
   message(paste("Number of componants", max(SlackRefCasc$component)))
 
   #calculates ratio of the electrical distance and the capacity matrix
     Numerator <- 1:nrow(SlackRefCasc) %>%
-    map(~{
-          SlackRef <- SlackRefCasc %>% slice(.x)
+    purrr::map(~{
+          SlackRef <- SlackRefCasc %>% dplyr::slice(.x)
           message("Component", .x)
 
-          gsubset <- delete.vertices(g, components(g)$membership != .x)
+          gsubset <- igraph::delete.vertices(g, igraph::components(g)$membership != .x)
 
           lemma <- ImpPTDF(gsubset, SlackRef$name)
 
@@ -63,16 +63,16 @@ Net_Ability <- function(g, gOrig = NULL){
 
   #gets the counts of the number of generator and load busses
   #This keeps the slack variable in. That may be not a good idea I am not sure
-  GenAndDem <-data_frame(
-    name = get.vertex.attribute(gOrig, "name"),
-    type = case_when(
-      get.vertex.attribute(gOrig, "Demand") > get.vertex.attribute(gOrig, "Generation") ~ "Demand",
-      get.vertex.attribute(gOrig, "Demand") < get.vertex.attribute(gOrig, "Generation") ~ "Generation",
+  GenAndDem <-dplyr::data_frame(
+    name = igraph::get.vertex.attribute(gOrig, "name"),
+    type = dplyr::case_when(
+      igraph::get.vertex.attribute(gOrig, "Demand") > igraph::get.vertex.attribute(gOrig, "Generation") ~ "Demand",
+      igraph::get.vertex.attribute(gOrig, "Demand") < igraph::get.vertex.attribute(gOrig, "Generation") ~ "Generation",
       TRUE ~"Transmission"
     )) %>%
-    group_by(type) %>%
-    summarise(counts = n()) %>%
-    filter(type != "Transmission")
+    dplyr::group_by(type) %>%
+    dplyr::summarise(counts = dplyr::n()) %>%
+    dplyr::filter(type != "Transmission")
 
   Denominator <- prod(GenAndDem$counts)
 

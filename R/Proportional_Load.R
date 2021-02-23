@@ -22,10 +22,10 @@
 Proportional_Load <-function(g, alpha, PowerFlow = "PowerFlow", Link.Limit = "Link.Limit"){
 
   #NaNs are  created if Inf*0
-  LineLimits <- get.edge.attribute(g, PowerFlow) %>%
+  LineLimits <- igraph::get.edge.attribute(g, PowerFlow) %>%
     abs(.)*alpha
 
-  g2 <- set_edge_attr(g, Link.Limit, value = LineLimits)
+  g2 <- igraph::set_edge_attr(g, Link.Limit, value = LineLimits)
 
   return(g2)
 

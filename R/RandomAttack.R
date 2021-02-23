@@ -16,9 +16,9 @@ RandomAttack <-function(g, Target = "Nodes", Number = 1, Name = "name"){
   #Number the total number of nodes/edges to remove
 
   if(Target == "Nodes"){
-    Out <- sample(get.vertex.attribute(g, name = Name), Number)
+    Out <- sample(igraph::get.vertex.attribute(g, name = Name), Number)
   } else if (Target =="Edges") {
-    Out <- sample(get.edge.attribute(g, name = Name), Number)
+    Out <- sample(igraph::get.edge.attribute(g, name = Name), Number)
   } else {
 
     stop("Target must be either 'Nodes' or 'Edges'")

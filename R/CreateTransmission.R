@@ -24,38 +24,38 @@ CreateTransmission <- function(g, EdgeName = "Link", VertexName = "name"){
   #EdgeName: the attribute name of the edges, this is a character vector
 
   #Create the edge list
-  Edgelist <- get.edgelist(g) %>%
-    as_tibble %>%
-    mutate(Link = get.edge.attribute(g, EdgeName))
+  Edgelist <- igraph::get.edgelist(g) %>%
+    tibble::as_tibble %>%
+    dplyr::mutate(Link = igraph::get.edge.attribute(g, EdgeName))
 
   #Produce the In and out dataframes
 
   In <- Edgelist %>%
-    mutate(
+    dplyr::mutate(
       name = V1,
       Adjacent = 1) %>%
-    select(-V1,-V2)
+    dplyr::select(-V1,-V2)
 
   Out <- Edgelist %>%
-    mutate(
+    dplyr::mutate(
       name = V2,
       Adjacent = -1) %>%
-    select(-V1,-V2)
+    dplyr::select(-V1,-V2)
 
-  Transdf <- bind_rows(In, Out) %>%
-    spread(., key = name, value = Adjacent, fill = 0)
+  Transdf <- dplyr::bind_rows(In, Out) %>%
+    tidyr::spread(., key = name, value = Adjacent, fill = 0)
 
   #Convert to a matrix
   Transmat <- Transdf %>%
-    select(-Link) %>%
-    .[match(get.edge.attribute(g, EdgeName), Transdf$Link),
-      match(get.vertex.attribute(g, "name"), names(.)) ] %>%
+    dplyr::select(-Link) %>%
+    .[match(igraph::get.edge.attribute(g, EdgeName), Transdf$Link),
+      match(igraph::get.vertex.attribute(g, "name"), names(.)) ] %>%
     #this step is necessary as tibbles cannot have row names
     as.matrix(., drop = FALSE)
 
 
   #name the rows.
-  rownames(Transmat) <- Transdf$Link[match(get.edge.attribute(g, EdgeName), Transdf$Link)]
+  rownames(Transmat) <- Transdf$Link[match(igraph::get.edge.attribute(g, EdgeName), Transdf$Link)]
 
   return(Transmat)
 }

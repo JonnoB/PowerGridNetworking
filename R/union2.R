@@ -18,16 +18,16 @@
 #'
 union2 <-function(g1, g2){
 
-  g1_df_edge <- as_data_frame(g1)
-  g2_df_edge <- as_data_frame(g2)
+  g1_df_edge <- igraph::as_data_frame(g1)
+  g2_df_edge <- igraph::as_data_frame(g2)
   
-  g1_df_vertex <- as_data_frame(g1, what = "vertices")
-  g2_df_vertex <- as_data_frame(g2, what = "vertices")
+  g1_df_vertex <- igraph::as_data_frame(g1, what = "vertices")
+  g2_df_vertex <- igraph::as_data_frame(g2, what = "vertices")
 
 
-  g <- graph_from_data_frame(d = bind_rows(g1_df_edge, g2_df_edge), 
+  g <- igraph::graph_from_data_frame(d = dplyr::bind_rows(g1_df_edge, g2_df_edge), 
                         directed = FALSE, 
-                        vertices = bind_rows(g1_df_vertex, g2_df_vertex))
+                        vertices = dplyr::bind_rows(g1_df_vertex, g2_df_vertex))
   
   return(g)
 

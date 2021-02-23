@@ -14,17 +14,17 @@
 Components_differ <-function(g, g0, EdgeName = "name"){
 
   #what edge/s is/are missing in the new graph?
-  g0_df <- as_data_frame(g0)
+  g0_df <- igraph::as_data_frame(g0)
   
   #A list containing the edge and vertex dataframes for g.
   #Both these elements are needed
-  g_df <- as_data_frame(g, what = "both")
+  g_df <- igraph::as_data_frame(g, what = "both")
 
   #testing code  
   #This shows that the component membership and the vertex data frame are in the same order
   # test <- g_df$vertices %>%
-  #   mutate(component = components(g)$membership) %>%
-  #   filter(name %in% effected_nodes)
+  #   dplyr::mutate(component = igraph::components(g)$membership) %>%
+  #   dplyr::filter(name %in% effected_nodes)
 
   #the edges that are in g0 but not in the subsequent graph g
   lost_edges <- g0_df[, EdgeName][!(g0_df[, EdgeName] %in% g_df$edges[, EdgeName])]
@@ -33,7 +33,7 @@ Components_differ <-function(g, g0, EdgeName = "name"){
   effected_nodes <-unique(c(g0_df[g0_df[,EdgeName] %in% lost_edges, 1], #from nodes
                             g0_df[g0_df[,EdgeName] %in% lost_edges, 2])) #to nodes
   
-  Out <- unique(components(g)$membership[g_df$vertices$name %in% effected_nodes])
+  Out <- unique(igraph::components(g)$membership[g_df$vertices$name %in% effected_nodes])
 
   return(Out)
   

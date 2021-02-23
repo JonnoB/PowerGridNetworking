@@ -6,9 +6,9 @@ EntropicDegreeAttack <-function(g, Target = "Nodes", Number = 1){
   #Number the total number of nodes/edges to remove
   
   if(Target == "Nodes"){
-    df <- as_data_frame(g, what = "vertices") %>%
-      mutate(metric = EntropicDegree(g, Scale = TRUE)) %>%
-      arrange(desc(metric))
+    df <- igraph::as_data_frame(g, what = "vertices") %>%
+      dplyr::mutate(metric = EntropicDegree(g, Scale = TRUE)) %>%
+      dplyr::arrange(dplyr::desc(metric))
     Out <- df$name[1:Number]
   } else {
     

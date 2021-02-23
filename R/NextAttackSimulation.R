@@ -6,7 +6,7 @@
 #' @param SimOrder The output dataframe of MultiAttackOrder
 #' @param folder The folder where the attack simulations are saved
 #' @export
-#' @seealso \code{\link{MultiAttackOrder}}, \code{\link{MultiAttack}}
+#' @seealso \code{\link{MultiAttackOrder}}
 #' @examples
 #'   NextAttackSimulation(SimOrder, folder)
 #'
@@ -14,10 +14,10 @@
 NextAttackSimulation <- function(SimOrder, folder){
 
 CurrentSims <- list.files(folder) %>%
-  str_replace_all(., "\\D", "" )
+  stringr::str_replace_all(., "\\D", "" )
 
 NeededSims <- SimOrder$SimulationID %>%
-  str_replace_all(., pattern ="\\D", "" ) %>%
+  stringr::str_replace_all(., pattern ="\\D", "" ) %>%
   as.numeric()
 
 #The simulations still required in current run.

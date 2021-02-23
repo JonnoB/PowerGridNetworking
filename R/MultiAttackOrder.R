@@ -13,20 +13,20 @@
 
 MultiAttackOrder <- function(g, Target = "Nodes", Sims, Name = "name"){
   
-  Number_attacks <- ifelse(Target == "Nodes", length(V(g)), length(E(g)))
+  Number_attacks <- ifelse(Target == "Nodes", length(igraph::V(g)), length(igraph::E(g)))
   
   Out <- 1:Sims %>%
-    map(~{
+    purrr::map(~{
       AttackOrder <- RandomAttack(g, Target, Number = Number_attacks, Name)
       df <- AttackOrder%>%
         as.matrix() %>%
         t %>%
-        as_tibble() %>%
-        setNames(., paste0("Target_", 1:length(AttackOrder)))
+        dplyr::as_tibble() %>%
+        stats::setNames(., paste0("Target_", 1:length(AttackOrder)))
       return(df)
     }) %>%
-    bind_rows() %>%
-    mutate(SimulationID = paste0("Simulation_ID_", 1:nrow(.))) %>%
-    select(SimulationID, everything())
+    dplyr::bind_rows() %>%
+    dplyr::mutate(SimulationID = paste0("Simulation_ID_", 1:nrow(.))) %>%
+    dplyr::select(SimulationID, dplyr::everything())
   return(Out)
 }

@@ -9,7 +9,7 @@ matpower_loader(file_path, output_graph = TRUE)
 \arguments{
 \item{file_path}{A character string. The path of the matpower file}
 
-\item{output_graph}{A logical value. This determines whether the function ouputs an igraph network of the matpower file or a 
+\item{output_graph}{A logical value. This determines whether the function ouputs an igraph network of the matpower file or a
 two element list where the first element is the bus/node data and the second element is the branch data}
 }
 \description{
@@ -18,5 +18,6 @@ This function loads the branch and bus data sections from the matpower dataforma
   together is more efficient than producing each one on its own.
 }
 \examples{
-# This example requires the loading of a matpower file. I don't know how to add raw datasets to the package yet so this will have to wait.
+# This example requires the loading of a matpower file. I don't know how to add raw datasets
+#to the package yet so this will have to wait.
 }

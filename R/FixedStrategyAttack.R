@@ -3,7 +3,7 @@
 #' This Removal method pre-calculates the attack order and removes a fixed number of nodes
 #'
 #' @param g An igraph object representing a power-grid
-#' @param DeltionOrder The order in which nodes will be targeted for deltion. This is a string vector
+#' @param DeletionOrder The order in which nodes will be targeted for deltion. This is a string vector
 #' @param Name the variable which holds the edge/node names.
 #' @param Target The element that will be attacked. A string, the default is Nodes. Can also be Edge.
 #' @param Number The total number of targets to calulcate the order for
@@ -19,10 +19,10 @@ FixedStrategyAttack <- function(g, DeletionOrder, Target = "Nodes", Name = "name
 
   #create a vector of either nodes or edge names for deletion
   if(Target == "Nodes"){
-    Remaining <- get.vertex.attribute(g, Name)
+    Remaining <- igraph::get.vertex.attribute(g, Name)
 
   } else {
-    Remaining <- get.edge.attribute(g, Name)
+    Remaining <- igraph::get.edge.attribute(g, Name)
   }
 
   #Finds which of the targets are still in the network

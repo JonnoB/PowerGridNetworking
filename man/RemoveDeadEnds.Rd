@@ -4,7 +4,7 @@
 \alias{RemoveDeadEnds}
 \title{Remove Dead Ends}
 \usage{
-RemoveDeadEnds(g, iteration = 1, Type = "Transfer")
+RemoveDeadEnds(g, iteration = 1)
 }
 \arguments{
 \item{g}{An igraph object representing a power network}

@@ -1,4 +1,4 @@
 RemoveSymbols <-function(df)  {
-  df  %>% mutate_all( funs(gsub("^[^A-Z0-9]{1,}", "", ., ignore.case = FALSE))) %>%
-    map_df(parse_guess) 
+  df  %>% dplyr::mutate_all( dplyr::funs(gsub("^[^A-Z0-9]{1,}", "", ., ignore.case = FALSE))) %>%
+    purrr::map_df(readr::parse_guess)
 }

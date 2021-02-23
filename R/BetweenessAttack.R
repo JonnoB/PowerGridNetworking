@@ -6,16 +6,16 @@ BetweenessAttack <-function(g, Target = "Nodes", Number = 1){
   #Number the total number of nodes/edges to remove
 
   if(Target == "Nodes"){
-    df <- as_data_frame(g, what = "vertices") %>%
-      mutate(metric = betweenness(g)) %>%
-      arrange(desc(metric))
+    df <- igraph::as_data_frame(g, what = "vertices") %>%
+      dplyr::mutate(metric = igraph::betweenness(g)) %>%
+      dplyr::arrange(dplyr::desc(metric))
     
     Out <- df$name[1:Number]
     
   } else if (Target =="Edges") {
-    df <- as_data_frame(g, what = "edges") %>%
-      mutate(metric = edge_betweenness(g)) %>%
-      arrange(desc(metric))
+    df <- igraph::as_data_frame(g, what = "edges") %>%
+      dplyr::mutate(metric = igraph::edge_betweenness(g)) %>%
+      dplyr::arrange(dplyr::desc(metric))
     
     Out <- df$name[1:Number]
   } else {
