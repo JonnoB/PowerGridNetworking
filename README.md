@@ -23,7 +23,7 @@ There is also a function that allows the loading of Matpower files into R, `matp
 
 The package has few examples. Good example datasets to explore can be found at [Electricity Ten Year Statement (ETYS)](https://www.nationalgrideso.com/insights/electricity-ten-year-statement-etys) or [IEEE](https://icseg.iti.illinois.edu/power-cases/). A use case of this package can be found at [this repo](https://github.com/JonnoB/ProportionalLoading), which was used for the analysis in the article [Bourne et al. 2019](https://arxiv.org/abs/1907.12848).
 
-#Cite
+# Cite
 To cite this package use 
   Bourne,J.  and O’Sullivan,A.  and Arcaute,E. 2019
   Don’t go chasing artificial waterfalls: Artificial line limits and cascading failures in power grids.
