@@ -47,7 +47,14 @@
   <a href="reference/index.html">Reference</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/JonnoB/PowerGridNetworking/">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -66,7 +73,7 @@
 <div id="an-r-package-for-complex-network-analysis-of-cascading-failures-on-power-grids" class="section level2">
 <h2 class="hasAnchor">
 <a href="#an-r-package-for-complex-network-analysis-of-cascading-failures-on-power-grids" class="anchor"></a>An R package for complex network analysis of cascading failures on power grids.</h2>
-<p>The R package is a general set of functions for network analysis that can be used for DC simulation of cascading failures on the power grid for systems under attack. It provides the tools necessary to run reproducible simulations in accordance with the PEARL framework discussed in <a href="https://arxiv.org/abs/1907.12848">Bourne et al. 2019</a>. It also includes functions for simulating targeted and random attacks on a given power network. The package provides support for networks with Line limits as well as functions for generating line limits using either proportional loading or a linear models derived from real line limit data.</p>
+<p>The R package is a general set of functions for network analysis that can be used for DC simulation of cascading failures on the power grid for systems under attack. It provides the tools necessary to run reproducible simulations in accordance with the PEARL framework discussed in <a href="https://arxiv.org/abs/1907.12848">Bourne et al. 2019</a>. It also includes functions for simulating targeted and random attacks on a given power network. The package provides support for networks with Line limits as well as functions for generating line limits using either proportional loading or a linear models derived from real line limit data. A website of package documentation can be found at <a href="https://jonnob.github.io/PowerGridNetworking/index.html" class="uri">https://jonnob.github.io/PowerGridNetworking/index.html</a></p>
 </div>
 </div>
 <div id="instructions" class="section level1">
@@ -76,7 +83,7 @@
 <li>Open <a href="https://cran.r-project.org/">R</a>/<a href="https://www.rstudio.com/">Rstudio</a> and ensure that <code>devtools</code> has been installed</li>
 <li>Run the following code <code><a href="https://rdrr.io/r/base/library.html">library(devtools); install_github("JonnoB/PowerGridNetworking")</a></code>
 </li>
-<li>Load the Power Grid Networking package normally using <code><a href="https://rdrr.io/r/base/library.html">library(PowerGridNetworking)</a></code>
+<li>Load the Power Grid Networking package normally using <code><a href="https://github.com/JonnoB/PowerGridNetworking">library(PowerGridNetworking)</a></code>
 </li>
 <li>All functions have help files e.g <code><a href="reference/PowerFlow.html">?PowerFlow</a></code>
 </li>
@@ -86,7 +93,6 @@
 <div id="comments" class="section level1">
 <h1 class="hasAnchor">
 <a href="#comments" class="anchor"></a>Comments</h1>
-<p>The package is designed to run on power networks represented by <code>igraph</code> object so ensure that this package is installed.</p>
 <p>The package contains three methods to create line limits</p>
 <ol>
 <li>
@@ -97,23 +103,39 @@
 <code>Proportional_Loading</code> a function that simply multiplies the initial loading by a factor supplied by the user</li>
 </ol>
 <p>There is also a function that allows the loading of Matpower files into R, <code>matpower_loader</code>. A broad selection of networks have been collected into a <a href="https://github.com/power-grid-lib/pglib-opf">single library</a> by <a href="https://power-grid-lib.github.io/">IEEE PES Task Force on Benchmarks for Validation of Emerging Power System Algorithms</a>. These can be useful for network analysis of power grids.</p>
-<p>The package is currently light on examples these will be added as development continues. Good example datasets to explore can be found at <a href="https://www.nationalgrideso.com/insights/electricity-ten-year-statement-etys">Electricity Ten Year Statement (ETYS)</a> or <a href="https://icseg.iti.illinois.edu/power-cases/">IEEE</a>. A use case of this package can be found at <a href="https://github.com/JonnoB/ProportionalLoading">this repo</a>, which was used for the analysis in the article <a href="https://arxiv.org/abs/1907.12848">Bourne et al. 2019</a>.</p>
+<p>The package has few examples. Good example datasets to explore can be found at <a href="https://www.nationalgrideso.com/insights/electricity-ten-year-statement-etys">Electricity Ten Year Statement (ETYS)</a> or <a href="https://icseg.iti.illinois.edu/power-cases/">IEEE</a>. A use case of this package can be found at <a href="https://github.com/JonnoB/ProportionalLoading">this repo</a>, which was used for the analysis in the article <a href="https://arxiv.org/abs/1907.12848">Bourne et al. 2019</a>.</p>
+<p>#Cite To cite this package use Bourne,J. and O’Sullivan,A. and Arcaute,E. 2019 Don’t go chasing artificial waterfalls: Artificial line limits and cascading failures in power grids. Chaos: An Interdisciplinary Journal of Nonlinear Science 29:11 doi.org/10.1063/1.5115493</p>
 </div>
 
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
-    <div class="license">
+    <div class="links">
+<h2>Links</h2>
+<ul class="list-unstyled">
+<li>Browse source code at <br><a href="https://github.com/JonnoB/PowerGridNetworking/">https://​github.com/​JonnoB/​PowerGridNetworking/​</a>
+</li>
+<li>Report a bug at <br><a href="https://github.com/JonnoB/PowerGridNetworking/issues">https://​github.com/​JonnoB/​PowerGridNetworking/​issues</a>
+</li>
+</ul>
+</div>
+<div class="license">
 <h2>License</h2>
 <ul class="list-unstyled">
 <li><a href="LICENSE.html">Full license</a></li>
 <li><small><a href="https://www.r-project.org/Licenses/GPL-3">GPL-3</a> + file <a href="LICENSE-text.html">LICENSE</a></small></li>
 </ul>
 </div>
+<div class="citation">
+<h2>Citation</h2>
+<ul class="list-unstyled">
+<li><a href="authors.html">Citing PowerGridNetworking</a></li>
+</ul>
+</div>
 <div class="developers">
 <h2>Developers</h2>
 <ul class="list-unstyled">
-<li>Jonathan Bourne <br><small class="roles"> Author, maintainer </small>  </li>
+<li>Jonathan Bourne <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0003-2616-3716" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 </ul>
 </div>
 
