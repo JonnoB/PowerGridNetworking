@@ -1,0 +1,18 @@
+citHeader("To cite PowerGridNetworking in publications use:")
+
+citEntry(
+  entry    = "Article",
+  title    = "Don’t go chasing artificial waterfalls: Artificial line limits and cascading failures in power grids",
+  author   = "Bourne,J.  and O’Sullivan,A.  and Arcaute,E.",
+  journal  = "Chaos: An Interdisciplinary Journal of Nonlinear Science",
+  year     = "2019",
+  volume   = "29",
+  number   = "11",
+  pages    = "113-117",
+  url      = "https://doi.org/10.1063/1.5115493",
+  textVersion = paste(Don’t go chasing artificial waterfalls: Artificial line limits and cascading failures in power grids.
+  Bourne,J.  and O’Sullivan,A.  and Arcaute,E.
+  Chaos: An Interdisciplinary Journal of Nonlinear Science 29:11 doi.org/10.1063/1.5115493
+
+  )
+)

@@ -1,7 +1,13 @@
 Package: PowerGridNetworking
 Title: Power-grid network simulation in R
 Version: 0.0.0.9000
-Authors@R: person("Jonathan", "Bourne", email = "first.last@example.com", role = c("aut", "cre"))
+Authors@R: 
+    c(person(given = "Jonathan",
+           family = "Bourne",
+           role = c("aut", "cre"),
+           email = "jonathan.s.bourne@gmail.com",
+           comment = c(ORCID = "0000-0003-2616-3716"))
+           )
 Description: This package is used to manipulate graph objects that represent power-grids. The functions are used to help calculate power flow, and understand cascading failures.
 Depends: R (>= 3.4.2)
 License: GPL-3 + file LICENSE
@@ -20,4 +26,8 @@ Imports:
     rlang (>= 0.1.2),
     utils
 Suggests: 
-    roxygen2
+    roxygen2,
+    knitr
+VignetteBuilder: knitr
+URL: https://github.com/JonnoB/PowerGridNetworking
+BugReports: https://github.com/JonnoB/PowerGridNetworking/issues
