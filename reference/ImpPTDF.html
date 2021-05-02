@@ -126,9 +126,9 @@
   <span class='va'>SlackRef</span>,
   <span class='va'>AZero</span>,
   <span class='va'>LineProperties</span>,
+  injection_vector <span class='op'>=</span> <span class='cn'>NULL</span>,
   EdgeName <span class='op'>=</span> <span class='st'>"Link"</span>,
-  VertexName <span class='op'>=</span> <span class='st'>"name"</span>,
-  PTDF_only <span class='op'>=</span> <span class='cn'>FALSE</span>
+  VertexName <span class='op'>=</span> <span class='st'>"name"</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -151,20 +151,27 @@
       <td><p>a matrix This is created by the LinePropertiesMatrix function</p></td>
     </tr>
     <tr>
+      <th>injection_vector</th>
+      <td><p>a numeric vector. The net generation values for all the nodes in the network</p></td>
+    </tr>
+    <tr>
       <th>EdgeName</th>
       <td><p>the variable that holds the edge names, a character string.</p></td>
     </tr>
     <tr>
       <th>VertexName</th>
-      <td><p>the variable that holds the names of the nodes, to identify the slack ref. a character string</p></td>
-    </tr>
-    <tr>
-      <th>PTDF_only</th>
-      <td><p>Logical. This option shows whether the only the PTDF will be generated and is used in certain situations
+      <td><p>the variable that holds the names of the nodes, to identify the slack ref. a character string
 to increase speed</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>This function calculates the PTDF and the impedance matrix also the power flow across the edges. However,
+the function outputs either the power flow or the PTDF and the impedance matrix. This is because by outputting only
+the power flow the calculation can be made much faster by avoiding matrix inversion. This is especially important
+as the matrices are sparse and inversion would create a dense matrix which is much larger in terms of RAM and slower in terms of
+processing speed. When the PTDF and impedance matrix are explicity required, then the injection_vector variable should be NULL</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='attack_the_grid.html'>attack_the_grid</a></code>,<code>CreateTransmission</code>, <code>LinePropertiesMatrix</code></p></div>
