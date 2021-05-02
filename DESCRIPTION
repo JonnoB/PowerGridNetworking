@@ -18,11 +18,11 @@ Imports:
     magrittr,
     igraph,
     dplyr,
-    animation,
     stringr,
     readr,
     purrr,
     stats,
+    Matrix,
     rlang (>= 0.1.2),
     utils
 Suggests: 

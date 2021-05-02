@@ -25,5 +25,7 @@ LinePropertiesMatrix <- function(g, Edgename = "Link", Weight = "Y"){
   colnames(C)<- Link
   rownames(C)<- Link
 
+  C <- Matrix::Matrix(C)
+
   return(C)
 }

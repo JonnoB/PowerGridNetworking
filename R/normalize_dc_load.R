@@ -82,7 +82,7 @@ normalise_dc_load <- function(g,
 
 #re-make the network using the normalised data.
   g_out <- igraph::graph_from_data_frame(g_edge_df, vertices = g_node_df, directed = FALSE) %>%
-    BalencedGenDem(., demand,
+    BalancedGenDem(., demand,
                    generation,
                    OutputVar  = net_generation)
 

@@ -86,7 +86,7 @@ attack_the_grid <- function(g,
 
   #precalculation of the line and transmission matrices
   #This speeds up the PTDF function by reducing expensive operations (Transmission more than LineProperties)
-  AZero <- CreateTransmission(g, EdgeName, VertexName)
+  AZero <- CreateTransmission(g, EdgeName = EdgeName, VertexName = VertexName)
   LineProperties <- LinePropertiesMatrix(g, EdgeName, Weight = "Y")
 
   GridCollapsed <- FALSE
@@ -146,7 +146,7 @@ attack_the_grid <- function(g,
     ##Rebalence network
     # #This means that the Cascade calc takes a balanced network which is good, generation or demand nodes may have been removed
     #this needs to be accounted for
-    g3 <- BalencedGenDem(g2, Demand, Generation, OutputVar = Net_generation)
+    g3 <- BalancedGenDem(g2, Demand, Generation, OutputVar = Net_generation)
 
     ####
     #
@@ -249,8 +249,8 @@ attack_the_grid <- function(g,
               #node_edge_count = node_edge_count,
               edge_status = edge_status,
               edge_power = edge_power,
-              #The -1 at the end is becuase the first column of the matrix i attack 0 and doesn't count
               #The number is the first attack round which once completed has no GC. All previous round do have a GC
-              gc_loss_round = sum(colMeans(node_edge_count^2, na.rm = TRUE)> 2*colMeans(node_edge_count, na.rm = TRUE))-1
+              gc_loss_round = sum(colMeans(node_edge_count^2, na.rm = TRUE)> 2*colMeans(node_edge_count, na.rm = TRUE))#-1 #previously t1 was subtracted but this lead
+              #to situations where the giant component appeared to be lost before any attacks were commenced
              ))
 }

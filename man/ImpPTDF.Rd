@@ -9,9 +9,9 @@ ImpPTDF(
   SlackRef,
   AZero,
   LineProperties,
+  injection_vector = NULL,
   EdgeName = "Link",
-  VertexName = "name",
-  PTDF_only = FALSE
+  VertexName = "name"
 )
 }
 \arguments{
@@ -23,17 +23,24 @@ ImpPTDF(
 
 \item{LineProperties}{a matrix This is created by the LinePropertiesMatrix function}
 
+\item{injection_vector}{a numeric vector. The net generation values for all the nodes in the network}
+
 \item{EdgeName}{the variable that holds the edge names, a character string.}
 
-\item{VertexName}{the variable that holds the names of the nodes, to identify the slack ref. a character string}
-
-\item{PTDF_only}{Logical. This option shows whether the only the PTDF will be generated and is used in certain situations
+\item{VertexName}{the variable that holds the names of the nodes, to identify the slack ref. a character string
 to increase speed}
 }
 \description{
 This is a wrapper for the more interesting parts of the electrical building blocks
   It creates both matrices as they almost always both need to be created and they take time so producing
   together is more efficient than producing each one on its own.
+}
+\details{
+This function calculates the PTDF and the impedance matrix also the power flow across the edges. However,
+the function outputs either the power flow or the PTDF and the impedance matrix. This is because by outputting only
+the power flow the calculation can be made much faster by avoiding matrix inversion. This is especially important
+as the matrices are sparse and inversion would create a dense matrix which is much larger in terms of RAM and slower in terms of
+processing speed. When the PTDF and impedance matrix are explicity required, then the injection_vector variable should be NULL
 }
 \examples{
 g2 <-make_ego_graph(g, 2, "AXMI")[[1]]

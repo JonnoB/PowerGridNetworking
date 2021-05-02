@@ -7,10 +7,17 @@
 #' @param SlackRef The slack node for the power-grid, A character vector
 #' @param AZero a matrix. This is created by the 'CreateTransmission' function
 #' @param LineProperties a matrix This is created by the LinePropertiesMatrix function
+#' @param injection_vector a numeric vector. The net generation values for all the nodes in the network
 #' @param EdgeName the variable that holds the edge names, a character string.
 #' @param VertexName the variable that holds the names of the nodes, to identify the slack ref. a character string
-#' @param PTDF_only Logical. This option shows whether the only the PTDF will be generated and is used in certain situations
 #' to increase speed
+#'
+#' @details This function calculates the PTDF and the impedance matrix also the power flow across the edges. However,
+#' the function outputs either the power flow or the PTDF and the impedance matrix. This is because by outputting only
+#' the power flow the calculation can be made much faster by avoiding matrix inversion. This is especially important
+#' as the matrices are sparse and inversion would create a dense matrix which is much larger in terms of RAM and slower in terms of
+#' processing speed. When the PTDF and impedance matrix are explicity required, then the injection_vector variable should be NULL
+#'
 #' @export
 #' @seealso \code{\link{attack_the_grid}},\code{CreateTransmission}, \code{LinePropertiesMatrix}
 #' @examples
@@ -28,38 +35,45 @@
 # }
 
 #This version calculates Azero externally saving quite a lot of time
-ImpPTDF <- function(g, SlackRef, AZero, LineProperties, EdgeName = "Link", VertexName = "name", PTDF_only = FALSE){
-  #This is a wrapper for the more interesting parts of the electrical building blocks
+ImpPTDF <- function(g, SlackRef, AZero, LineProperties, injection_vector = NULL ,EdgeName = "Link", VertexName = "name"){
 
-  #message("Creating Power matrices")
-  #edge index is used quite a lot so is assigned here
+  #edge index is used several times in the function so is assigned here to save time
   edge_index <- igraph::get.edge.attribute(g, EdgeName)
   #subset the original edge transmission matrix to only contain current nodes
   AZero <-  AZero[rownames(AZero) %in% edge_index, colnames(AZero) %in% igraph::get.vertex.attribute(g, name = VertexName), drop = FALSE]
-  #AZero <- CreateTransmission(g, EdgeName, VertexName)
 
-  # #remove Slack bus, usually the largest generator
+  #Remove Slack bus, usually the largest generator
   #drop = FALSE stops the matrix being converted to a vector when there are only two nodes in the sub-graph
   A <- AZero[,colnames(AZero)!=SlackRef, drop = FALSE]
 
-  #Create the diagonal matrix of edge impedance
-  C <- LineProperties[edge_index, edge_index] #LinePropertiesMatrix(g, EdgeName, Weight = "Y")
+  #Subset the line properties matrix to only the relevant edges
+  C <- LineProperties[rownames(LineProperties) %in% edge_index, colnames(LineProperties) %in% edge_index]
 
-  #message("Inverting the Susceptance matrix") #As this is DC it is the same as the admittance matrix. It is sparse
+  B <- Matrix::t(A) %*% C %*% A
 
-  B <- t(A) %*% C %*% A
+  if(is.null(injection_vector)){
 
-  Imp <- base::solve(B) #If the Impedance matrix is inverted again it does not return the original Addmitance matrix due to rounding errors
-  #The 0 values of the sparse addmittance matrix are lost and a dense matrix is returned with many very small numbers
+    Imp <- Matrix::solve(B) #If the Impedance matrix is inverted again it does not return the original Admittance matrix due to rounding errors
+    #The 0 values of the sparse admittance matrix are lost and a dense matrix is returned with many very small numbers
 
-  #message("Creating the PTDF")
+    PTDF <- C %*% A %*% Imp
 
-  PTDF <- C %*% A %*% Imp
+    Out <-list(Imp, PTDF, NULL)
+
+  } else {
+
+    #this creates a temporary vector avoiding matrix inversion
+    #Which is much faster when only the power flow is needed, it also uses much less RAM
+    temp <- Matrix::solve(B, injection_vector)
+
+    Power <- C %*% A %*% temp
+
+    Out <-list(NULL, NULL, Power)
+
+  }
 
 
-  Out <-list(Imp, PTDF)
-
-  names(Out)<- c("Imp", "PTDF")
+  names(Out)<- c("Imp", "PTDF", "Power")
 
   return(Out)
 

@@ -53,7 +53,7 @@ Iterates through the network removing edges until no edges are over the line lim
 \details{
 This version of cascade works with the attack_the_grid function. It is confusing as it is called cascade2 not one but there we go.
 
-The function outputs a list of 3 elements. the first element is the updated igraph oobject after the cascade has terminated.
+The function outputs a list of 3 elements. the first element is the updated igraph object after the cascade has terminated.
 The second element is a vector of node power values, the third element is a vector of the edge status.
 }
 \seealso{

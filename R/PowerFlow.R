@@ -45,12 +45,12 @@ PowerFlow <- function(g, AZero, LineProperties,
           InjectionVector <- igraph::get.vertex.attribute(gsubset, name = Net_generation)[igraph::get.vertex.attribute(gsubset, name = VertexName)!=SlackRef$name]
 
           Power <- ImpPTDF(gsubset,
-                            SlackRef$name,
-                            AZero = AZero,
-                            LineProperties = LineProperties,
-                            EdgeName,
-                            VertexName,
-                            PTDF_only = TRUE)$PTDF %*% InjectionVector
+                           SlackRef = SlackRef$name,
+                           AZero = AZero,
+                           LineProperties = LineProperties,
+                           injection_vector = InjectionVector,
+                           EdgeName,
+                           VertexName)$Power
 
           gsubset <- igraph::set_edge_attr(gsubset, name = power_flow, value = Power)
         }

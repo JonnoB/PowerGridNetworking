@@ -4,7 +4,7 @@
 #'
 #' This version of cascade works with the attack_the_grid function. It is confusing as it is called cascade2 not one but there we go.
 #'
-#' The function outputs a list of 3 elements. the first element is the updated igraph oobject after the cascade has terminated.
+#' The function outputs a list of 3 elements. the first element is the updated igraph object after the cascade has terminated.
 #' The second element is a vector of node power values, the third element is a vector of the edge status.
 #'
 #' @param g An igraph object. The graph at its current state in the attack process
@@ -24,7 +24,7 @@
 #' @seealso \code{\link{attack_the_grid}}
 
 
-#Version of cacade that outputs a list of vectors and the updated graph
+#Version of cascade that outputs a list of vectors and the updated graph
 Cascade2 <- function(g,
                      g0 = NULL,
                      node_power = node_power,
@@ -59,7 +59,7 @@ Cascade2 <- function(g,
     #This stops needless subgraphs being recalculated then joined.
     #This cannot be the first iteration and there needs to be more than one component
     if(!is.null(g0) & comp_info$no>1){
-      #find components that need to be recalculuated
+      #find components that need to be recalculated
       RecalcFlow <- Components_differ(g, g0, EdgeName = EdgeName)
       #save the full graph
       g_temp <- g
@@ -100,7 +100,7 @@ Cascade2 <- function(g,
     g2<- igraph::delete.edges(g, edge_index_over)
 
     #Balence grid after over powered lines and edges are removed
-    g3 <- BalencedGenDem(g2, Demand, Generation, OutputVar = Net_generation)
+    g3 <- BalancedGenDem(g2, Demand, Generation, OutputVar = Net_generation)
 
     ####
     #

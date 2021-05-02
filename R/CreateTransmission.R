@@ -25,7 +25,8 @@ CreateTransmission <- function(g, EdgeName = "Link", VertexName = "name"){
 
   #Create the edge list
   Edgelist <- igraph::get.edgelist(g) %>%
-    tibble::as_tibble %>%
+    tibble::as_tibble(., .names_repair = "universal") %>%
+    rlang::set_names(c("V1", "V2")) %>%
     dplyr::mutate(Link = igraph::get.edge.attribute(g, EdgeName))
 
   #Produce the In and out dataframes
@@ -56,6 +57,8 @@ CreateTransmission <- function(g, EdgeName = "Link", VertexName = "name"){
 
   #name the rows.
   rownames(Transmat) <- Transdf$Link[match(igraph::get.edge.attribute(g, EdgeName), Transdf$Link)]
+  #Convert into a sparse matrix
+  Transmat <- Matrix::Matrix(Transmat)
 
   return(Transmat)
 }

@@ -18,16 +18,16 @@ BalancedGenDem <- function(g, DemandVar, GenerationVar, OutputVar = "BalencedPow
   sum_dem <- rep(NA, length(comp_mem))
   sum_gen <-  rep(NA, length(comp_mem))
 
-  #Get the nodeal demand and generation
-  Demand <- igraph::get.vertex.attribute(g, DemandVar) 
+  #Get the nodal demand and generation
+  Demand <- igraph::get.vertex.attribute(g, DemandVar)
   Generation <- igraph::get.vertex.attribute(g, GenerationVar)
-  
+
   #The loop inserts the sum of gen and dem into the respective vector
   for(n in 1:max(comp_mem)){
-    
+
     sum_dem[comp_mem==n]  <-sum(Demand[comp_mem ==n])
     sum_gen[comp_mem==n]  <-sum(Generation[comp_mem ==n])
-   
+
   }
   #The dead island is if if either of the vectors is 0 at each element
   #that means that the component lacks generation or demand for the component that node is in.
@@ -36,7 +36,7 @@ BalancedGenDem <- function(g, DemandVar, GenerationVar, OutputVar = "BalencedPow
   Demand <- ifelse(sum_dem>sum_gen, Demand*(sum_gen/sum_dem), Demand)
   Generation = ifelse(sum_gen>sum_dem, Generation*(sum_dem/sum_gen), Generation)
   #print(all.equal(Demand, df$Demand))
-  
+
   g <- igraph::set.vertex.attribute(g, OutputVar, value =(Generation-Demand)*(!DeadIsland))
   #The function can take a binary vector, it doesn't have to be an indexed vector I have checked
   g <- igraph::delete.vertices(g, DeadIsland)
