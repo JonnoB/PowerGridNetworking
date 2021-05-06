@@ -15,7 +15,7 @@ union2(g1, g2)
 A new graph object
 }
 \description{
-Merges two graphs maintaining whilst thier attributes.
+Merges two graphs maintaining whilst their attributes.
 }
 \details{
 This function is an upgrade to the \pkg{igraph} function "union".

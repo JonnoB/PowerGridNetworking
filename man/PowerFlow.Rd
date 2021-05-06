@@ -29,6 +29,9 @@ PowerFlow(
 
 \item{power_flow}{A character string. The name of the edge attribute that will hold the power flow information}
 }
+\value{
+A graph with a PowerFlow attribute assigned to the edges
+}
 \description{
 Calculates the PowerFlow from a graph that contains the following attributes,
 named edges, edgeweights, a balanced power generation and demand column. Writes a new edge attribute of power flow
@@ -36,7 +39,11 @@ named edges, edgeweights, a balanced power generation and demand column. Writes 
 The function outputs a a graph with the correct power flow values
 }
 \examples{
-PowerFlow(g, Slackref)
+PowerFlow(g, AZero, LineProperties,
+EdgeName = "Link",
+VertexName = "name",
+Net_generation = "BalencedPower",
+power_flow = "PowerFlow")
 }
 \keyword{flow}
 \keyword{power}

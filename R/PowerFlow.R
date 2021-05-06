@@ -12,9 +12,15 @@
 #' @param Net_generation The name that the net generation data for each node is held in
 #' @param power_flow A character string. The name of the edge attribute that will hold the power flow information
 #' @keywords power flow
+#'
+#' @return A graph with a PowerFlow attribute assigned to the edges
 #' @export
 #' @examples
-#' PowerFlow(g, Slackref)
+#' PowerFlow(g, AZero, LineProperties,
+#'EdgeName = "Link",
+#'VertexName = "name",
+#'Net_generation = "BalencedPower",
+#'power_flow = "PowerFlow")
 
 #Azero is calculated externally
 PowerFlow <- function(g, AZero, LineProperties,
@@ -51,17 +57,31 @@ PowerFlow <- function(g, AZero, LineProperties,
                            injection_vector = InjectionVector,
                            EdgeName,
                            VertexName)$Power
-
-          gsubset <- igraph::set_edge_attr(gsubset, name = power_flow, value = Power)
+          #The Power object is a sparse matrix of dimension 1 will all values will in. this has to be converted to a vector
+          #as sometimes there an error is thrown "Error in eattrs[[name]][index] <- value :"
+          gsubset <- igraph::set_edge_attr(gsubset, name = power_flow, value = as.vector(Power))
         }
 
         gsubset
 
       })
+
+    #create a list of all the edge and vertex attributes for each of the subgraphs
+    #Transpose the list and join all edges into a dataframe and all vertices into a dataframe
+    gList_2 <- 1:length(gList) %>% map(~{
+
+      igraph::as_data_frame(gList[[.x]], what = "both")
+
+    }) %>%
+      purrr::transpose(.) %>%
+      map(dplyr::bind_rows)
+    #create a graph from the list of length two created in the previous step
+    g <- graph_from_data_frame(gList_2$edges, directed = FALSE, vertices = gList_2$vertices)
+
     #This function could be replaced with the method that just matches edges but it is so fast I don't care enough
     #It would mean that union could be completley removed which woul be more secure and simpler
-    g <- gList %>%
-      Reduce(union2, .)
+    # g <- gList %>%
+    #   Reduce(union2, .)
   }
 
   return(g)
