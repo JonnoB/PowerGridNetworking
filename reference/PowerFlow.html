@@ -166,9 +166,16 @@ The function outputs a a graph with the correct power flow values</p>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A graph with a PowerFlow attribute assigned to the edges</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'>PowerFlow</span><span class='op'>(</span><span class='va'>g</span>, <span class='va'>Slackref</span><span class='op'>)</span>
+    <pre class="examples"><div class='input'><span class='fu'>PowerFlow</span><span class='op'>(</span><span class='va'>g</span>, <span class='va'>AZero</span>, <span class='va'>LineProperties</span>,
+EdgeName <span class='op'>=</span> <span class='st'>"Link"</span>,
+VertexName <span class='op'>=</span> <span class='st'>"name"</span>,
+Net_generation <span class='op'>=</span> <span class='st'>"BalencedPower"</span>,
+power_flow <span class='op'>=</span> <span class='st'>"PowerFlow"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='error'>Error in "igraph" %in% class(graph): object 'g' not found</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
