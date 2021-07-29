@@ -81,7 +81,7 @@ PowerFlow <- function(g, AZero, LineProperties,
     #This function could be replaced with the method that just matches edges but it is so fast I don't care enough
     #It would mean that union could be completley removed which woul be more secure and simpler
     # g <- gList %>%
-    #   Reduce(union2, .)
+    #  Reduce(union2, .)
   }
 
   return(g)

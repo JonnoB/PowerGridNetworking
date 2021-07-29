@@ -33,10 +33,15 @@ BalancedGenDem <- function(g, DemandVar, GenerationVar, OutputVar = "BalencedPow
   #that means that the component lacks generation or demand for the component that node is in.
   DeadIsland <- sum_dem==0 | sum_gen==0
 
+  #If the current demand in the component is greater than the maximum generation
+  #reduce the demand proportionally to the level of maximum generation
   Demand <- ifelse(sum_dem>sum_gen, Demand*(sum_gen/sum_dem), Demand)
+  #If the current generation is great than the current demand.
+  #Proportionally reduce the generation to the level of demand.
   Generation = ifelse(sum_gen>sum_dem, Generation*(sum_dem/sum_gen), Generation)
   #print(all.equal(Demand, df$Demand))
 
+  #Set the output variable to the Total generation minus the total demand for each node, and 0 if it is a dead island.
   g <- igraph::set.vertex.attribute(g, OutputVar, value =(Generation-Demand)*(!DeadIsland))
   #The function can take a binary vector, it doesn't have to be an indexed vector I have checked
   g <- igraph::delete.vertices(g, DeadIsland)
